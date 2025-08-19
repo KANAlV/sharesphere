@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await sql`
-      INSERT INTO users (username, email, password)
+      INSERT INTO users (username, email, password_hash)
       VALUES (${username}, ${email}, ${hashedPassword})
       RETURNING id, username, email, created_at
     `;
