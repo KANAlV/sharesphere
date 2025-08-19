@@ -30,6 +30,7 @@ export default function SignupPage() {
       const data = await res.json();
       if (res.ok) {
         setMessage(`Signup successful! Welcome, ${data.user.username}`);
+        window.location.href = "/login";
       } else {
         setMessage(data.error || "Error signing up");
       }
@@ -39,52 +40,56 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded-xl shadow-md w-80 space-y-4"
-      >
-        <h2 className="text-xl font-bold text-center">Sign Up</h2>
+    <div className="flex min-h-screen items-center justify-center">
+      <div>
+        <div className="flex items-center justify-center text-black">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-6 rounded-xl shadow-md w-80 space-y-4"
+          >
+            <h2 className="text-xl font-bold text-center">Sign Up</h2>
 
-        <input
-          type="text"
-          name="username"
-          placeholder="username"
-          value={form.username}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
+            <input
+              type="text"
+              name="username"
+              placeholder="username"
+              value={form.username}
+              onChange={handleChange}
+              className="border p-2 w-full rounded"
+              required
+            />
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={handleChange}
+              className="border p-2 w-full rounded"
+              required
+            />
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          className="border p-2 w-full rounded"
-          required
-        />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={handleChange}
+              className="border p-2 w-full rounded"
+              required
+            />
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-        >
-          Sign Up
-        </button>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            >
+              Sign Up
+            </button>
 
-        <p className="text-center text-sm">{message}</p>
-      </form>
+            <p className="text-center text-sm">{message}</p>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
