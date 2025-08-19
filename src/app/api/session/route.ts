@@ -1,12 +1,19 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+// pages/api/session.ts
+import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 
-export async function GET() {
-  const token = cookies().get("session")?.value;
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  // Get the raw cookie header
+  const rawCookies = req.headers.cookie || "";
+
+  // Extract the 'session' cookie
+  const token = rawCookies
+    .split("; ")
+    .find((row) => row.startsWith("session="))
+    ?.split("=")[1];
 
   if (!token) {
-    return NextResponse.json({ user: null }, { status: 200 });
+    return res.status(200).json({ user: null });
   }
 
   try {
@@ -15,8 +22,9 @@ export async function GET() {
       email: string;
       username: string;
     };
-    return NextResponse.json({ user: decoded }, { status: 200 });
-  } catch {
-    return NextResponse.json({ user: null }, { status: 200 });
+
+    return res.status(200).json({ user: decoded });
+  } catch (err) {
+    return res.status(200).json({ user: null });
   }
 }
