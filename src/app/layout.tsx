@@ -17,13 +17,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export default function RootLayout({
+// ✅ Make the layout async so we can await cookies()
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // ✅ Check JWT session from cookies (server-side)
-  const token = cookies().get("session")?.value;
+  // Await cookies() to access .get()
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+
   let user: null | { id: string; username: string; email: string } = null;
 
   if (token) {
