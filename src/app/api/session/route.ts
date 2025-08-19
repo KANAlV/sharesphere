@@ -1,10 +1,11 @@
-// src/app/api/session/route.ts
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
 export async function GET() {
-  const token = cookies().get("session")?.value;
+  // Await the cookies object
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
 
   if (!token) {
     return NextResponse.json({ user: null }, { status: 200 });
