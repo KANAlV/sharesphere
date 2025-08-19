@@ -2,7 +2,17 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import jwt from "jsonwebtoken";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+type Data = { user: { id: string; email: string; username: string } | null };
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<Data>
+) {
+  // Only allow GET requests
+  if (req.method !== "GET") {
+    return res.status(405).json({ user: null });
+  }
+
   // Get the raw cookie header
   const rawCookies = req.headers.cookie || "";
 
