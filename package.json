@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.1",
     "flowbite-react": "^0.12.7",
     "next": "15.4.7",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "vercel": "^46.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
