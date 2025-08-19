@@ -1,29 +1,13 @@
-// pages/api/session.ts
-import type { NextApiRequest, NextApiResponse } from "next";
+// src/app/api/session/route.ts
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-type Data = { user: { id: string; email: string; username: string } | null };
-
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  // Only allow GET requests
-  if (req.method !== "GET") {
-    return res.status(405).json({ user: null });
-  }
-
-  // Get the raw cookie header
-  const rawCookies = req.headers.cookie || "";
-
-  // Extract the 'session' cookie
-  const token = rawCookies
-    .split("; ")
-    .find((row) => row.startsWith("session="))
-    ?.split("=")[1];
+export async function GET() {
+  const token = cookies().get("session")?.value;
 
   if (!token) {
-    return res.status(200).json({ user: null });
+    return NextResponse.json({ user: null }, { status: 200 });
   }
 
   try {
@@ -32,9 +16,8 @@ export default function handler(
       email: string;
       username: string;
     };
-
-    return res.status(200).json({ user: decoded });
-  } catch (err) {
-    return res.status(200).json({ user: null });
+    return NextResponse.json({ user: decoded }, { status: 200 });
+  } catch {
+    return NextResponse.json({ user: null }, { status: 200 });
   }
 }
