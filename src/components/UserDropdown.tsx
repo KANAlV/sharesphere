@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect } from "react";
 import "flowbite"; // ensures Flowbite initializes on the client
 
@@ -8,6 +8,11 @@ type User = {
   username: string;
   email: string;
 };
+
+async function handleLogout() {
+    await fetch("/api/logout");
+    window.location.href = "/"; // redirect manually
+  }
 
 export default function UserDropdown({ user }: { user: User }) {
   useEffect(() => {
@@ -53,36 +58,34 @@ export default function UserDropdown({ user }: { user: User }) {
           aria-labelledby="dropdownDefaultButton"
         >
           <li>
-            <a
+            <Link
               href="#"
               className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
               Dashboard
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               href="#"
               className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
               Settings
-            </a>
+            </Link>
           </li>
           <li>
-            <a
+            <Link
               href="#"
               className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
               Earnings
-            </a>
+            </Link>
           </li>
-          <li>
-            <a
-              href="/api/logout" 
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+          <li
+            onClick={handleLogout}
+            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
-              Sign out
-            </a>
+             Sign out
           </li>
         </ul>
       </div>
