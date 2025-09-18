@@ -9,15 +9,14 @@ type Course = {
 };
 
 const courses: Course[] = [
-  {id: 1, title: "Advanced Systems Integration and Architecture", description: "Sir, tapos na po."},
-  {id: 2, title: "Advanced Database", description: "Sir, tapos na po."},
-  {id: 3, title: "Enterprise Architecture", description: "Sir, tapos na po."},
-  {id: 4, title: "Event-Driven Programming", description: "Sir, tapos na po."},
-  {id: 5, title: "Data and Digital Communications", description: "Sir, tapos na po."},
+  { id: 1, title: "Advanced Systems Integration and Architecture", description: "Sir, tapos na po." },
+  { id: 2, title: "Advanced Database", description: "Sir, tapos na po." },
+  { id: 3, title: "Enterprise Architecture", description: "Sir, tapos na po." },
+  { id: 4, title: "Event-Driven Programming", description: "Sir, tapos na po." },
+  { id: 5, title: "Data and Digital Communications", description: "Sir, tapos na po." },
 ];
 
 export default function CourseCarousel() {
-  const [hoveredCourse, setHoveredCourse] = useState<number | null>(null);
   const [showDropdown, setShowDropdown] = useState<number | null>(null);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -25,7 +24,7 @@ export default function CourseCarousel() {
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const scrollAmount = 250; // pixels to move
+      const scrollAmount = 250;
       scrollRef.current.scrollBy({
         left: direction === "left" ? -scrollAmount : scrollAmount,
         behavior: "smooth",
@@ -34,7 +33,6 @@ export default function CourseCarousel() {
   };
 
   const handleMouseEnter = (id: number) => {
-    setHoveredCourse(id);
     hoverTimer.current = setTimeout(() => {
       setShowDropdown(id);
     }, 1000);
@@ -44,16 +42,16 @@ export default function CourseCarousel() {
     if (hoverTimer.current) {
       clearTimeout(hoverTimer.current);
     }
-    setHoveredCourse(null);
     setShowDropdown(null);
   };
+
   return (
     <div className="relative w-full max-w-5xl mx-auto mt-30">
       <button
         onClick={() => scroll("left")}
         className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
       >
-        <ChevronLeftIcon/>
+        <ChevronLeftIcon />
       </button>
 
       <div
@@ -85,7 +83,7 @@ export default function CourseCarousel() {
         onClick={() => scroll("right")}
         className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
       >
-        <ChevronRightIcon/>
+        <ChevronRightIcon />
       </button>
     </div>
   );
