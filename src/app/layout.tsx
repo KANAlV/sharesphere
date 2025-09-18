@@ -45,34 +45,32 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
-        <nav className="bg-gradient-to-r from-violet-300 to-white to-[30%] shadow-lg dark:bg-gradient-to-r dark:from-violet-500 dark:to-violet-950 fixed w-full z-20 top-0 start-0 dark:border-gray-600">
+        <nav className="bg-gradient-to-r from-violet-500 to-white to-[40%] shadow-lg dark:bg-gradient-to-r dark:from-white dark:to-zinc-900 dark:to-[30%] fixed w-full z-20 top-0 start-0 dark:border-gray-600">
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
               <Image width={32} height={32} src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">SHARESPHERE</span>
           </Link>
           <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-             <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6 text-gray-700 dark:text-gray-300"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 
-                    8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 
-                    8.967 0 0 1-2.312 6.022c1.733.64 
-                    3.56 1.085 5.455 1.31m5.714 0a24.255 
-                    24.255 0 0 1-5.714 0m5.714 
-                    0a3 3 0 1 1-5.714 0"
-                  />
-                </svg>
+              <button className="hs-dark-mode-active:hidden block hs-dark-mode p-3 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+    </svg>
               </button>
+              <button className="hs-dark-mode-active:block hidden hs-dark-mode p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                <svg className="shrink-0 size-4" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2"></path>
+      <path d="M12 20v2"></path>
+      <path d="m4.93 4.93 1.41 1.41"></path>
+      <path d="m17.66 17.66 1.41 1.41"></path>
+      <path d="M2 12h2"></path>
+      <path d="M20 12h2"></path>
+      <path d="m6.34 17.66-1.41 1.41"></path>
+      <path d="m19.07 4.93-1.41 1.41"></path>
+    </svg>
+              </button>
+              
               {user ? (
                 <UserDropdown user={user} />
               ) : (

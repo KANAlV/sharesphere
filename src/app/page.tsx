@@ -1,20 +1,92 @@
-import Image from "next/image";
+"use client";
+import { useState, useRef } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "flowbite-react";
 
-export default function Home() {
+type Course = {
+  id: number;
+  title: string;
+  description: string;
+};
+
+const courses: Course[] = [
+  {id: 1, title: "Advanced Systems Integration and Architecture", description: "Sir, tapos na po."},
+  {id: 2, title: "Advanced Database", description: "Sir, tapos na po."},
+  {id: 3, title: "Enterprise Architecture", description: "Sir, tapos na po."},
+  {id: 4, title: "Event-Driven Programming", description: "Sir, tapos na po."},
+  {id: 5, title: "Data and Digital Communications", description: "Sir, tapos na po."},
+];
+
+export default function CourseCarousel() {
+  const [hoveredCourse, setHoveredCourse] = useState<number | null>(null);
+  const [showDropdown, setShowDropdown] = useState<number | null>(null);
+  const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = 250; // pixels to move
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const handleMouseEnter = (id: number) => {
+    setHoveredCourse(id);
+    hoverTimer.current = setTimeout(() => {
+      setShowDropdown(id);
+    }, 1000);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+    }
+    setHoveredCourse(null);
+    setShowDropdown(null);
+  };
   return (
-    <div className="bg-white font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 dark:bg-violet-950">
-      <div className="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 mt-auto">
-        <a href="#">
-          <img className="rounded-t-lg h-50 w-100 object-fit" src="data:image/jpeg;base64,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" alt="" />
-        </a>
-        <div className="p-5">
-          <a href="#">
-            <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Placeholder</h5>
-          </a>
-          <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">Crazy? I was crazy once, they me in a room, a rubber room, a rubber room with rats, and rats makes me crazy. Crazy? I was crazy once, they me in a room, a rubber room, a rubber room with rats, and rats makes me crazy. Crazy? I was crazy once, they me in a room, a rubber room, a rubber room with rats, and rats makes me crazy.</p>
-        </div>
+    <div className="relative w-full max-w-5xl mx-auto mt-30">
+      <button
+        onClick={() => scroll("left")}
+        className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
+      >
+        <ChevronLeftIcon/>
+      </button>
+
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto space-x-15 no-scrollbar scroll-smooth px-10"
+      >
+        {courses.map((course) => (
+          <div
+            key={course.id}
+            onMouseEnter={() => handleMouseEnter(course.id)}
+            onMouseLeave={handleMouseLeave}
+            className="relative w-48 h-48 bg-white dark:bg-gray-800 shadow-md rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer"
+          >
+            <p className="text-center font-semibold">{course.title}</p>
+
+            {showDropdown === course.id && (
+              <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-3 z-20">
+                <h3 className="font-bold">{course.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  {course.description}
+                </p>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
+      <button
+        onClick={() => scroll("right")}
+        className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
+      >
+        <ChevronRightIcon/>
+      </button>
     </div>
   );
 }
