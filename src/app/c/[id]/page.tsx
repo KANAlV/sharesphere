@@ -5,9 +5,11 @@ type Post = {
   content: string;
 };
 
-export default async function OrgPage(props: any) {
-  const { params } = props;
-
+export default async function OrgPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const posts = (await sql`
     SELECT title, content 
     FROM posts
