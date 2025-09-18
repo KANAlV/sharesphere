@@ -36,7 +36,7 @@ export default async function RootLayout({
         username: string;
         email: string;
       };
-    } catch (err) {
+    } catch {
       user = null;
     }
   }
