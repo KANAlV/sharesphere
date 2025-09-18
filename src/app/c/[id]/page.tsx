@@ -5,13 +5,9 @@ type Post = {
   content: string;
 };
 
-interface OrgPageProps {
-  params: {
-    id: string;
-  };
-}
+export default async function OrgPage(props: { params: { id: string } }) {
+  const { params } = props;
 
-export default async function OrgPage({ params }: OrgPageProps) {
   const posts = (await sql`
     SELECT title, content 
     FROM posts
