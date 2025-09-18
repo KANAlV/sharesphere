@@ -1,15 +1,15 @@
 import { sql } from "@/lib/db";
 
-type Props = {
-  params: { id: string };
-};
-
 type Post = {
   title: string;
   content: string;
 };
 
-export default async function OrgPage({ params }: Props) {
+export default async function OrgPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const posts = (await sql`
     SELECT title, content 
     FROM posts
