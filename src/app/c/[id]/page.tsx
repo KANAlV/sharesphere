@@ -5,18 +5,20 @@ type Post = {
   content: string;
 };
 
-export default async function OrgPage({ params }: { params: { id: string } }) {
+export default async function OrgPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+
   const posts = (await sql`
     SELECT title, content 
     FROM posts
     WHERE categories_id = (
-      SELECT id FROM categories WHERE category_name = ${params.id}
+      SELECT id FROM categories WHERE category_name = ${id}
     )
   `) as Post[];
 
   return (
     <div className="relative w-full max-w-5xl mx-auto mt-30">
-      <h1>{params.id}</h1>
+      <h1>{id}</h1>
 
       <div className="space-y-4 mt-6">
         {posts.length > 0 ? (
