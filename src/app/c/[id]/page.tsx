@@ -1,5 +1,4 @@
 import { sql } from "@/lib/db";
-import { title } from "process";
 
 type Post = {
   title: string;
@@ -23,7 +22,7 @@ export default async function OrgPage(props: { params: Promise<{ id: string }> }
     WHERE category_name = ${id};
   `;
 
-  var titleHeader;
+  let titleHeader;
   for(let i = 0; i < id.length;i++){
     if (i == 0)
     {

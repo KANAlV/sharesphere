@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface FormData {
   usernameEmail: string;
@@ -12,7 +11,6 @@ interface FormData {
 export default function Login() {
   const [form, setForm] = useState<FormData>({ usernameEmail: "", password: "" });
   const [message, setMessage] = useState<string>("");
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
