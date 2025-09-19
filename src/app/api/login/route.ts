@@ -31,14 +31,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    // ✅ Create JWT
+    // Create JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET!,   // add JWT_SECRET to your .env.local
       { expiresIn: "1h" }
     );
 
-    // ✅ Create response and set cookie
+    // Create response and set cookie
     const res = NextResponse.json({
       message: "Login successful",
       user: {

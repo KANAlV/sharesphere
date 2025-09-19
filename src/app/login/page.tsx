@@ -33,8 +33,7 @@ export default function Login() {
 
       if (res.ok) {
         setMessage(`Login successful! Welcome, ${data.user.username}`);
-        router.push("/");
-        router.refresh();
+        window.location.href = "/";
       } else {
         setMessage(data.error || "Error logging in");
       }
