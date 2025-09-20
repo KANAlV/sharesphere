@@ -24,6 +24,33 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
     }
   };
 
+  const displaytitle = (title: string) => {
+    let displayTitle;
+    for(let i = 0; i < title.length;i++){
+      if (i == 0)
+      {
+        displayTitle = null;
+        displayTitle = title.charAt(0).toUpperCase();
+      }
+      else
+      {
+        switch (title.charAt(i)) {
+          case "_": displayTitle = displayTitle + " ";
+                  break;
+          default: if (title.charAt(i - 1) == "_") {displayTitle = displayTitle + title.charAt(i).toUpperCase();}
+                  else {displayTitle = displayTitle + title.charAt(i);}
+                  break; 
+        }
+        
+      }
+    }
+    return displayTitle;
+  }
+
+  const redirect = (dest: string) => {
+    window.location.href = "c/" + dest;
+  }
+
   const handleMouseEnter = (id: number) => {
     hoverTimer.current = setTimeout(() => {
       setShowDropdown(id);
@@ -61,13 +88,14 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
             key={course.id}
             onMouseEnter={() => handleMouseEnter(course.id)}
             onMouseLeave={handleMouseLeave}
+            onClick={() => redirect(course.category_name)}
             className="relative w-48 h-48 bg-white dark:bg-gray-800 shadow-md rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer"
           >
-            <p className="text-center font-semibold">{course.category_name}</p>
+            <p className="text-center font-semibold">{displaytitle(course.category_name)}</p>
 
             {showDropdown === course.id && (
               <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-3 z-20">
-                <h3 className="font-bold">{course.category_name}</h3>
+                <h3 className="font-bold">{displaytitle(course.category_name)}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300">
                   {course.description}
                 </p>
