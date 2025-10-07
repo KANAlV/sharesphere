@@ -39,13 +39,12 @@ export default async function RootLayout({
     } catch {
       user = null;
     }
-  }
+  }  
 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
-        <nav className="bg-gradient-to-r from-violet-500 to-white to-[40%] shadow-lg dark:bg-gradient-to-r dark:from-white dark:to-zinc-900 dark:to-[30%] fixed w-full z-20 top-0 start-0 dark:border-gray-600">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
+        <nav className="bg-gradient-to-r from-violet-500 to-white to-[40%] shadow-lg dark:bg-gradient-to-r dark:from-white dark:to-zinc-800 dark:to-[30%] fixed w-full z-20 top-0 start-0 dark:border-gray-600">
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
               <Image width={32} height={32} src="https://flowbite.com/docs/images/logo.svg" className="h-8" alt="Flowbite Logo" />

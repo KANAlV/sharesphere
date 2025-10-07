@@ -24,6 +24,14 @@ export async function POST(req: Request) {
 
     const user = users[0];
 
+    // ✅ New: if Google account (no password), tell user to log in with Google
+    if (!user.password_hash) {
+      return NextResponse.json(
+        { error: "This account uses Google Sign-In. Please log in with Google." },
+        { status: 400 }
+      );
+    }
+
     // Compare password with stored hash
     const isMatch = await bcrypt.compare(password, user.password_hash);
 
@@ -34,7 +42,7 @@ export async function POST(req: Request) {
     // Create JWT
     const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
-      process.env.JWT_SECRET!,   // add JWT_SECRET to your .env.local
+      process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
 
