@@ -59,7 +59,7 @@ export default function CoursePage({
   const toggleAnnouncements = () => setShowAnnouncements(!showAnnouncements);
 
   //font color
-  var fontcolor = "black";
+  let fontcolor = "black";
   const hexColor = pageDetails.theme.startsWith('#') ? pageDetails.theme.slice(1) : pageDetails.theme;
 
   const r = parseInt(hexColor.substring(0, 2), 16);
