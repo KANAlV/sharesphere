@@ -25,5 +25,17 @@ export default async function page(props: { params: Promise<{ id: string }> }) {
     content:string
   }[];
 
-  return <CoursePage posts={posts} id={id}/>
+  const details = (await sql`
+    SELECT description, theme, banner, created_at
+    FROM categories
+    WHERE category_name = ${id}
+    LIMIT 1
+  `) as {
+    description: string;
+    theme: string;
+    banner: string;
+    created_at: string;
+  }[];
+
+  return <CoursePage posts={posts} id={id} details={details}/>
 }
