@@ -1,6 +1,7 @@
 "use client";
+
 import Link from "next/link";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import "flowbite"; // ensures Flowbite initializes on the client
 
 type User = {
@@ -10,29 +11,54 @@ type User = {
 };
 
 async function handleLogout() {
-    await fetch("/api/logout");
-    window.location.href = "/"; // redirect manually
-  }
+  await fetch("/api/logout");
+  window.location.href = "/"; // redirect manually
+}
 
-export default function UserDropdown({ user }: { user: User }) {
+export default function UserDropdown({ user }: { user: User | null }) {
+  const [isDroppedDown, setIsDroppedDown] = useState(false);
+
+  const loggedIn = user !== null;
+
   useEffect(() => {
-    // Flowbite automatically initializes components with data attributes
+    const dropdown = document.getElementById("dropdown");
+
+    // Function to check dropdown visibility
+    const checkDropdown = () => {
+      if (dropdown) {
+        const visible = !dropdown.classList.contains("hidden");
+        setIsDroppedDown(visible);
+      }
+    };
+
+    // Watch for attribute changes (Flowbite toggles "hidden")
+    const observer = new MutationObserver(checkDropdown);
+    if (dropdown) {
+      observer.observe(dropdown, { attributes: true });
+    }
+
+    // Initial check
+    checkDropdown();
+
+    // Cleanup observer
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <div>
+    <div className="relative inline-block">
       <button
         id="dropdownDefaultButton"
         data-dropdown-toggle="dropdown"
         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 
           focus:outline-none focus:ring-blue-300 font-medium rounded-lg 
-          text-sm px-5 py-2.5 text-center inline-flex items-center 
+          text-sm w-10 h-10 text-center inline-flex items-center 
           dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
         type="button"
       >
-        Welcome, {user.username}
         <svg
-          className="w-2.5 h-2.5 ms-3"
+          className={`w-2.5 h-2.5 m-auto transition-transform duration-200 ${
+            isDroppedDown ? "rotate-180" : "rotate-0"
+          }`}
           aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -51,41 +77,33 @@ export default function UserDropdown({ user }: { user: User }) {
       <div
         id="dropdown"
         className="z-10 hidden bg-white divide-y divide-gray-100 
-          rounded-lg shadow-sm w-44 dark:bg-gray-700"
+          rounded-lg shadow-sm w-44 dark:bg-gray-700 absolute right-0 mt-2"
       >
         <ul
           className="py-2 text-sm text-gray-700 dark:text-gray-200"
           aria-labelledby="dropdownDefaultButton"
         >
-          <li>
+          <li className="block md:hidden">
             <Link
               href="#"
               className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
-              Dashboard
+              Dark Mode
             </Link>
           </li>
-          <li>
+          <li className={`${loggedIn ? "hidden": "block"}`}>
             <Link
-              href="#"
+              href="/login"
               className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
             >
-              Settings
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-              Earnings
+              Login
             </Link>
           </li>
           <li
             onClick={handleLogout}
-            className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-             Sign out
+            className={`${loggedIn ? "block": "hidden"} px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer`}
+          >
+            Sign out
           </li>
         </ul>
       </div>
