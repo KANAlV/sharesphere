@@ -5,20 +5,13 @@ export default async function page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
 
   const result = await sql`
-    SELECT COUNT(*)::int AS count 
-    FROM categories 
-    WHERE category_name = ${id};
+    SELECT * FROM fetchCategoryCount(${id});
   `;
 
   const exists = result[0].count > 0;
 
   const posts = (await sql`
-    SELECT id AS dir,title, content 
-    FROM posts
-    WHERE categories_id = (
-      SELECT id FROM categories WHERE category_name = ${id}
-    )
-    ORDER BY created_at DESC
+    SELECT * FROM fetchPosts(${id});
   `) as {
     dir:string
     title:string
@@ -26,10 +19,7 @@ export default async function page(props: { params: Promise<{ id: string }> }) {
   }[];
 
   const details = (await sql`
-    SELECT description, theme, banner, created_at
-    FROM categories
-    WHERE category_name = ${id}
-    LIMIT 1
+    SELECT * FROM fetchCategoryDetails(${id});
   `) as {
     description: string;
     theme: string;

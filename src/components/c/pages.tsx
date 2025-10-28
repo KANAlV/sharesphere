@@ -1,4 +1,5 @@
 "use client";
+import { tree } from "next/dist/build/templates/app-page";
 import { useState, useEffect } from "react";
 
 type Post = {
@@ -74,7 +75,7 @@ export default function CoursePage({
     fontcolor = "black";
   }
 
-  //sticky behavior
+  //sidebar sticky behavior
   const [isSticky, setIsSticky] = useState(false);
   useEffect(() => {
     const banner = document.getElementById("banner");
@@ -87,12 +88,15 @@ export default function CoursePage({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  //sidebar mobile toggle
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div
       className="flex z-10 absolute w-full h-auto"
       style={{ backgroundColor: pageDetails.theme, color: fontcolor }}
     >
-      <div className="relative w-full lg:max-w-2xl xl:max-w-3xl 2xl:max-w-5xl mx-auto sm:mt-20">
+      <div className="relative w-full lg:max-w-xl xl:max-w-3xl 2xl:max-w-4xl 3xl:max-w-5xl mx-auto sm:mt-20">
         <div className="space-y-4 mt-6">
           {/* Page Name */}
           {true ? (
@@ -186,13 +190,23 @@ export default function CoursePage({
         </div>
       </div>
 
+      {/* {SIDEBAR Mobile Toggle} */}
+      <div 
+        className="z-30 lg:hidden fixed top-22 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50 "
+        onClick={() => setIsOpen(true)}
+      >
+        ≡
+      </div>
       {/* SIDEBAR — fixed/absolute independent of flow */}
       <div
-        className={`${
-          isSticky ? "fixed top-20 lg:right-5 2xl:right-20" : "absolute top-70 lg:right-5 2xl:right-20"
-        } h-[400px] lg:w-60 2xl:w-80 bg-black/50 rounded-2xl text-white p-4`}
+        className={`
+          ${isSticky ? "lg:fixed lg:top-20 lg:right-5 xl:right-7 2xl:right-10 " : "lg:absolute lg:top-70 lg:right-5 xl:right-7 2xl:right-10 "}
+          transition-opacity duration-500 ease-in-out
+          ${isOpen ? "block" : "hidden"}
+          fixed top-18 min-h-screen w-screen bg-[#111] lg:block lg:min-h-[400px] lg:w-60 2xl:w-70 3xl:w-100 lg:bg-black/50 lg:rounded-2xl text-white p-4`}
         style={{ zIndex: 50 }}
       >
+        <div className="lg:hidden h-5 w-screen"><div className="fixed right-7 w-5 h-5 text-3xl" onClick={() => setIsOpen(false)}>≡</div></div>
         <div className="p-4 border-b border-stone-800 ">
           <h1 className="font-bold">{categoryName}</h1>
           <p style={{ opacity: .8 }}>{pageDetails.description}</p>
@@ -202,7 +216,7 @@ export default function CoursePage({
         {/* Tags */}
         <div className="p-4 border-b border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15">
           <p style={{ opacity: .3 }}>Related Tags</p>
-          
+
         </div>
       </div>
 
