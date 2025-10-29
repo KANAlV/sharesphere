@@ -198,10 +198,9 @@ export default function CoursePage({
       </div>
       {/* SIDEBAR — fixed/absolute independent of flow */}
       <div
-        className={`
-          ${isSticky ? "lg:fixed lg:top-20 lg:right-5 xl:right-7 2xl:right-10 " : "lg:absolute lg:top-70 lg:right-5 xl:right-7 2xl:right-10 "}
-          transition-opacity duration-500 ease-in-out
+        className={` transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
+          ${isSticky ? "lg:fixed lg:top-20 lg:right-5 xl:right-7 2xl:right-10 " : "lg:absolute lg:top-70 lg:right-5 xl:right-7 2xl:right-10 "}
           fixed top-18 min-h-screen w-screen bg-[#111] lg:block lg:min-h-[400px] lg:w-60 2xl:w-70 3xl:w-100 lg:bg-black/50 lg:rounded-2xl text-white p-4`}
         style={{ zIndex: 50 }}
       >
