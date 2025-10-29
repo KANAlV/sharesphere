@@ -69,49 +69,52 @@ export default function CourseCarousel({ courses }: { courses: Course[] }) {
   }
 
   return (
-    <div className="relative w-full max-w-5xl mx-auto mt-30">
-      {/* Scroll left */}
-      <button
-        onClick={() => scroll("left")}
-        className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
-      >
-        <ChevronLeftIcon />
-      </button>
+    <div className="w-full min-h-full mt-30">
+      {/* carousel */}
+      <div className="relative w-full max-w-15/16 mx-auto mb-10">
+        {/* Scroll left */}
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
+        >
+          <ChevronLeftIcon />
+        </button>
 
-      {/* Scrollable list */}
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto space-x-15 no-scrollbar scroll-smooth px-10"
-      >
-        {courses.map((course) => (
-          <div
-            key={course.id}
-            onMouseEnter={() => handleMouseEnter(course.id)}
-            onMouseLeave={handleMouseLeave}
-            onClick={() => redirect(course.category_name)}
-            className="relative w-48 h-48 bg-white dark:bg-gray-800 shadow-md rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer"
-          >
-            <p className="text-center font-semibold">{displaytitle(course.category_name)}</p>
+        {/* Scrollable list */}
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto space-x-15 no-scrollbar scroll-smooth px-10"
+        >
+          {courses.map((course) => (
+            <div
+              key={course.id}
+              onMouseEnter={() => handleMouseEnter(course.id)}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => redirect(course.category_name)}
+              className="relative w-50 h-50 bg-white dark:bg-gray-800 shadow-md rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer"
+            >
+              <p className="text-center font-semibold">{displaytitle(course.category_name)}</p>
 
-            {showDropdown === course.id && (
-              <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-3 z-20">
-                <h3 className="font-bold">{displaytitle(course.category_name)}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  {course.description}
-                </p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+              {showDropdown === course.id && (
+                <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-900 shadow-lg rounded-lg p-3 z-20">
+                  <h3 className="font-bold">{displaytitle(course.category_name)}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                    {course.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
 
-      {/* Scroll right */}
-      <button
-        onClick={() => scroll("right")}
-        className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
-      >
-        <ChevronRightIcon />
-      </button>
+        {/* Scroll right */}
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
+        >
+          <ChevronRightIcon />
+        </button>
+      </div>      
     </div>
   );
 }

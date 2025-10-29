@@ -1,5 +1,6 @@
 import { sql } from "@/lib/db";
 import CoursePage from "@/components/c/pages";
+import Sidebar from "@/components/sidebar";
 
 export default async function page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -16,6 +17,7 @@ export default async function page(props: { params: Promise<{ id: string }> }) {
     dir:string
     title:string
     content:string
+    posted:string
   }[];
 
   const details = (await sql`
@@ -27,5 +29,8 @@ export default async function page(props: { params: Promise<{ id: string }> }) {
     created_at: string;
   }[];
 
-  return <CoursePage posts={posts} id={id} details={details}/>
+  return <>
+    <CoursePage posts={posts} id={id} details={details}/>
+    <Sidebar id={id} details={details}/>
+  </>
 }
