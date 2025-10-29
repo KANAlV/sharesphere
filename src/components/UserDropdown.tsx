@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import "flowbite"; // ensures Flowbite initializes on the client
+import { initFlowbite } from "flowbite";
 
 type User = {
   id: string;
@@ -16,6 +16,10 @@ async function handleLogout() {
 }
 
 export default function UserDropdown({ user }: { user: User | null }) {
+  useEffect(() => {
+    // Initialize Flowbite dropdowns, tooltips, etc.
+    initFlowbite();
+  }, []);
   const [isDroppedDown, setIsDroppedDown] = useState(false);
 
   const loggedIn = user !== null;
