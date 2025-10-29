@@ -5,6 +5,7 @@ type Post = {
   dir: string;
   title: string;
   content: string;
+  posted: string;
 };
 
 type Details = {
@@ -27,6 +28,7 @@ export default function CoursePage({
     window.location.href = "../posts/" + dest;
   };
 
+  //format course name
   let categoryName = "";
   for (let i = 0; i < id.length; i++) {
     if (i == 0) {
@@ -49,12 +51,6 @@ export default function CoursePage({
 
   const pageDetails = details[0];
 
-  const dateCreated = new Date(pageDetails.created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  });
-
   const [showAnnouncements, setShowAnnouncements] = useState(true);
   const toggleAnnouncements = () => setShowAnnouncements(!showAnnouncements);
 
@@ -74,28 +70,25 @@ export default function CoursePage({
     fontcolor = "black";
   }
 
-  //sidebar sticky behavior
-  const [isSticky, setIsSticky] = useState(false);
-  useEffect(() => {
-    const banner = document.getElementById("banner");
-    const handleScroll = () => {
-      if (!banner) return;
-      const bannerBottom = banner.getBoundingClientRect().bottom;
-      setIsSticky(bannerBottom <= 0);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  //sidebar mobile toggle
-  const [isOpen, setIsOpen] = useState(false);
+  //format date
+  const displayPostedDate = (postedDate: string) => {
+    let displayPostedDate = "";
+    for(let i = 0; i < postedDate.length;i++){
+      if(postedDate.charAt(i) != " "){
+        displayPostedDate = displayPostedDate + postedDate.charAt(i);
+      } else {
+        break;
+      }
+    }
+    return displayPostedDate;
+  }
 
   return (
     <div
       className="flex z-10 absolute w-full h-auto"
       style={{ backgroundColor: pageDetails.theme, color: fontcolor }}
     >
-      <div className="relative w-full lg:max-w-xl xl:max-w-3xl 2xl:max-w-4xl 3xl:max-w-5xl mx-auto sm:mt-20">
+      <div className="relative w-full lg:max-w-2xl xl:max-w-4xl 2xl:max-w-5xl 3xl:max-w-6xl mx-auto sm:mt-20">
         <div className="space-y-4 mt-6">
           {/* Page Name */}
           {true ? (
@@ -110,7 +103,6 @@ export default function CoursePage({
                   backgroundRepeat: "no-repeat",
                 }}
               >
-                <div className="sm:hidden bottom-0 m-0 p-0 absolute w-full bg-background-dark/100 rounded-t-2xl h-3" />
               </div>
               <div className="pl-4">
                 <h1 className="text-xl font-bold">{categoryName}</h1>
@@ -179,42 +171,15 @@ export default function CoursePage({
                 onClick={() => redirect(post.dir)}
                 className="p-4 border-t border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15"
               >
-                <h2 className="text-xl font-bold">{post.title}</h2>
+                <div className="flex items-center">
+                  <h2 className="text-xl font-bold">{post.title}</h2><span className="w-4" /><p className=" inline-block opacity-80">{displayPostedDate(post.posted)}</p>
+                </div>
                 <p className="line-clamp-3">{post.content}</p>
               </div>
             ))
           ) : (
             <p>This Page does not have Any Entry.</p>
           )}
-        </div>
-      </div>
-
-      {/* {SIDEBAR Mobile Toggle} */}
-      <div 
-        className="z-30 lg:hidden fixed top-22 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50 "
-        onClick={() => setIsOpen(true)}
-      >
-        ≡
-      </div>
-      {/* SIDEBAR — fixed/absolute independent of flow */}
-      <div
-        className={` transition-opacity duration-500 ease-in-out lg:opacity-100
-          ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none"}
-          ${isSticky ? "lg:fixed lg:top-20 lg:right-5 xl:right-7 2xl:right-10 " : "lg:absolute lg:top-70 lg:right-5 xl:right-7 2xl:right-10 "}
-          fixed top-18 min-h-screen w-screen bg-[#111] lg:block lg:min-h-[400px] lg:w-60 2xl:w-70 3xl:w-100 lg:bg-black/50 lg:rounded-2xl text-white p-4`}
-        style={{ zIndex: 50 }}
-      >
-        <div className="lg:hidden h-5 w-screen"><div className="fixed right-7 w-5 h-5 text-3xl" onClick={() => setIsOpen(false)}>≡</div></div>
-        <div className="p-4 border-b border-stone-800 ">
-          <h1 className="font-bold">{categoryName}</h1>
-          <p style={{ opacity: .8 }}>{pageDetails.description}</p>
-          <div style={{ opacity: .3 }}>Created {dateCreated}</div>
-          
-        </div>
-        {/* Tags */}
-        <div className="p-4 border-b border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15">
-          <p style={{ opacity: .3 }}>Related Tags</p>
-
         </div>
       </div>
 
