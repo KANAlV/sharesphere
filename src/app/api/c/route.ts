@@ -21,21 +21,22 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Missing category" }, { status: 400 });
     }
 
-    // ✅ Just run the query — no <Post[]>
     const result = await sql`
       SELECT * FROM fetchPosts(${category}, 10, ${offset});
     `;
 
-    // ✅ Explicitly cast after
-    const posts = result as unknown as Post[];
+    const posts = result as Post[];
 
     console.log("Query result:", posts.length);
 
     return NextResponse.json(posts, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("API crashed:", error);
     return NextResponse.json(
-      { error: "Internal server error", details: String(error) },
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
