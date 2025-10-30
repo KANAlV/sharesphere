@@ -66,11 +66,11 @@ export default function CoursePage({
       if (debounceTimer) return;
 
       debounceTimer = setTimeout(() => {
-        if (
-          window.innerHeight + window.scrollY >= document.body.offsetHeight - 200 &&
-          !loading &&
-          hasMore
-        ) {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const pageHeight = document.documentElement.scrollHeight;
+
+        // Only trigger when scrolled to the very bottom
+        if (!loading && hasMore && scrollPosition >= pageHeight - 1) {
           loadMorePosts();
         }
         debounceTimer = null;
@@ -83,6 +83,7 @@ export default function CoursePage({
       if (debounceTimer) clearTimeout(debounceTimer);
     };
   }, [loadMorePosts, loading, hasMore]);
+
 
   // --- Format course name ---
   const categoryName = id
