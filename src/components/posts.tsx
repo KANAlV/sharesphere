@@ -1,6 +1,6 @@
 type Course = {
-  id: number;
-  category_name: string;
+  id: string;
+  name: string;
   description: string;
 };
 
@@ -56,7 +56,7 @@ export default function Posts({ courses }: { courses: Course[] }) {
                             key={course.id}
                             value={course.id}
                         >
-                        {displaytitle(course.category_name)}
+                        {displaytitle(course.name)}
                         </option>
                     ))}
                 </select>

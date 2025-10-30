@@ -4,11 +4,10 @@ import Posts from "@/components/posts";
 
 export default async function CourseCarouselWrapper() {
   const courses = (await sql`
-    SELECT id, category_name, description 
-    FROM categories
+    SELECT * FROM fetchCourses()
   `) as {
-    id: number;
-    category_name: string;
+    id: string;
+    name: string;
     description: string;
   }[];
 
