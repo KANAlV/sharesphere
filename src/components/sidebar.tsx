@@ -98,9 +98,9 @@ export default function Sidebar({
       <div
         className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
-          ${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}
-          fixed top-18 min-h-screen w-screen bg-[#111]
-          lg:block lg:min-h-[400px] lg:max-w-1/6
+          ${isSticky ? "lg:fixed lg:top-20 lg:h-7/8" : "lg:absolute lg:top-70 lg:h-4/6"}
+          fixed top-18 h-screen w-screen bg-[#111]
+          lg:block lg:max-w-1/6
           lg:bg-black/50 lg:rounded-2xl text-white p-4`}
         style={{
           zIndex: 50,
