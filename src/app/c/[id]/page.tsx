@@ -6,7 +6,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
 
   const result = await sql`SELECT * FROM fetchCategoryCount(${id});`;
-  const exists = result[0].count > 0;
 
   const posts = (await sql`
     SELECT * FROM fetchPosts(${id}, 10, 0);
