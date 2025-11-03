@@ -77,7 +77,7 @@ export default function Sidebar({
     const handleScroll = () => {
       if (!banner) return;
       const bannerBottom = banner.getBoundingClientRect().bottom;
-      setIsSticky(bannerBottom <= 0);
+      setIsSticky(bannerBottom <= 50);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -98,7 +98,7 @@ export default function Sidebar({
       <div
         className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
-          ${isSticky ? "lg:fixed lg:top-20 lg:h-7/8" : "lg:absolute lg:top-70 lg:h-4/6"}
+          ${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}
           fixed top-18 h-screen w-screen bg-[#111]
           lg:block lg:max-w-1/6
           lg:bg-black/50 lg:rounded-2xl text-white p-4`}
