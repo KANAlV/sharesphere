@@ -213,7 +213,7 @@ export default function CoursePage({
                 </svg>
               </div>
             </div>
-            <div className={`${sortSelect ? "block":"hidden"} z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
+            <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
               <Link href={`../${id}`}><div className="hover:bg-black/30 px-3">Recent</div></Link>
               <div className="hover:bg-black/30 px-3">Most Liked</div>
             </div>
