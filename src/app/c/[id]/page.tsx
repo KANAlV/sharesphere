@@ -18,6 +18,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     dislikes: number;
   }[];
 
+  const rel = (await sql`
+    SELECT * FROM fetchRelatedOrgs(${id});
+  `) as {
+    dir: string;
+    title: string;
+    theme: string;
+  }[];
+
   const announcements = (await sql`
     SELECT * FROM fetchAnnounceCarousel(${id});
   `) as {
@@ -39,7 +47,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <CoursePageClient id={id} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} />
+      <Sidebar id={id} details={details} rel={rel} />
     </>
   );
 }
