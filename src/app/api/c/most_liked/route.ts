@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     }
 
     const result = await sql`
-      SELECT * FROM fetchPosts(${category}, 10, ${offset});
+      SELECT * FROM fetchMostLikedPosts(${category}, 10, ${offset});
     `;
 
     const posts = result as Post[];

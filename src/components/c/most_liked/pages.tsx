@@ -54,7 +54,7 @@ export default function CoursePage({
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/c?category=${id}&offset=${offset}`);
+      const res = await fetch(`/api/c/most_liked?category=${id}&offset=${offset}`);
       const newPosts: Post[] = await res.json();
 
       if (newPosts.length === 0) {
@@ -197,11 +197,11 @@ export default function CoursePage({
             </div>
           </div>
           
-          {/* Posts */}
+          {/* Sort */}
           <div className="pt-5">
             <div className="relative inline-block">
               <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="bg-white dark:bg-[#7B7B7B] h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
-                <div>Recent</div>
+                <div>Most Liked</div>
               </div>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                 <svg
@@ -214,11 +214,12 @@ export default function CoursePage({
               </div>
             </div>
             <div className={`${sortSelect ? "block":"hidden"} z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
-              <div className="hover:bg-black/30 px-3">Recent</div>
-              <Link href={`${id}/most_liked`}><div className="hover:bg-black/30 px-3">Most Liked</div></Link>
+              <Link href={`../${id}`}><div className="hover:bg-black/30 px-3">Recent</div></Link>
+              <div className="hover:bg-black/30 px-3">Most Liked</div>
             </div>
           </div>
 
+          {/* Posts */}
           {posts.length > 0 ? (
             posts.map((post, idx) => (
               <div
