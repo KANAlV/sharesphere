@@ -5,7 +5,12 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { EyeIcon, EyeSlashIcon, SunIcon, MoonIcon } from "@heroicons/react/24/solid";
+
+// ✅ Import your custom SVG files here (place them in /public or /assets if needed)
+import EyeIcon from "@/public/icons/eye.svg";
+import EyeSlashIcon from "@/public/icons/eye-slash.svg";
+import SunIcon from "@/public/icons/sun.svg";
+import MoonIcon from "@/public/icons/moon.svg";
 
 interface FormData {
   usernameEmail: string;
@@ -49,7 +54,6 @@ export default function Login() {
     }
   };
 
-  // ✅ Move the GoogleSignInButton here (inline)
   const GoogleSignInButton = () => (
     <button
       onClick={() => signIn("google", { callbackUrl: "/" })}
@@ -61,10 +65,14 @@ export default function Login() {
   );
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} min-h-screen flex flex-col md:flex-row`}>
+    <div
+      className={`${
+        darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      } min-h-screen flex flex-col md:flex-row`}
+    >
       {/* Left Panel */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
-        <Image src="/sharesphere/logo(1).svg" alt="Logo" width={100} height={100} />
+        <Image src="/sharesphere_logo.png" alt="Logo" width={100} height={100} />
         <h1 className="text-4xl font-bold font-playfair mt-4">ShareSphere</h1>
         <p className="text-center mt-4 text-gray-300 max-w-sm text-lg">
           Your Digital Hub for Academic and Creative Collaboration at STI College Alabang.
@@ -73,16 +81,21 @@ export default function Login() {
 
       {/* Right Panel */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6 relative">
-        {/* Dark/Light Toggle */}
+        {/* Dark/Light Mode Toggle */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="absolute top-4 right-4 p-2 rounded-full border hover:bg-gray-200 dark:hover:bg-gray-700"
         >
-          {darkMode ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-600" />}
+          {darkMode ? (
+            <SunIcon className="w-6 h-6 fill-yellow-400" />
+          ) : (
+            <MoonIcon className="w-6 h-6 fill-gray-600" />
+          )}
         </button>
 
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
           <h2 className="text-2xl font-bold mb-4">Log into ShareSphere</h2>
+
           <input
             type="text"
             name="usernameEmail"
@@ -92,6 +105,7 @@ export default function Login() {
             className="border p-3 w-full rounded"
             required
           />
+
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -107,7 +121,11 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
             >
-              {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeSlashIcon className="w-5 h-5 fill-current" />
+              ) : (
+                <EyeIcon className="w-5 h-5 fill-current" />
+              )}
             </button>
           </div>
 
@@ -116,7 +134,10 @@ export default function Login() {
             <Link href="/signup">Sign Up</Link>
           </div>
 
-          <button type="submit" className="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
+          <button
+            type="submit"
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+          >
             Log-in
           </button>
 
