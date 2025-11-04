@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "All fields required" }, { status: 400 });
     }
 
-    // Find user by email OR username
+  
     const users = await sql`
       SELECT * FROM users 
       WHERE email = ${usernameEmail} OR username = ${usernameEmail}
@@ -24,7 +24,7 @@ export async function POST(req: Request) {
 
     const user = users[0];
 
-    // ✅ New: if Google account (no password), tell user to log in with Google
+    
     if (!user.password_hash) {
       return NextResponse.json(
         { error: "This account uses Google Sign-In. Please log in with Google." },
@@ -32,21 +32,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Compare password with stored hash
+   
     const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!isMatch) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
 
-    // Create JWT
+    
     const token = jwt.sign(
       { id: user.id, email: user.email, username: user.username },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
 
-    // Create response and set cookie
+    
     const res = NextResponse.json({
       message: "Login successful",
       user: {
