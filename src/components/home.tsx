@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "flowbite-react";
 
 type Course = {

@@ -192,7 +192,7 @@ export default function CoursePage({
                   </a>
                 ))
               ) : (
-                <p>This Page does not have Any Entry.</p>
+                <p>There are no announcements yet.</p>
               )}
             </div>
           </div>
@@ -214,8 +214,8 @@ export default function CoursePage({
               </div>
             </div>
             <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
-              <Link href={`../${id}`}><div className="hover:bg-black/30 px-3">Recent</div></Link>
-              <div className="hover:bg-black/30 px-3">Most Liked</div>
+              <Link href={`../${id}`}><div className="hover:bg-gray-500 px-3">Recent</div></Link>
+              <div className="hover:bg-gray-500 px-3">Most Liked</div>
             </div>
           </div>
 

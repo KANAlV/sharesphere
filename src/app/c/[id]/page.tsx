@@ -5,8 +5,6 @@ import Sidebar from "@/components/sidebar";
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
 
-  const result = await sql`SELECT * FROM fetchCategoryCount(${id});`;
-
   const posts = (await sql`
     SELECT * FROM fetchPosts(${id}, 10, 0);
   `) as {
@@ -16,14 +14,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     posted: string;
     likes: number;
     dislikes: number;
-  }[];
-
-  const rel = (await sql`
-    SELECT * FROM fetchRelatedOrgs(${id});
-  `) as {
-    dir: string;
-    title: string;
-    theme: string;
   }[];
 
   const announcements = (await sql`
@@ -44,6 +34,16 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     created_at: string;
   }[];
 
+  // Sidebar data
+  
+  const rel = (await sql`
+    SELECT * FROM fetchRelatedOrgs(${id});
+  `) as {
+    dir: string;
+    title: string;
+    theme: string;
+  }[];
+
   const tags = (await sql`
     SELECT * FROM fetchRelatedTags(${id});
   `) as {
@@ -52,10 +52,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     color: string;
   }[];
 
+  const rules = (await sql`
+    SELECT * FROM fetchPageRules(${id}, false);
+  `) as {
+    rule: string;
+    description: string;
+    num: string;
+  }[];
+
   return (
     <>
       <CoursePageClient id={id} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} rel={rel} tags={tags}/>
+      <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
     </>
   );
 }

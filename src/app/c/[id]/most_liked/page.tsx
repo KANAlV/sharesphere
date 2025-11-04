@@ -35,11 +35,37 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     banner: string;
     created_at: string;
   }[];
+  
+  // Sidebar data
+  
+  const rel = (await sql`
+    SELECT * FROM fetchRelatedOrgs(${id});
+  `) as {
+    dir: string;
+    title: string;
+    theme: string;
+  }[];
+
+  const tags = (await sql`
+    SELECT * FROM fetchRelatedTags(${id});
+  `) as {
+    dir: string;
+    tag: string;
+    color: string;
+  }[];
+
+  const rules = (await sql`
+    SELECT * FROM fetchPageRules(${id}, false);
+  `) as {
+    rule: string;
+    description: string;
+    num: string;
+  }[];
 
   return (
     <>
       <CoursePageClient id={id} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} />
+      <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
     </>
   );
 }

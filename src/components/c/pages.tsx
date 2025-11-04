@@ -192,7 +192,7 @@ export default function CoursePage({
                   </a>
                 ))
               ) : (
-                <p>This Page does not have Any Entry.</p>
+                <p>There are no announcements yet.</p>
               )}
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function CoursePage({
           {/* Posts */}
           <div className="pt-5">
             <div className="relative inline-block">
-              <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="bg-white dark:bg-[#7B7B7B] h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
+              <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
                 <div>Recent</div>
               </div>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
@@ -213,9 +213,9 @@ export default function CoursePage({
                 </svg>
               </div>
             </div>
-            <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
-              <div className="hover:bg-black/30 px-3">Recent</div>
-              <Link href={`${id}/most_liked`}><div className="hover:bg-black/30 px-3">Most Liked</div></Link>
+            <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-gray-500 w-35 hover:inset-shadow-2xs appearance-none`}>
+              <div className="hover:bg-gray-500/30 px-3">Recent</div>
+              <Link href={`${id}/most_liked`}><div className="hover:bg-gray-500/30 px-3">Most Liked</div></Link>
             </div>
           </div>
 
