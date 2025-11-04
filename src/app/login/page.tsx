@@ -12,55 +12,32 @@ interface FormData {
   password: string;
 }
 
-export function GoogleSignInButton() {
-  return (
-    <button
-      onClick={() => signIn("google", { callbackUrl: "/" })}
-      className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 rounded hover:bg-gray-100"
-    >
-      <Image src="/google.png" alt="Google" width={20} height={20} className="inline-block" />
-      <span className="text-gray-700">Sign in with Google</span>
-    </button>
-  );
-}
-
 export default function Login() {
-  const [form, setForm] = useState<FormData>({
-    usernameEmail: "",
-    password: "",
-  });
+  const [form, setForm] = useState<FormData>({ usernameEmail: "", password: "" });
   const [message, setMessage] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
-
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
   useEffect(() => {
-    if (error === "AccessDenied") {
-      setMessage("You do not have permission to log in.");
-    } else if (error === "CredentialsSignin") {
-      setMessage("Invalid username/email or password.");
-    }
+    if (error === "AccessDenied") setMessage("You do not have permission to log in.");
+    else if (error === "CredentialsSignin") setMessage("Invalid username/email or password.");
   }, [error]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("Loading...");
-
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-
       const data = await res.json();
-
       if (res.ok) {
         setMessage(`Login successful! Welcome, ${data.user.username}`);
         window.location.href = "/";
@@ -72,11 +49,22 @@ export default function Login() {
     }
   };
 
+  // ✅ Move the GoogleSignInButton here (inline)
+  const GoogleSignInButton = () => (
+    <button
+      onClick={() => signIn("google", { callbackUrl: "/" })}
+      className="w-full flex items-center justify-center gap-2 border border-gray-300 py-2 rounded hover:bg-gray-100"
+    >
+      <Image src="/google.png" alt="Google" width={20} height={20} className="inline-block" />
+      <span className="text-gray-700">Sign in with Google</span>
+    </button>
+  );
+
   return (
     <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} min-h-screen flex flex-col md:flex-row`}>
       {/* Left Panel */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
-       <Image src="/sharesphere_logo.png" alt="Logo" width={300} height={300} />
+        <Image src="/sharesphere/logo(1).svg" alt="Logo" width={100} height={100} />
         <h1 className="text-4xl font-bold font-playfair mt-4">ShareSphere</h1>
         <p className="text-center mt-4 text-gray-300 max-w-sm text-lg">
           Your Digital Hub for Academic and Creative Collaboration at STI College Alabang.
@@ -85,7 +73,7 @@ export default function Login() {
 
       {/* Right Panel */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6 relative">
-        {/* Dark/Light Mode Toggle */}
+        {/* Dark/Light Toggle */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className="absolute top-4 right-4 p-2 rounded-full border hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -93,13 +81,8 @@ export default function Login() {
           {darkMode ? <SunIcon className="w-6 h-6 text-yellow-400" /> : <MoonIcon className="w-6 h-6 text-gray-600" />}
         </button>
 
-        <form
-          onSubmit={handleSubmit}
-          className="w-full max-w-md space-y-4"
-        >
+        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
           <h2 className="text-2xl font-bold mb-4">Log into ShareSphere</h2>
-
-          {/* Email Input */}
           <input
             type="text"
             name="usernameEmail"
@@ -109,8 +92,6 @@ export default function Login() {
             className="border p-3 w-full rounded"
             required
           />
-
-          {/* Password Input with Toggle */}
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
@@ -130,38 +111,22 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Links */}
           <div className="flex justify-between text-sm">
-            <Link href="/forgot-password">
-              Forgot Password?
-            </Link>
-            <Link href="/signup">
-              Sign Up
-            </Link>
+            <Link href="/forgot-password">Forgot Password?</Link>
+            <Link href="/signup">Sign Up</Link>
           </div>
 
-          {/* Login Button */}
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
-          >
+          <button type="submit" className="w-full bg-black text-white py-2 rounded hover:bg-gray-800">
             Log-in
           </button>
 
-          {/* Divider */}
           <div className="flex items-center justify-center text-gray-400">
             <span className="mx-2">OR</span>
           </div>
 
-          {/* Google Sign-In */}
           <GoogleSignInButton />
 
-          {/* Admin Login */}
-          <p className="text-center text-sm text-gray-500 mt-2">
-            Log-in as Admin
-          </p>
-
-          {/* Message */}
+          <p className="text-center text-sm text-gray-500 mt-2">Log-in as Admin</p>
           {message && <p className="text-center text-red-500">{message}</p>}
         </form>
       </div>
