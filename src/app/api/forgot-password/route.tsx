@@ -122,8 +122,8 @@ export async function POST(req: Request) {
 
    
     return NextResponse.json({ error: "Invalid request format" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ Forgot Password Error:", err);
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ error: (err as Error).message || "Server error" }, { status: 500 });
   }
 }
