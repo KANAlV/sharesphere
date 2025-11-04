@@ -44,10 +44,18 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     created_at: string;
   }[];
 
+  const tags = (await sql`
+    SELECT * FROM fetchRelatedTags(${id});
+  `) as {
+    dir: string;
+    tag: string;
+    color: string;
+  }[];
+
   return (
     <>
       <CoursePageClient id={id} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} rel={rel} />
+      <Sidebar id={id} details={details} rel={rel} tags={tags}/>
     </>
   );
 }

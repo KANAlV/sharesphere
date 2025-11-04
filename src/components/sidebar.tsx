@@ -15,14 +15,22 @@ type Rel = {
   theme: string;
 };
 
+type Tags = {
+  dir: string;
+  tag: string;
+  color: string;
+};
+
 export default function Sidebar({
   id,
   details,
-  rel
+  rel,
+  tags
 }: {
   id: string;
   details: Details[];
   rel: Rel[];
+  tags: Tags[];
 }) {
   // Format course name
   let categoryName = "";
@@ -142,7 +150,7 @@ export default function Sidebar({
           </div>
         </div>
 
-        {/* SIDEBAR CONTENT */}
+        {/* MAIN CONTENT */}
         <div className="p-4 border-b border-stone-800">
           <h1 className="font-bold">{categoryName}</h1>
           <p style={{ opacity: 0.8 }}>{pageDetails.description}</p>
@@ -159,9 +167,26 @@ export default function Sidebar({
           </div>
         </div>
 
+        {/* Tags */}
         <div className="p-4 border-b border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15">
-          <p style={{ opacity: 0.3 }}>Related Tags</p>
+          <p style={{ opacity: 0.8 }}>Tags</p>
+          {rel.length > 0 ? (
+            tags.map((post, idx) => (
+              <a href={`/o/${redirectTo(post.tag)}`} key={idx}>
+                <div className={`px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
+                style={{ backgroundColor: post.color, color: textColor(post.color) }}
+                >
+                  {post.tag}
+                </div>
+              </a>
+            ))
+            ) : (
+              <p style={{ opacity: 0.8 }}>No related orgs/clubs found.</p>
+            )
+          }
         </div>
+
+        {/* Related Orgs/Clubs */}
         {pathname === `/c/${id}` ? (
           <div className="p-4 border-b border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15">
             <p style={{ opacity: 0.3 }}>Related Orgs / Clubs</p>
@@ -176,10 +201,10 @@ export default function Sidebar({
                   </a>
                 </div>
               ))
-            ) : (
-              <p style={{ opacity: 0.5 }}>No related orgs/clubs found.</p>
-            )
-              }
+              ) : (
+                <p style={{ opacity: 0.5 }}>No related orgs/clubs found.</p>
+              )
+            }
           </div>) : null}
 
       </div>
