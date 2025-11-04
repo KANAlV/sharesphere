@@ -6,16 +6,35 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 
-// ✅ Import your custom SVG files here (place them in /public or /assets if needed)
-import EyeIcon from "@/public/icons/eye.svg";
-import EyeSlashIcon from "@/public/icons/eye-slash.svg";
-import SunIcon from "@/public/icons/sun.svg";
-import MoonIcon from "@/public/icons/moon.svg";
-
 interface FormData {
   usernameEmail: string;
   password: string;
 }
+
+// ✅ Inline SVG components
+const EyeIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" className="w-5 h-5">
+    <path d="M572.52 241.4C518.8 135.7 407.8 64 288 64S57.2 135.7 3.48 241.4a48.3 48.3 0 000 29.1C57.2 376.3 168.2 448 288 448s230.8-71.7 284.5-177.4a48.3 48.3 0 000-29.2zM288 400c-79.4 0-144-64.6-144-144s64.6-144 144-144 144 64.6 144 144-64.6 144-144 144z"/>
+  </svg>
+);
+
+const EyeSlashIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" className="w-5 h-5">
+    <path d="M634 471L38 3C30-3 18-1 12 7S1 26 9 33l596 468c8 6 20 5 27-3s5-20-3-27zM320 400c-79 0-144-65-144-144 0-27 8-53 21-75l52 41a80 80 0 00107 107l41 52c-22 13-48 21-75 21zM320 112c79 0 144 65 144 144 0 27-8 53-21 75l-52-41a80 80 0 00-107-107l-41-52c22-13 48-21 75-21z"/>
+  </svg>
+);
+
+const SunIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" className="w-6 h-6">
+    <path d="M256 128a128 128 0 100 256 128 128 0 000-256zm0-128c17.7 0 32 14.3 32 32v32a32 32 0 11-64 0V32c0-17.7 14.3-32 32-32zm0 480a32 32 0 0132 32v32a32 32 0 01-64 0v-32a32 32 0 0132-32zm256-224a32 32 0 01-32 32h-32a32 32 0 010-64h32a32 32 0 0132 32zM96 256a32 32 0 01-32 32H32a32 32 0 010-64h32a32 32 0 0132 32zm307-147a32 32 0 01-45 45l-23-23a32 32 0 1145-45l23 23zm-307 0l23-23a32 32 0 1145 45l-23 23a32 32 0 11-45-45zm307 307a32 32 0 11-45 45l-23-23a32 32 0 1145-45l23 23zm-307 0l23 23a32 32 0 11-45 45l-23-23a32 32 0 1145-45z"/>
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" className="w-6 h-6">
+    <path d="M223.5 32c-27.2 0-53.3 5.6-77.1 15.8C79.3 79.8 32 142.9 32 217.1c0 97.2 78.8 176 176 176 74.2 0 137.3-47.3 169.3-114.4 10.2-23.8 15.8-49.9 15.8-77.1 0-26.4-5.4-51.4-15.1-74.2C363 68.9 296.8 32 223.5 32z"/>
+  </svg>
+);
 
 export default function Login() {
   const [form, setForm] = useState<FormData>({ usernameEmail: "", password: "" });
@@ -86,11 +105,7 @@ export default function Login() {
           onClick={() => setDarkMode(!darkMode)}
           className="absolute top-4 right-4 p-2 rounded-full border hover:bg-gray-200 dark:hover:bg-gray-700"
         >
-          {darkMode ? (
-            <SunIcon className="w-6 h-6 fill-yellow-400" />
-          ) : (
-            <MoonIcon className="w-6 h-6 fill-gray-600" />
-          )}
+          {darkMode ? <SunIcon /> : <MoonIcon />}
         </button>
 
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
@@ -121,11 +136,7 @@ export default function Login() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
             >
-              {showPassword ? (
-                <EyeSlashIcon className="w-5 h-5 fill-current" />
-              ) : (
-                <EyeIcon className="w-5 h-5 fill-current" />
-              )}
+              {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
             </button>
           </div>
 
