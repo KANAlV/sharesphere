@@ -76,7 +76,7 @@ export default function Login() {
     <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"} min-h-screen flex flex-col md:flex-row`}>
       {/* Left Panel */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
-       <Image src="/sharesphere/logo(1).svg" alt="Logo" width={100} height={100} />
+       <Image src="/sharesphere_logo.png" alt="Logo" width={300} height={300} />
         <h1 className="text-4xl font-bold font-playfair mt-4">ShareSphere</h1>
         <p className="text-center mt-4 text-gray-300 max-w-sm text-lg">
           Your Digital Hub for Academic and Creative Collaboration at STI College Alabang.
