@@ -110,7 +110,8 @@ export default function Sidebar({
   }, [isClient]);
 
   const pathname = usePathname();
-  const redirectTo = (redir: string) => redir.replace(/ /g, '_');
+  const redirectTo = (redir: string) => encodeURIComponent(redir.replace(/ /g, '_'));
+  const isTagPage = pathname.includes(`/c/${id}/tags/`);
 
   // --- Font color logic ---
   const textColor = (theme: string) => {
@@ -151,8 +152,9 @@ export default function Sidebar({
         className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
           ${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}
-          fixed top-18 h-screen w-screen bg-[#111]
+          fixed top-18 h-screen lg:max-h-8/9 w-screen bg-[#111]
           lg:block lg:max-w-1/6
+          overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
           lg:bg-black/0 text-white`}
         style={{
           zIndex: 50,
@@ -186,24 +188,26 @@ export default function Sidebar({
         </div>
 
         {/* Tags */}
-        <div className="mt-1 px-8 py-4 lg:bg-gray-500/50">
-          <p style={{ opacity: 0.9 }}>Tags</p>
-            <div className="flex">
-              {rel.length > 0 ? (
-                tags.map((post, idx) => (
-                  <a href={`./${id}/${redirectTo(post.tag)}`} key={idx} className="inline-block w-min">
-                    <div className={`px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
-                    style={{ backgroundColor: post.color, color: textColor(post.color) }}
-                    >
-                      {post.tag}
-                    </div>
-                  </a>
-                ))
-                ) : (
-                  <p style={{ opacity: 0.9 }}>No Tags found.</p>
-                )
-              }
-            </div>
+        <div className="mt-1 pl-8 py-4 lg:bg-gray-500/50">
+          <p style={{ opacity: 0.9 }}>
+            {pathname != `/c/${id}` ? "Currently showing posts for:" : "Most Popular Tags"}
+          </p>
+          <div className="block max-h-120 overflow-y-clip">
+            {rel.length > 0 ? (
+              tags.map((post, idx) => (
+                <a href={`/c/${id}/tags/${redirectTo(post.tag)}`} key={idx} className="block w-min">
+                  <div className={`px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
+                  style={{ backgroundColor: post.color, color: textColor(post.color) }}
+                  >
+                    {post.tag}
+                  </div>
+                </a>
+              ))
+              ) : (
+                <p style={{ opacity: 0.9 }}>No Tags found.</p>
+              )
+            }
+          </div>
         </div>
 
         {/* Rules */}
