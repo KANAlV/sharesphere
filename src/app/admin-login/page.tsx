@@ -171,7 +171,7 @@ export default function AdminLoginPage() {
   );
 }
 
-function SunIcon(props: any) {
+function SunIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor">
       <path d="M256 128a128 128 0 100 256 128 128 0 000-256zM256 0c17.7 0 32 14.3 32 32v32a32 32 0 11-64 0V32c0-17.7 14.3-32 32-32zM256 480a32 32 0 0132 32v32a32 32 0 01-64 0v-32a32 32 0 0132-32zm256-224a32 32 0 01-32 32h-32a32 32 0 010-64h32a32 32 0 0132 32zM96 256a32 32 0 01-32 32H32a32 32 0 010-64h32a32 32 0 0132 32z" />
@@ -179,7 +179,7 @@ function SunIcon(props: any) {
   );
 }
 
-function MoonIcon(props: any) {
+function MoonIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor">
       <path d="M223.5 32c-27.2 0-53.3 5.6-77.1 15.8C79.3 79.8 32 142.9 32 217.1c0 97.2 78.8 176 176 176 74.2 0 137.3-47.3 169.3-114.4 10.2-23.8 15.8-49.9 15.8-77.1 0-26.4-5.4-51.4-15.1-74.2C363 68.9 296.8 32 223.5 32z" />
