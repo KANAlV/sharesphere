@@ -111,7 +111,6 @@ export default function Sidebar({
 
   const pathname = usePathname();
   const redirectTo = (redir: string) => encodeURIComponent(redir.replace(/ /g, '_'));
-  const isTagPage = pathname.includes(`/c/${id}/tags/`);
 
   // --- Font color logic ---
   const textColor = (theme: string) => {
@@ -273,7 +272,7 @@ export default function Sidebar({
           }
         </div>
 
-        <div className="p-2 w-inherit lg:bg-gray-500/50 rounded-b-2xl" />
+        <div className="p-2 mt-50 lg:m-0 w-inherit lg:bg-gray-500/50 rounded-b-2xl" />
       </div>
     </div>
   );
