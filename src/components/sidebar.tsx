@@ -157,7 +157,7 @@ export default function Sidebar({
           overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
           lg:bg-black/0 text-white`}
         style={{
-          zIndex: 50,
+          zIndex: 30,
           left: isClient && window.innerWidth >= 1024 ? sidebarLeft ?? "auto" : "auto",
           right: !isClient || window.innerWidth < 1024 ? 0 : "auto",
           color: textColor(pageDetails.theme),

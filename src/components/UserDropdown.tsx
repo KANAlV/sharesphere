@@ -80,7 +80,7 @@ export default function UserDropdown({ user }: { user: User | null }) {
 
       <div
         id="dropdown"
-        className="z-10 hidden bg-white divide-y divide-gray-100 
+        className="z-50 hidden bg-white divide-y divide-gray-100 
           rounded-lg shadow-sm w-44 dark:bg-gray-700 absolute right-0 mt-2"
       >
         <ul
