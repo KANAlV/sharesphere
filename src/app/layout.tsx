@@ -48,7 +48,7 @@ export default async function RootLayout({
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
               <Image width={32} height={32} src="/sharesphere_logo.png" className="h-8" alt="Flowbite Logo" />
-              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">SHARESPHERE</span>
+              <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">SHARESPHERE</span>
           </Link>
           
           <div className="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
