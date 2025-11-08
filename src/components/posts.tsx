@@ -85,56 +85,7 @@ export default function Posts({
   };
 
   return (
-    <div className="bg-white dark:bg-[#2F2F2F] w-15/16 min-h-[90vh] mx-auto mb-5 rounded-3xl">
-      {/* Filter Section */}
-      <div className="m-8 pt-5 flex flex-wrap items-center">
-        {/* Time Filter */}
-        <div className="relative inline-block">
-          <select
-            id="filter"
-            name="filter"
-            className="bg-white dark:bg-[#7B7B7B] h-10 w-50 px-3 rounded-lg hover:inset-shadow-2xs appearance-none"
-          >
-            <option value="recent">Recent</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-            <svg
-              className="w-3 h-3 fill-current text-[#818181] dark:text-white"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <polygon points="0,3 20,3 10,15" />
-            </svg>
-          </div>
-        </div>
-
-        <div className="relative inline-block">
-          <select
-            id="courses"
-            name="courses"
-            className="bg-white dark:bg-[#7B7B7B] h-10 w-50 ml-5 px-3 rounded-lg hover:inset-shadow-2xs appearance-none"
-          >
-            <option value="Recently Posted">All Courses</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {displaytitle(course.name)}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-            <svg
-              className="w-3 h-3 fill-current text-[#818181] dark:text-white"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <polygon points="0,3 20,3 10,15" />
-            </svg>
-          </div>
-        </div>
-      </div>
+    <div className="bg-transparent w-15/16 min-h-[90vh] mx-auto mb-5 rounded-3xl">
 
       <div className="px-8 pb-8">
         {posts.length === 0 ? (
@@ -146,7 +97,7 @@ export default function Posts({
             <Link
               key={post.id}
               href={`/posts/${post.id}`}
-              className="bg-transparent dark:bg-transparent p-5 rounded-xl shadow mb-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block"
+              className="bg-transparent p-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block border-t-2 border-t-gray-500/50 dark:border-b-white/50"
             >
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                 {post.title}
