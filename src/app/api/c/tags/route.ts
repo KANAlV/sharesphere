@@ -14,9 +14,10 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
+    const tag = searchParams.get("tags");
     const offset = parseInt(searchParams.get("offset") || "0", 10);
 
-    console.log("Incoming request:", { category, offset });
+    console.log("Incoming request:", { category, tag, offset });
 
     if (!category) {
       console.error("Missing category");
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
     }
 
     const result = await sql`
-      SELECT * FROM fetchPosts(${category}, 10, ${offset});
+      SELECT * FROM fetchTagPosts(${category}, ${decodeURIComponent(tag||"")}, 10, ${offset});
     `;
 
     const posts = result as Post[];

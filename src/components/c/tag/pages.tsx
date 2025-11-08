@@ -28,16 +28,18 @@ type Announce = {
 export default function CoursePage({
   posts: initialPosts,
   id,
+  tag,
   details: initialDetails,
   announcements,
 }: {
   posts: Post[];
   id: string;
+  tag: string;
   details: Details[];
   announcements: Announce[];
 }) {
   const redirect = (dest: string) => {
-    window.location.href = "../posts/" + dest;
+    window.location.href = "/posts/" + dest;
   };
 
   // --- State ---
@@ -54,7 +56,7 @@ export default function CoursePage({
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/c?category=${id}&offset=${offset}`);
+      const res = await fetch(`/api/c/tags?category=${id}&tags=${encodeURIComponent(tag)}&offset=${offset}`);
       const newPosts: Post[] = await res.json();
 
       if (newPosts.length === 0) {
@@ -215,7 +217,7 @@ export default function CoursePage({
             </div>
             <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-gray-500 w-35 hover:inset-shadow-2xs appearance-none`}>
               <div className="hover:bg-gray-500/30 px-3">Recent</div>
-              <Link href={`${id}/most_liked`}><div className="hover:bg-gray-500/30 px-3">Most Liked</div></Link>
+              <Link href={`/c/${id}/tags/${tag}/most_liked`}><div className="hover:bg-gray-500/30 px-3">Most Liked</div></Link>
             </div>
           </div>
 
