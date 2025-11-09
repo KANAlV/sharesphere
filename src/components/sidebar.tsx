@@ -110,7 +110,7 @@ export default function Sidebar({
   }, [isClient]);
 
   const pathname = usePathname();
-  const redirectTo = (redir: string) => encodeURIComponent(redir.replace(/ /g, '_'));
+  const redirectTo = (redir?: string) => encodeURIComponent((redir ?? "").replace(/ /g, '_'));
 
   // --- Font color logic ---
   const textColor = (theme: string) => {
