@@ -202,8 +202,8 @@ export default function CoursePage({
           {/* Posts */}
           <div className="pt-5">
             <div className="relative inline-block">
-              <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
-                <div>Recent</div>
+              <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="select-none cursor-pointer bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
+                <div className="hover:bg-gray-500/30 px-3">Recent</div>
               </div>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                 <svg
@@ -215,7 +215,7 @@ export default function CoursePage({
                 </svg>
               </div>
             </div>
-            <div className={`${sortSelect ? "block":"hidden"} fixed z-20 bg-gray-500 w-35 hover:inset-shadow-2xs appearance-none`}>
+            <div className={`${sortSelect ? "block":"hidden"} absolute z-20 bg-gray-500 w-35 hover:inset-shadow-2xs appearance-none`}>
               <div className="hover:bg-gray-500/30 px-3">Recent</div>
               <Link href={`/c/${id}/tags/${tag}/most_liked`}><div className="hover:bg-gray-500/30 px-3">Most Liked</div></Link>
             </div>

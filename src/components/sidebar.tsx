@@ -187,18 +187,38 @@ export default function Sidebar({
         </div>
 
         {/* Tags */}
-        <div className="mt-1 pl-8 py-4 lg:bg-gray-500/50">
+        <div className=" mt-1 pl-8 py-4 lg:bg-gray-500/50">
           <p style={{ opacity: 0.9 }}>
             {pathname != `/c/${id}` ? "Currently showing posts for:" : "Most Popular Tags"}
           </p>
           <div className="block max-h-120 overflow-y-clip">
             {rel.length > 0 ? (
               tags.map((post, idx) => (
-                <a href={`/c/${id}/tags/${redirectTo(post.tag)}`} key={idx} className="block w-min">
-                  <div className={`px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
+                <a href={pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`} key={idx} className="block w-min">
+                  <div className={`flex px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
                   style={{ backgroundColor: post.color, color: textColor(post.color) }}
                   >
                     {post.tag}
+                    {pathname !== `/c/${id}` ? (
+                    <svg
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      aria-hidden="true"
+                      focusable="false"
+                      className="pl-2"
+                    >
+                      <path
+                        d="M6 6L18 18M6 18L18 6"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  ) : null}
                   </div>
                 </a>
               ))

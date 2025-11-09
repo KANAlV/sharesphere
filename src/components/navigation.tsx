@@ -11,7 +11,7 @@ export default function Navigation() {
             >
             <div
                 onClick={() => setIsOpen(!isOpen)}
-                className={`hidden lg:block absolute top-1/30 right-0 rounded-full ${isOpen ? "":"w-2/3"}  h-4/5 bg-white/90 dark:bg-black/90 border-gray-500 border-2`}
+                className={`hidden lg:block absolute top-1/30 right-0 rounded-full ${isOpen ? "":"w-2/3"}  h-4/5 bg-white/90 dark:bg-black/90 border-gray-500 border-2 cursor-pointer`}
             >
                 <svg
                 viewBox="0 0 100 80"
@@ -22,11 +22,11 @@ export default function Navigation() {
                 strokeWidth="1"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="object-center m-auto mt-3"
+                className="object-center m-auto"
                 >
-                <rect x="15" width="15" height="100"></rect>
-                <rect x="45" width="15" height="100"></rect>
-                <rect x="75" width="15" height="100"></rect>
+                <rect x="15" className="w-1/10" height="100"></rect>
+                <rect x="45" className="w-1/10" height="100"></rect>
+                <rect x="75" className="w-1/10" height="100"></rect>
                 </svg>
             </div>
 
@@ -38,7 +38,7 @@ export default function Navigation() {
                 >
                 <Link
                     href="/"
-                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50
+                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4
                         ${isOpen ? "lg:flex":"lg:hidden"}
                     `}
@@ -50,10 +50,9 @@ export default function Navigation() {
                     <div className={`text-xs lg:text-lg lg:pl-2 mt-1 `}>Home</div>
                 </Link>
 
-                <Link
-                    href="/courses"
-                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50
-                        lg:flex-row lg:justify-start lg:my-4
+                <div 
+                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                        lg:flex-row lg:justify-start lg:my-4 cursor-pointer
                         ${isOpen ? "lg:flex":"lg:hidden"}
                     `}
                 >
@@ -63,12 +62,11 @@ export default function Navigation() {
                     <path d="M13 13l4-2 4 2v4l-4 2-4-2v-4z"/>
                     </svg>
                     <div className={`text-xs lg:text-lg lg:pl-2 mt-1 `}>Courses</div>
-                </Link>
+                </div>
 
-                <Link
-                    href="/organizations"
-                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50
-                        lg:flex-row lg:justify-start lg:my-4
+                <div
+                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                        lg:flex-row lg:justify-start lg:my-4 cursor-pointer
                         ${isOpen ? "lg:flex":"lg:hidden"}
                     `}
                 >
@@ -81,11 +79,11 @@ export default function Navigation() {
                     <path d="M23 21v-2a3 3 0 0 0-3-3h-1"/>
                     </svg>
                     <div className={`text-xs lg:text-lg lg:pl-2 mt-1 `}>Organizations</div>
-                </Link>
+                </div>
 
                 <Link
                     href="/u"
-                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50
+                    className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4
                         ${isOpen ? "lg:flex":"lg:hidden"}
                     `}
