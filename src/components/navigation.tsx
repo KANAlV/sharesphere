@@ -1,12 +1,17 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react"
+import { usePathname } from "next/navigation";
 export default function Navigation() {
+    const pathname = usePathname();
+
+    const isHidden = pathname === "/login" || pathname === "/signup";
     const [isOpen, setIsOpen] = useState(false);
     return(
         <div
             className={`z-40 fixed w-screen h-16 x lg:h-full bottom-0 lg:top-18
                 ${isOpen ? "lg:w-1/5" : "lg:w-1/50"} 
+                ${isHidden ? "hidden" : "flex lg:flex"}
             `}
             >
             <div
