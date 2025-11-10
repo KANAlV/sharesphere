@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { SunIcon, MoonIcon } from "@heroicons/react/24/solid";
 
 export default function SignupPage() {
   const [form, setForm] = useState({
@@ -73,17 +72,6 @@ export default function SignupPage() {
 
       {/* Right Side */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6 relative">
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="absolute top-4 right-4 p-2 rounded-full border hover:bg-gray-200 dark:hover:bg-gray-700"
-        >
-          {darkMode ? (
-            <SunIcon className="w-6 h-6 text-yellow-400" />
-          ) : (
-            <MoonIcon className="w-6 h-6 text-gray-600" />
-          )}
-        </button>
-
         <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
           <h2 className="text-2xl font-bold mb-4">
             {step === "signup" ? "Create Account" : "Verify Your Email"}

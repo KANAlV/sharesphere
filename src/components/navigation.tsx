@@ -43,6 +43,7 @@ export default function Navigation() {
                 >
                 <Link
                     href="/"
+                    onClick={() => setIsOpen(!isOpen)}
                     className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4
                         ${isOpen ? "lg:flex":"lg:hidden"}
@@ -57,6 +58,7 @@ export default function Navigation() {
 
                 <Link
                     href="/courses"
+                    onClick={() => setIsOpen(!isOpen)}
                     className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4 cursor-pointer
                         ${isOpen ? "lg:flex":"lg:hidden"}
@@ -72,6 +74,7 @@ export default function Navigation() {
 
                 <Link
                     href="/organizations"
+                    onClick={() => setIsOpen(!isOpen)}
                     className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4 cursor-pointer
                         ${isOpen ? "lg:flex":"lg:hidden"}
@@ -90,6 +93,7 @@ export default function Navigation() {
 
                 <Link
                     href="/u"
+                    onClick={() => setIsOpen(!isOpen)}
                     className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                         lg:flex-row lg:justify-start lg:my-4
                         ${isOpen ? "lg:flex":"lg:hidden"}
