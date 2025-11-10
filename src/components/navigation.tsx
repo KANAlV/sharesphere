@@ -11,7 +11,7 @@ export default function Navigation() {
         <div
             className={`z-40 fixed w-screen h-16 x lg:h-full bottom-0 lg:top-18
                 ${isOpen ? "lg:w-1/5" : "lg:w-1/50"} 
-                ${isHidden ? "hidden" : "flex lg:flex"}
+                ${isHidden ? "hidden" : "block lg:block"}
             `}
             >
             <div
