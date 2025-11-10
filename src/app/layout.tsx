@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ✅ Make the layout async so we can await cookies()
+// Make the layout async so we can await cookies()
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -43,7 +43,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
-        <Navigation/>
+        <Navigation user={user ? { ...user } : null} />
         <Topbar user={user ? { ...user } : null} />
         {children}
       </body>

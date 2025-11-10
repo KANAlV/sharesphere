@@ -49,6 +49,17 @@ export default function Sidebar({
     else categoryName += id.charAt(i);
   }
 
+  function OrgName(name: string) {
+    let categoryName = "";
+    for (let i = 0; i < name.length; i++) {
+      if (i === 0) categoryName = name.charAt(0).toUpperCase();
+      else if (name.charAt(i) === "_") categoryName += " ";
+      else if (name.charAt(i - 1) === "_") categoryName += name.charAt(i).toUpperCase();
+      else categoryName += name.charAt(i);
+    }
+    return categoryName;
+  }
+
   const pageDetails = details[0];
   const dateCreated = new Date(pageDetails.created_at).toLocaleDateString("en-US", {
     year: "numeric",
@@ -109,7 +120,10 @@ export default function Sidebar({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isClient]);
 
+  // --- Path logics ---
+
   const pathname = usePathname();
+  const inOrgs = pathname.startsWith("/o/")
   const redirectTo = (redir?: string) => encodeURIComponent((redir ?? "").replace(/ /g, '_'));
 
   // --- Font color logic ---
@@ -189,7 +203,7 @@ export default function Sidebar({
         {/* Tags */}
         <div className=" mt-1 pl-8 py-4 lg:bg-gray-500/50">
           <p style={{ opacity: 0.9 }}>
-            {pathname != `/c/${id}` ? "Currently showing posts for:" : "Most Popular Tags"}
+            {pathname != `/c/${id}` || `/o/${id}` ? "Currently showing posts for:" : "Most Popular Tags"}
           </p>
           <div className="block max-h-120 overflow-y-clip">
             {rel.length > 0 ? (
@@ -273,7 +287,7 @@ export default function Sidebar({
         </div>
 
         {/* Related Orgs/Clubs */}
-        <div className="mt-1 px-8 py-4 lg:bg-gray-500/50">
+        <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4 lg:bg-gray-500/50`}>
           <p style={{ opacity: 0.9 }}>Related Orgs / Clubs</p>
           {rel.length > 0 ? (
             rel.map((post, idx) => (
@@ -282,7 +296,7 @@ export default function Sidebar({
                   href={`/o/${redirectTo(post.title)}`}
                   className="hover:underline"
                 >
-                  {post.title}
+                  {OrgName(post.title)}
                 </a>
               </div>
             ))

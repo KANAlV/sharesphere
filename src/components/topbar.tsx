@@ -11,7 +11,7 @@ type User = {
 }
 export default function Topbar({ user }: { user: User | null }) {
     const pathname = usePathname();
-    const isHidden = pathname.startsWith("/login") || pathname.startsWith("/signup");
+    const isHidden = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/forgot-password");
     return (
         <nav className={`bg-[#1F1E3D] fixed w-full z-20 top-0 start-0 dark:border-gray-600`}>
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">

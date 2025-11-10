@@ -3,8 +3,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 
-export default function Navigation() {
-  const pathname = usePathname()?.replace(/\/$/, ""); // remove trailing slash
+type User = {
+    id: string;
+    username: string;
+    email: string;
+}
+export default function Navigation({ user }: { user: User | null }) {
+  const [isUser, setUser] = useState<User | null>(user);
+  const pathname = usePathname()?.replace(/\/$/, "");
   const isHidden =
     pathname === "/login" ||
     pathname === "/signup" ||
@@ -12,7 +18,7 @@ export default function Navigation() {
 
   const [isOpen, setIsOpen] = useState(false);
 
-  if (isHidden) return null; // ✅ fully hide nav on those pages
+  if (isHidden) return null;
 
   return (
     <div
@@ -150,25 +156,27 @@ export default function Navigation() {
           </Link>
 
           {/* User */}
-          <Link
-            href="/u"
-            onClick={() => setIsOpen(false)}
-            className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
-              lg:flex-row lg:justify-start lg:my-4
-              ${isOpen ? "lg:flex" : "lg:hidden"}
-            `}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="currentColor"
+          {isUser ? (
+            <Link
+                href="/u"
+                onClick={() => setIsOpen(false)}
+                className={`${user != null ? "flex":"hidden"} flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                lg:flex-row lg:justify-start lg:my-4
+                ${isOpen ? "lg:flex" : "lg:hidden"}
+                `}
             >
-              <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.65-.07.98s.03.66.07.98L2.46 14.6a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65a7.03 7.03 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z" />
-            </svg>
-            <div className="text-xs lg:text-lg lg:pl-2 mt-1">User</div>
-          </Link>
+                <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                >
+                <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.65-.07.98s.03.66.07.98L2.46 14.6a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65a7.03 7.03 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z" />
+                </svg>
+                <div className="text-xs lg:text-lg lg:pl-2 mt-1">{user?.username}</div>
+            </Link>
+            ) : null}
         </div>
       </div>
     </div>

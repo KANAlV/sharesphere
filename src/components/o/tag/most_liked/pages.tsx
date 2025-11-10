@@ -56,7 +56,7 @@ export default function CoursePage({
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/c/tags/most_liked?category=${id}&tags=${encodeURIComponent(tag)}&offset=${offset}`);
+      const res = await fetch(`/api/o/tags/most_liked?organization=${id}&tags=${encodeURIComponent(tag)}&offset=${offset}`);
       const newPosts: Post[] = await res.json();
 
       if (newPosts.length === 0) {

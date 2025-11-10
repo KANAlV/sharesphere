@@ -28,18 +28,16 @@ type Announce = {
 export default function CoursePage({
   posts: initialPosts,
   id,
-  tag,
   details: initialDetails,
   announcements,
 }: {
   posts: Post[];
   id: string;
-  tag: string;
   details: Details[];
   announcements: Announce[];
 }) {
   const redirect = (dest: string) => {
-    window.location.href = "/posts/" + dest;
+    window.location.href = "../posts/" + dest;
   };
 
   // --- State ---
@@ -56,7 +54,7 @@ export default function CoursePage({
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/c/tags/most_liked?category=${id}&tags=${encodeURIComponent(tag)}&offset=${offset}`);
+      const res = await fetch(`/api/o?organization=${id}&offset=${offset}`);
       const newPosts: Post[] = await res.json();
 
       if (newPosts.length === 0) {
@@ -203,7 +201,7 @@ export default function CoursePage({
           <div className="pt-5">
             <div className="relative inline-block">
               <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="select-none cursor-pointer bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
-                <div>Most Liked</div>
+                <div>Recent</div>
               </div>
               <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
                 <svg
@@ -216,8 +214,8 @@ export default function CoursePage({
               </div>
             </div>
             <div className={`${sortSelect ? "block":"hidden"} absolute z-20 bg-gray-500 w-35 hover:inset-shadow-2xs appearance-none`}>
-              <Link href={`/c/${id}/tags/${tag}`}><div className="hover:bg-gray-500/30 px-3">Recent</div></Link>
-              <div className="hover:bg-gray-500/30 px-3">Most Liked</div>
+              <div className="hover:bg-gray-500/30 px-3">Recent</div>
+              <Link href={`${id}/most_liked`}><div className="hover:bg-gray-500/30 px-3">Most Liked</div></Link>
             </div>
           </div>
 

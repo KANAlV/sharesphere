@@ -176,7 +176,7 @@ export default function CoursePage({
             }`}
           >
             <div className="min-w-100% h-50 flex overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
-              {posts.length > 0 ? (
+              {announcements.length > 0 ? (
                 announcements.map((announce, idx) => (
                   <a
                     key={`${announce.dir}-${idx}`}
