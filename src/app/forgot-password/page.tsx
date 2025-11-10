@@ -86,6 +86,7 @@ export default function ForgotPassword() {
         setEmail("");
         setOtp("");
         setNewPassword("");
+        setTimeout(() => (window.location.href = "/login"), 2000);
       } else {
         setMessage(data.error || "❌ Failed to reset password.");
       }
