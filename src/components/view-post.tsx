@@ -2,7 +2,22 @@
 
 import { useState } from "react";
 
-export default function PostView({ post, similarPosts }: any) {
+type Post = {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  username: string;
+  likes?: number;
+  dislikes?: number;
+};
+
+//Automatically define the expected props, hope it works
+interface PostViewProps {
+  post: Post;
+}
+
+export default function PostView({ post }: PostViewProps) {
   // Use values fetched directly from the database
   const [likes] = useState(post.likes || 0);
   const [dislikes] = useState(post.dislikes || 0);
