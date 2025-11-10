@@ -44,7 +44,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
         <Navigation/>
-        <Topbar user={user}/>
+        <Topbar user={user ? { ...user } : null} />
         {children}
       </body>
     </html>
