@@ -97,7 +97,7 @@ export default function Posts({
             <Link
               key={post.id}
               href={`/posts/${post.id}`}
-              className="bg-transparent p-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block border-t-2 border-t-gray-500/50 dark:border-b-white/50"
+              className="bg-transparent p-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block border-t-2"
             >
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
                 {post.title}
@@ -108,6 +108,20 @@ export default function Posts({
               <p className="text-gray-700 dark:text-gray-300 line-clamp-3">
                 {post.content}
               </p>
+              <div className="flex">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
+                    <path fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+                          d="M14 9V5a2 2 0 0 0-2-2l-3 7v8h8.5A2.5 2.5 0 0 0 20 17.5V12a2 2 0 0 0-2-2h-2zM7 22V9H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3z"/>
+                  </svg>
+                  {post.likes}
+                  <span className="w-4" />
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
+                    <title>Dislike</title>
+                    <path fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+                          d="M10 15v4a2 2 0 0 0 2 2l3-7V6H6.5A2.5 2.5 0 0 0 4 8.5V14a2 2 0 0 0 2 2h2zM17 2v13h3a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-3z"/>
+                  </svg>
+                  {post.dislikes}
+                  </div>
             </Link>
           ))
         )}
