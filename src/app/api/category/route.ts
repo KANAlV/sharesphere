@@ -5,6 +5,7 @@ type Info = {
     id: string;
     name: string;
     description: string;
+    banner: string;
 };
 
 export async function GET(req: Request) {

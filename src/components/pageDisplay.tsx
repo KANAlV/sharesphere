@@ -2,11 +2,13 @@
 import { useState,useEffect,useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 type Info = {   // singular type
     id: string;
     name: string;
     description: string;
+    banner: string;
 }
 
 export default function Info({ info: initialPosts }: {info: Info[];}) {
@@ -83,9 +85,12 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
     };
     }, [loadMorePosts, loading, hasMore]);
     return (
-        <div className="mt-20 m-auto p-4 w-full lg:w-3/5 h-max flex flex-wrap gap-4">
+        <div className="mt-20 m-auto p-1 w-full lg:w-3/5 justify-between h-max flex flex-wrap gap-4">
             {/* <!-- top-right small box --> */}
-            <div className="w-full h-10 mb-4 flex justify-end items-center">
+            <div className="flex items-center justify-between w-full">
+                <span className="text-2xl pl-2">
+                    {pathname.startsWith("/organizations") ? "Organizations" : "Courses"}
+                </span>
                 <div className="cursor-pointer grid grid-cols-2 h-10 w-25 rounded-full border-2 border-gray-500">
                     <div className="border-r-1 border-gray-500">
                         <svg
@@ -128,17 +133,32 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
             </div>
 
             {/* <!-- info container --> */}
-            <div className={`w-full h-max ${gridView ? "grid grid-cols-3 lg:grid-cols-6 gap-4" : "grid grid-cols-2 gap-4"}`}>
+            <div className={`w-full h-max ${gridView ? "grid grid-cols-3 md:grid-cols-5 xl:grid-cols-6 gap-2" : "grid grid-cols-2 gap-4"}`}>
                 {info.length > 0 ?
                     info.map((Info) => (
                         <Link href={`/${location}/` + Info.name} key={Info.id}>
                             <div
                                 key={Info.id}
-                                className={`${gridView ?
-                                    "relative w-30 h-30 lg:w-40 lg:h-40 bg-white dark:bg-gray-800 shadow-md rounded-lg flex items-center justify-center cursor-pointer flex-shrink-0":
-                                    "w-full h-20 bg-white dark:bg-gray-800 shadow-md rounded-lg flex items-center pl-4 cursor-pointer flex-shrink-0"}`}
+                                className={`overflow-clip ${gridView
+                                ? "relative w-30 h-30 xl:w-40 xl:h-40 bg-white dark:bg-gray-800 shadow-md rounded-lg flex flex-col items-center justify-center cursor-pointer flex-shrink-0"
+                                : "w-full h-20 bg-white dark:bg-gray-800 shadow-md rounded-lg flex items-center pl-4 cursor-pointer flex-shrink-0"
+                                }`}
                             >
-                                <p className="text-center font-semibold line-clamp-3">{displayTitle(Info.name)}</p>
+                                <div
+                                className={`${gridView ? "w-full h-full" : "w-12 h-12 rounded-lg"}`}
+                                style={{
+                                    backgroundImage: `url(${Info.banner})`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    backgroundRepeat: "no-repeat",
+                                }}
+                                />
+
+                                <div className="flex px-2 items-center justify-center w-full h-full">
+                                <p className="text-center text-xs lg:text-md font-semibold line-clamp-3">
+                                    {displayTitle(Info.name)}
+                                </p>
+                                </div>
                             </div>
                         </Link>
                     )

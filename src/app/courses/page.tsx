@@ -8,6 +8,7 @@ export default async function Page(){
         id: string;
         name: string;
         description: string;
+        banner: string;
     }[];
 
     return (<PageDisplay info={info} />)
