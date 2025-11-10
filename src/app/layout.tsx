@@ -16,6 +16,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const metadata = {
+  title: 'Sharesphere',
+  icons: {
+    icon: '/favicon.svg', // your favicon path
+  },
+};
+
 // Make the layout async so we can await cookies()
 export default async function RootLayout({
   children,
