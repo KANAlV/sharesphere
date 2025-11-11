@@ -61,6 +61,33 @@ export default function Navigation({ user }: { user: User | null }) {
             isOpen ? "lg:px-8" : "lg:px-2"
           } justify-evenly items-center`}
         >
+          {/* User Pc view */}
+          {isUser ? (
+            <Link
+                href="/u"
+                onClick={() => setIsOpen(false)}
+                className={`${user != null ? "lg:block":"lg:hidden"} hidden flex-row pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                lg:flex-row lg:justify-start lg:my-4
+                ${isOpen ? "lg:flex" : "lg:hidden"}
+                `}
+            >
+                <div className="lg:pl-2 mt-1">
+                  <div className="text-gray-500">Logged in As:</div>
+                  <div className="text-lg">{user?.username}</div>
+                </div>
+                <span className="w-2/4"/>
+                <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                >
+                <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.65-.07.98s.03.66.07.98L2.46 14.6a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65a7.03 7.03 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z" />
+                </svg>
+            </Link>
+            ) : null}
+
           {/* Home */}
           <Link
             href="/"
@@ -155,12 +182,12 @@ export default function Navigation({ user }: { user: User | null }) {
             <div className="text-xs lg:text-lg lg:pl-2 mt-1">Organizations</div>
           </Link>
 
-          {/* User */}
+          {/* User mobile view */}
           {isUser ? (
             <Link
                 href="/u"
                 onClick={() => setIsOpen(false)}
-                className={`${user != null ? "flex":"hidden"} flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                className={`${user != null ? "flex":"hidden"} lg:hidden flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
                 lg:flex-row lg:justify-start lg:my-4
                 ${isOpen ? "lg:flex" : "lg:hidden"}
                 `}

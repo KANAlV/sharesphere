@@ -16,7 +16,7 @@ const EyeSlashIcon = () => (
 );
 
 export default function AdminLoginPage() {
-  const [adminName, setAdminName] = useState("");
+  const [usernameEmail, setUsernameEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [darkMode, setDarkMode] = useState(false);
@@ -32,14 +32,14 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/admin-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminName, password }),
+        body: JSON.stringify({ usernameEmail, password }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.success) {
         setMessage("✅ Login successful! Redirecting...");
-        setTimeout(() => (window.location.href = "/admin/dashboard"), 1200);
+        setTimeout(() => (window.location.href = "/"), 1200);
       } else {
         setMessage(data.message || "❌ Invalid credentials.");
       }
@@ -112,10 +112,10 @@ export default function AdminLoginPage() {
 
           <input
             type="text"
-            name="adminName"
-            placeholder="Username"
-            value={adminName}
-            onChange={(e) => setAdminName(e.target.value)}
+            name="usernameEmail"
+            placeholder="Username or Email"
+            value={usernameEmail}
+            onChange={(e) => setUsernameEmail(e.target.value)}
             className={`border p-3 w-full rounded ${
               darkMode
                 ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"

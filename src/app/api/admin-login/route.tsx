@@ -1,63 +1,61 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
 import { sql } from "@/lib/db";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   try {
-    const { adminName, password } = await req.json();
+    const { usernameEmail, password } = await req.json();
 
-    if (!adminName || !password) {
-      return NextResponse.json(
-        { success: false, message: "Missing credentials" },
-        { status: 400 }
-      );
+    if (!usernameEmail || !password) {
+      return NextResponse.json({ error: "All fields required" }, { status: 400 });
     }
 
-    console.log("🔍 Checking admin:", adminName);
-
-    // Fetch admin data
-    const admin = await sql`
-      SELECT 
-        "adminID" AS id, 
-        "adminName" AS name, 
-        password_hash 
-      FROM admins 
-      WHERE "adminName" = ${adminName}
+  
+    const users = await sql`
+      SELECT * FROM loginAdmin(${usernameEmail})
     `;
 
-    if (admin.length === 0) {
-      console.log("❌ Admin not found");
-      return NextResponse.json(
-        { success: false, message: "Admin not found" },
-        { status: 401 }
-      );
+    if (users.length === 0) {
+      return NextResponse.json({ error: "User does not exist" }, { status: 400 });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, admin[0].password_hash);
+    const user = users[0];
+   
+    const isMatch = await bcrypt.compare(password, user.password_hash);
 
-    if (!isPasswordValid) {
-      console.log("❌ Invalid password");
-      return NextResponse.json(
-        { success: false, message: "Invalid password" },
-        { status: 401 }
-      );
+    if (!isMatch) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
+    
+    const token = jwt.sign(
+      { id: user.admin_id, email: user.admin_email, username: user.admin_name},
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
 
-    console.log("✅ Login successful:", admin[0].name);
-
-    return NextResponse.json({
+    
+    const res = NextResponse.json({
       success: true,
       message: "Login successful",
-      admin: {
-        id: admin[0].id,
-        name: admin[0].name,
+      user: {
+        id: user.admin_id,
+        username: user.admin_name,
+        email: user.admin_email,
       },
+    }, { status: 200 });
+
+    res.cookies.set("session", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
     });
-  } catch (error) {
-    console.error("🔥 Server error:", error);
-    return NextResponse.json(
-      { success: false, message: "Server error" },
-      { status: 500 }
-    );
+
+    return res;
+
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
