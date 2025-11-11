@@ -14,15 +14,13 @@ type Post = {
 export default async function PostPage({ params }: { params: { id: string } }) {
   const postId = params.id;
 
-  // Fetch clicked post
-  const result = await sql`
+  // Fetch selected post
+  const [post] = (await sql`
     SELECT p.id, p.title, p.content, p.created_at, u.username, p.likes, p.dislikes
     FROM posts p
     JOIN users u ON p.author_id = u.id
     WHERE p.id = ${postId}
-  `;
-
-  const post = result[0] as Post | undefined;
+  `);
 
   if (!post) {
     return <div className="text-center py-10">Post not found.</div>;
