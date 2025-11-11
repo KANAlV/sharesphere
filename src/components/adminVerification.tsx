@@ -25,18 +25,14 @@ export async function AdminVerification() {
             ) AS "exists";
             `;
             
-            console.log("userdata:" + user.id, user.email, user.username);
             if (!result[0].exists) {
-                console.log("try redirect");
                 redirect("/");
             }
         } catch {
             user = null;
-            console.log("catch redirect");
             redirect("/");
         }
     } else {
-        console.log("else redirect");
         redirect("/");
     }
         
