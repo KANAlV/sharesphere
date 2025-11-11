@@ -57,7 +57,7 @@ export default function Navigation({ user }: { user: User | null }) {
         } h-screen lg:border-r border-gray-500`}
       >
         <div
-          className={`flex lg:block w-full lg:pt-10 ${
+          className={`flex lg:block w-full lg:pt-2 ${
             isOpen ? "lg:px-8" : "lg:px-2"
           } justify-evenly items-center`}
         >
