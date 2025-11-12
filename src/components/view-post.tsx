@@ -2,34 +2,35 @@
 
 import { useState } from "react";
 
-export default function PostView({ post }: { post: unknown }) { 
-  const typedPost = post as {
-    id: string;
-    title: string;
-    content: string;
-    created_at: string;
-    username: string;
-    likes?: number;
-    dislikes?: number;
-  };
+type Post = {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  username: string;
+  likes: number;
+  dislikes: number;
+};
 
-  const [likes] = useState(typedPost.likes || 0);
-  const [dislikes] = useState(typedPost.dislikes || 0);
+export default function PostView({ post }: { post: Post }) { 
+
+  const [likes] = useState(post.likes || 0);
+  const [dislikes] = useState(post.dislikes || 0);
   const [comment, setComment] = useState("");
 
   return (
     <div className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-8 rounded-lg w-full ml-15">
       {/* Title */}
       <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5">
-        <p className="text-black dark:text-white text-5xl font-bold">{typedPost.title}</p>
+        <p className="text-black dark:text-white text-5xl font-bold">{post.title}</p>
         <p className="text-sm text-black dark:text-white">
-          {typedPost.username} — {new Date(typedPost.created_at).toLocaleDateString()}
+          {post.username} — {new Date(post.created_at).toLocaleDateString()}
         </p>
       </div>
 
       {/* Content */}
       <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 px-5 pt-10 pb-4">
-        <p className="text-xl text-black dark:text-white mb-4">{typedPost.content}</p>
+        <p className="text-xl text-black dark:text-white mb-4">{post.content}</p>
       </div>
 
       {/* Likes / Dislikes */}
