@@ -13,7 +13,7 @@ export default async function CourseCarouselWrapper() {
     description: string;
   }[];
 
-  // --- posts ---
+  // --- posts --- //
   const postsRaw = await (sql`
     SELECT * FROM fetchAllPosts(10, 0);
   `) as {
