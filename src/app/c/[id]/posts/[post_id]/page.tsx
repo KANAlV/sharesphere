@@ -1,16 +1,18 @@
 import { sql } from "@/lib/db";
 import PostView from "@/components/view-post";
-import Sidebar from "@/components/sidebar";
 
-export default async function PostPage(props: { params: Promise<{ id: string; postid: string; }> }) {
-  const { id, postid } = await props.params;
+export default async function PostPage({
+  params,
+}: {
+  params: { id: string; post_id: string };
+}) {
+  const { id, post_id } = await params;
 
-  // Fetch selected post
   const posts = (await sql`
     SELECT p.id::TEXT, p.title, p.content, p.created_at, u.username, p.likes, p.dislikes
     FROM posts p
     JOIN users u ON p.author_id = u.id
-    WHERE p.id = ${postid}
+    WHERE p.id = ${post_id}
   `) as {
     id: string;
     title: string;
@@ -28,7 +30,6 @@ export default async function PostPage(props: { params: Promise<{ id: string; po
   }
 
   // Sidebar data
-  
   const rel = (await sql`
     SELECT * FROM fetchRelatedOrgs(${id});
   `) as {
@@ -38,7 +39,10 @@ export default async function PostPage(props: { params: Promise<{ id: string; po
   }[];
 
   const tags = (await sql`
-    SELECT t.id AS dir, t.name AS tag, t.color FROM page_tags pt JOIN tags t ON t.id = pt.tag_id WHERE pt.page_id = ${postid};
+    SELECT t.id AS dir, t.name AS tag, t.color 
+    FROM page_tags pt 
+    JOIN tags t ON t.id = pt.tag_id 
+    WHERE pt.page_id = ${post_id};
   `) as {
     dir: string;
     tag: string;
