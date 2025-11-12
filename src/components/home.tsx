@@ -1,94 +1,76 @@
 "use client";
 
-import { useRef } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "flowbite-react";
+import { useState, useEffect } from "react";
 
-type Course = {
-  id: string;
-  name: string;
-  description: string;
-};
+export default function TextCarousel() {
+  const [announcements, setAnnouncements] = useState<
+    { announceid: number; author_id: string; title: string; content: string }[]
+  >([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-export default function CourseCarousel({ courses }: { courses: Course[] }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const scrollAmount = 250;
-      scrollRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const displaytitle = (title: string) => {
-    let displayTitle;
-    for(let i = 0; i < title.length;i++){
-      if (i == 0)
-      {
-        displayTitle = null;
-        displayTitle = title.charAt(0).toUpperCase();
-      }
-      else
-      {
-        switch (title.charAt(i)) {
-          case "_": displayTitle = displayTitle + " ";
-                  break;
-          default: if (title.charAt(i - 1) == "_") {displayTitle = displayTitle + title.charAt(i).toUpperCase();}
-                  else {displayTitle = displayTitle + title.charAt(i);}
-                  break; 
-        }
-        
+  // Fetching announcements
+  useEffect(() => {
+    async function fetchAnnouncements() {
+      try {
+        const res = await fetch("/api/announcements");
+        const data = await res.json();
+        setAnnouncements(data.announcements || []);
+      } catch (err) {
+        console.error("Failed to load announcements:", err);
       }
     }
-    return displayTitle;
-  }
 
-  const redirect = (dest: string) => {
-    window.location.href = "c/" + dest;
-  }
+    fetchAnnouncements();
+  }, []);
 
-  if (!courses || courses.length === 0) {
-    return <p className="text-center mt-10">No courses found.</p>;
-  }
+  // Should Auto scroll every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % (announcements.length || 1));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [announcements.length]);
+
+  if (announcements.length === 0) {
+  return (
+    <div className="w-[80%] mx-auto mt-30 mb-15">
+      <div className="relative w-full h-52 md:h-60 flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded-2xl shadow-lg">
+        <p className="text-xl text-gray-500 dark:text-gray-400">
+          No announcements available.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+  const current = announcements[currentIndex];
 
   return (
-    <div className="w-full min-h-full mt-30">
-      {/* carousel */}
-      <div className="relative w-full max-w-15/16 mx-auto mb-10">
-        {/* Scroll left */}
-        <button
-          onClick={() => scroll("left")}
-          className="absolute left-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
-        >
-          <ChevronLeftIcon />
-        </button>
-
-        {/* Scrollable list */}
-        <div
-          ref={scrollRef}
-          className="flex overflow-x-auto space-x-15 no-scrollbar scroll-smooth px-10"
-        >
-          {courses.map((course) => (
-            <div
-              key={course.id}
-              onClick={() => redirect(course.name)}
-              className="relative w-50 h-50 bg-white dark:bg-gray-800 shadow-md rounded-lg flex-shrink-0 flex items-center justify-center cursor-pointer"
-            >
-              <p className="text-center font-semibold">{displaytitle(course.name)}</p>
-            </div>
-          ))}
+    <div className="w-[80%] mx-auto mt-30 mb-15">
+      <div className="relative w-full h-52 md:h-60 flex items-center justify-center bg-gray-200 dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden transition-all duration-700">
+        <div className="text-center px-6">
+          <p className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-200">
+            {current.title}
+          </p>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{current.content}</p>
         </div>
 
-        {/* Scroll right */}
-        <button
-          onClick={() => scroll("right")}
-          className="absolute right-0 top-1/2 -translate-y-1/2 bg-gray-200 dark:bg-gray-700 p-2 rounded-full z-10"
-        >
-          <ChevronRightIcon />
-        </button>
-      </div>      
+        {/* Indicators */}
+        <div className="absolute bottom-3 flex gap-2 justify-center">
+          {announcements.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                currentIndex === index
+                  ? "bg-blue-500 scale-125"
+                  : "bg-gray-400 dark:bg-gray-600"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

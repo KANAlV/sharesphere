@@ -5,10 +5,11 @@ import UserDropdown from "./UserDropdownWrapper";
 import { usePathname } from "next/navigation";
 
 type User = {
-    id: string;
-    username: string;
-    email: string;
-}
+  id: string;
+  username: string;
+  email: string;
+};
+
 export default function Topbar({ user }: { user: User | null }) {
     const pathname = usePathname();
     const isHidden = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/forgot-password");
