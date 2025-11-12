@@ -11,7 +11,7 @@ type Post = {
   likes: number;
   dislikes: number;
 };
-
+//test
 export default function PostView({ post }: { post: Post }) { 
 
   const [likes] = useState(post.likes || 0);
