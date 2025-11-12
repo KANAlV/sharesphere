@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 
 type Post = {
@@ -19,7 +18,7 @@ export default function PostView({ post }: { post: Post }) {
   const [comment, setComment] = useState("");
 
   return (
-    <div className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-8 rounded-lg w-full ml-15">
+    <div id="title" className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-4 rounded-lg w-full lg:max-w-7/9 lg:ml-12 mt-16 lg:mt-22">
       {/* Title */}
       <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5">
         <p className="text-black dark:text-white text-5xl font-bold">{post.title}</p>

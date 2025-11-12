@@ -31,16 +31,17 @@ export default async function PostPage({
   }
 
   // Sidebar data
-  const rel = (await sql`
-    SELECT * FROM fetchRelatedOrgs(${id});
-  `) as {
+  
+  type Rel = {
     dir: string;
     title: string;
     theme: string;
-  }[];
+  }
+  
+  const rel: Rel[] = [];
 
   const details = (await sql`
-    SELECT * FROM fetchCategoryDetails(${id});
+    SELECT * FROM fetchOrgDetails(${id});
   `) as {
     description: string;
     theme: string;
@@ -49,10 +50,7 @@ export default async function PostPage({
   }[];
 
   const tags = (await sql`
-    SELECT t.id AS dir, t.name AS tag, t.color 
-    FROM page_tags pt 
-    JOIN tags t ON t.id = pt.tag_id 
-    WHERE pt.page_id = ${post_id};
+    SELECT * FROM fetchOrgRelatedTags(${id});
   `) as {
     dir: string;
     tag: string;
@@ -60,7 +58,7 @@ export default async function PostPage({
   }[];
 
   const rules = (await sql`
-    SELECT * FROM fetchPageRules(${id}, false);
+    SELECT * FROM fetchPageRules(${id}, true);
   `) as {
     rule: string;
     description: string;
@@ -72,5 +70,6 @@ export default async function PostPage({
       <PostView post={post} />
       <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
     </>
+      
   );
 }

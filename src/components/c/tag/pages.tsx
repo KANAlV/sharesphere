@@ -39,7 +39,7 @@ export default function CoursePage({
   announcements: Announce[];
 }) {
   const redirect = (dest: string) => {
-    window.location.href = "/posts/" + dest;
+    window.location.href = "/c/" + id + "/posts/" + dest;
   };
 
   // --- State ---

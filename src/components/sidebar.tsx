@@ -72,25 +72,33 @@ export default function Sidebar({
   const [sidebarLeft, setSidebarLeft] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [sidebarMode, setSidebarMode] = useState(true);
 
   // Mark when running on client (so window/document are safe)
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+
   // Dynamically calculate sidebar position (only on large screens)
   useEffect(() => {
     if (!isClient) return;
-
-    const banner = document.getElementById("banner");
 
     const updatePosition = () => {
       if (window.innerWidth < 1024) {
         setSidebarLeft(null);
         return;
       }
-      if (banner) {
-        const rect = banner.getBoundingClientRect();
+
+      const banner = document.getElementById("banner");
+      const title = document.getElementById("title");
+
+      if (title) {setSidebarMode(false)};
+
+      // Prefer banner, fallback to title
+      const refElement = banner ?? title;
+      if (refElement) {
+        const rect = refElement.getBoundingClientRect();
         setSidebarLeft(rect.right + 20);
       }
     };
@@ -109,16 +117,22 @@ export default function Sidebar({
   useEffect(() => {
     if (!isClient) return;
 
-    const banner = document.getElementById("banner");
     const handleScroll = () => {
-      if (!banner) return;
-      const bannerBottom = banner.getBoundingClientRect().bottom;
-      setIsSticky(bannerBottom <= 50);
+      const banner = document.getElementById("banner");
+      const title = document.getElementById("title");      
+
+      // Prefer banner, fallback to title
+      const refElement = banner ?? title;
+      if (!refElement) return;
+
+      const bottom = refElement.getBoundingClientRect().bottom;
+      setIsSticky(bottom <= 50);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isClient]);
+
 
   // --- Path logics ---
 
@@ -164,7 +178,10 @@ export default function Sidebar({
       <div
         className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
-          ${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}
+          ${sidebarMode ?
+            `${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}`:
+            `${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-22"}`
+          }
           fixed top-18 h-screen lg:max-h-8/9 w-screen bg-[#111]
           lg:block lg:max-w-1/6
           overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
@@ -203,7 +220,7 @@ export default function Sidebar({
         {/* Tags */}
         <div className=" mt-1 pl-8 py-4 lg:bg-gray-500/50">
           <p style={{ opacity: 0.9 }}>
-            {pathname != `/c/${id}` || `/o/${id}` ? "Currently showing posts for:" : "Most Popular Tags"}
+            {pathname.startsWith(`/c/`)||pathname.startsWith(`/o/`) ? "Most Popular Tags":"Currently showing posts for:"}
           </p>
           <div className="block max-h-120 overflow-y-clip">
             {rel.length > 0 ? (

@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db";
-import CoursePageClient from "@/components/c/most_liked/pages";
+import CoursePageClient from "@/components/o/most_liked/pages";
 import Sidebar from "@/components/sidebar";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {

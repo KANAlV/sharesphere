@@ -1,5 +1,5 @@
 import { sql } from "@/lib/db";
-import CoursePageClient from "@/components/c/tag/pages";
+import CoursePageClient from "@/components/o/tag/pages";
 import Sidebar from "@/components/sidebar";
 
 export default async function Page(props: { params: Promise<{ id: string, tag: string }> }) {
