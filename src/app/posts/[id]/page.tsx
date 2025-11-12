@@ -14,7 +14,7 @@ type Post = {
 export default async function PostPage({
   params,
 }: {
-  params: { id: string };
+  params: { id: unknown };
 }) {
   // ✅ destructure params properly (it's not a Promise)
   const { id } = params;
