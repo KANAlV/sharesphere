@@ -8,7 +8,8 @@ type Rule = {
 
 export async function POST(req: Request) {
   try {
-    let { page_name, theme, pagetype, description, bannerUrl, rules } = await req.json();
+    let { page_name } = await req.json();
+    const { theme, pagetype, description, bannerUrl, rules } = await req.json();
 
     // Normalize page_name: replace spaces with underscores
     if (page_name) {
@@ -23,8 +24,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Rules must be an array" }, { status: 400 });
     }
 
-    let pageResult;
     const isCourse = pagetype === "categories";
+    let pageResult;
 
     // Insert page
     if (isCourse) {
