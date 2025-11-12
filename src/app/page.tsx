@@ -3,6 +3,8 @@ import TextCarousel from "@/components/home";
 import Posts from "@/components/posts";
 
 export default async function CourseCarouselWrapper() {
+  
+  // --- courses ---
   const courses = (await sql`
     SELECT * FROM fetchCourses()
   `) as {
@@ -11,7 +13,11 @@ export default async function CourseCarouselWrapper() {
     description: string;
   }[];
 
-  const postsRaw = await sql`SELECT * FROM fetchAllPosts(10, 0);`;
+  // --- posts ---
+  const postsRaw = await sql`
+    SELECT * FROM fetchAllPosts(10, 0);
+  `;
+
   const posts = JSON.parse(JSON.stringify(postsRaw));
 
   console.log("Fetched courses:", courses);

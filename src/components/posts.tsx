@@ -15,7 +15,9 @@ type Post = {
   created_at: string;
   likes: number;
   dislikes: number;
-  username?: string; // 👈 Add username field
+  category: string,
+  organization?: string,
+  username?: string;
 };
 
 export default function Posts({
@@ -108,7 +110,7 @@ export default function Posts({
           posts.map((post) => (
             <Link
               key={post.id}
-              href={`/posts/${post.id}`}
+              href={`/${post.organization ? "o/" + post.organization:"c/" + post.category}/posts/${post.id}`}
               className="bg-transparent p-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block border-t-2"
             >
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white">
