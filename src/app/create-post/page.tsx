@@ -1,7 +1,5 @@
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center">
+import CreatePostPage from "@/components/create-post";
 
-    </div>
-  )
+export default function Page() {
+  return <CreatePostPage />;
 }

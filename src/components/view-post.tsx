@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function PostView({ post }: { post: unknown }) {  // Cast 'post' to a known structure (since it's unknown)
+export default function PostView({ post }: { post: unknown }) { 
   const typedPost = post as {
     id: string;
     title: string;

@@ -11,16 +11,22 @@ type Post = {
   dislikes: number;
 };
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  const postId = params.id;
+export default async function PostPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = params;
 
   // Fetch selected post
-  const [post] = (await sql`
+  const posts = (await sql`
     SELECT p.id, p.title, p.content, p.created_at, u.username, p.likes, p.dislikes
     FROM posts p
     JOIN users u ON p.author_id = u.id
-    WHERE p.id = ${postId}
-  `);
+    WHERE p.id = ${id}
+  `) as Post[];
+
+  const post = posts[0];
 
   if (!post) {
     return <div className="text-center py-10">Post not found.</div>;
