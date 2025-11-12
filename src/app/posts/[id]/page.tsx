@@ -16,6 +16,7 @@ export default async function PostPage({
 }: {
   params: { id: string };
 }) {
+  // ✅ destructure params properly (it's not a Promise)
   const { id } = params;
 
   // Fetch selected post
