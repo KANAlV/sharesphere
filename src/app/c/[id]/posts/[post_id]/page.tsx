@@ -2,12 +2,8 @@ import { sql } from "@/lib/db";
 import PostView from "@/components/view-post";
 import Sidebar from "@/components/sidebar";
 
-export default async function PostPage({
-  params,
-}: {
-  params: { id: string; post_id: string };
-}) {
-  const { id, post_id } = await params;
+export default async function PostPage(props: { params: Promise<{ id: string, post_id: string }> }) {
+  const { id, post_id } = await props.params;
 
   const posts = (await sql`
     SELECT p.id::TEXT, p.title, p.content, p.created_at, u.username, p.likes, p.dislikes
