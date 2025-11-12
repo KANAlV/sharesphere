@@ -14,9 +14,19 @@ export default async function CourseCarouselWrapper() {
   }[];
 
   // --- posts ---
-  const postsRaw = await sql`
+  const postsRaw = await (sql`
     SELECT * FROM fetchAllPosts(10, 0);
-  `;
+  `) as {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  likes: number;
+  dislikes: number;
+  category: string,
+  organization: string,
+  username?: string;
+}[];
 
   const posts = JSON.parse(JSON.stringify(postsRaw));
 

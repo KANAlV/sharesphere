@@ -16,7 +16,7 @@ type Post = {
   likes: number;
   dislikes: number;
   category: string,
-  organization?: string,
+  organization: string,
   username?: string;
 };
 
@@ -76,7 +76,7 @@ export default function Posts({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [loadMorePosts, loading, hasMore]);
 
-  // 👇 Fetch usernames for each post once on mount
+  // Fetch usernames for each post once on mount
   useEffect(() => {
     const fetchUsernames = async () => {
       try {
