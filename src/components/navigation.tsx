@@ -8,7 +8,7 @@ type User = {
     username: string;
     email: string;
 }
-export default function Navigation({ user }: { user: User | null }) {
+export default function Navigation({ user, admin }: { user: User | null, admin: boolean}) {
   const [isUser, setUser] = useState<User | null>(user);
   const pathname = usePathname()?.replace(/\/$/, "");
   const isHidden =
@@ -59,14 +59,15 @@ export default function Navigation({ user }: { user: User | null }) {
         <div
           className={`flex lg:block w-full lg:pt-2 ${
             isOpen ? "lg:px-8" : "lg:px-2"
-          } justify-evenly items-center`}
+          } items-center overflow-x-auto scrollbar-track-black/0 whitespace-nowrap gap-4 px-4`}
         >
+
           {/* User Pc view */}
           {isUser ? (
             <Link
                 href="/u"
                 onClick={() => setIsOpen(false)}
-                className={`${user != null ? "lg:block":"lg:hidden"} hidden flex-row pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                className={`${user != null ? "lg:block":"lg:hidden"} hidden flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
                 lg:flex-row lg:justify-start lg:my-4
                 ${isOpen ? "lg:flex" : "lg:hidden"}
                 `}
@@ -92,7 +93,7 @@ export default function Navigation({ user }: { user: User | null }) {
           <Link
             href="/"
             onClick={() => setIsOpen(false)}
-            className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+            className={`flex flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
               lg:flex-row lg:justify-start lg:my-4
               ${isOpen ? "lg:flex" : "lg:hidden"}
             `}
@@ -130,7 +131,7 @@ export default function Navigation({ user }: { user: User | null }) {
           <Link
             href="/courses"
             onClick={() => setIsOpen(false)}
-            className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+            className={`flex flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
               lg:flex-row lg:justify-start lg:my-4 cursor-pointer
               ${isOpen ? "lg:flex" : "lg:hidden"}
             `}
@@ -156,7 +157,7 @@ export default function Navigation({ user }: { user: User | null }) {
           <Link
             href="/organizations"
             onClick={() => setIsOpen(false)}
-            className={`flex flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+            className={`flex flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
               lg:flex-row lg:justify-start lg:my-4 cursor-pointer
               ${isOpen ? "lg:flex" : "lg:hidden"}
             `}
@@ -187,7 +188,7 @@ export default function Navigation({ user }: { user: User | null }) {
             <Link
                 href="/u"
                 onClick={() => setIsOpen(false)}
-                className={`${user != null ? "flex":"hidden"} lg:hidden flex-col pt-2 items-center justify-center flex-1 h-full hover:bg-gray-500/50 select-none
+                className={`${user != null ? "flex":"hidden"} lg:hidden flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
                 lg:flex-row lg:justify-start lg:my-4
                 ${isOpen ? "lg:flex" : "lg:hidden"}
                 `}
@@ -204,6 +205,24 @@ export default function Navigation({ user }: { user: User | null }) {
                 <div className="text-xs lg:text-lg lg:pl-2 mt-1">{user?.username}</div>
             </Link>
             ) : null}
+
+            {/* page creation */}
+          <Link
+            href="/page_creation"
+            onClick={() => setIsOpen(false)}
+            className={`${admin ? "hidden":"flex"} flex-col pt-2 items-center justify-center min-w-[22%] h-full hover:bg-gray-500/50 select-none
+              lg:flex-row lg:justify-start lg:my-4 cursor-pointer
+              ${isOpen ? "lg:flex" : "lg:hidden"}
+            `}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+            <div className="text-xs lg:text-lg lg:pl-2 mt-1">Page Creation</div>
+          </Link>
         </div>
       </div>
     </div>

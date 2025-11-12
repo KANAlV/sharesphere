@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import "flowbite";
 import Navigation from "@/components/navigation";
 import Topbar from "@/components/topbar";
+import { sql } from "@/lib/db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,11 +48,23 @@ export default async function RootLayout({
     }
   }  
 
+  //check if user exist in adminDB
+  let admin = false;
+  const result = await sql`
+  SELECT EXISTS(
+      SELECT 1 FROM admins WHERE admin_name = ${user?.username} AND admin_id = ${user?.id} AND admin_email = ${user?.email}
+  ) AS "exists";
+  `;
+  
+  if (!result[0].exists) {
+      admin = true;
+  }
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
-        <Navigation user={user ? { ...user } : null} />
-        <Topbar user={user ? { ...user } : null} />
+        <Navigation user={user ? { ...user } : null} admin={admin}/>
+        <Topbar user={user ? { ...user } : null}/>
         {children}
       </body>
     </html>

@@ -2,6 +2,7 @@
 import { useState,useEffect,useCallback } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 type Info = {   // singular type
     id: string;
@@ -90,19 +91,18 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
                 <span className="text-2xl pl-2">
                     {pathname.startsWith("/organizations") ? "Organizations" : "Courses"}
                 </span>
-                <div className="cursor-pointer grid grid-cols-2 h-10 w-25 rounded-full border-2 border-gray-500">
-                    <div className="border-r-1 border-gray-500">
+                <div className="cursor-pointer overflow-clip grid grid-cols-2 h-10 w-25 rounded-full border-2 border-gray-500">
+                    <div className={`${gridView ? "bg-[currentColor]" : "none"} border-r-1 border-gray-500`}>
                         <svg
                             onClick={() => setGridView(true)}
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
                             viewBox="0 0 24 24"
-                            fill={gridView ? "currentColor" : "none"}
-                            stroke="currentColor"
+                            fill = "none"
                             strokeWidth="1.5"
                             strokeLinejoin="round"
-                            className="m-auto my-2 cursor-pointer"
+                            className={`m-auto my-2 cursor-pointer ${gridView ? "stroke-background" : "stroke-current"}`}
                         >
                             <rect x="3" y="3" width="7" height="7" />
                             <rect x="14" y="3" width="7" height="7" />
@@ -110,18 +110,17 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
                             <rect x="3" y="14" width="7" height="7" />
                         </svg>
                     </div>
-                    <div className="border-l-1 border-gray-500">
+                    <div className={`${!gridView ? "bg-[currentColor]" : "none"} border-l-1 border-gray-500`}>
                         <svg
                             onClick={() => setGridView(false)}
                             xmlns="http://www.w3.org/2000/svg"
                             width="24"
                             height="24"
                             viewBox="0 0 24 24"
-                            fill={!gridView ? "currentColor" : "none"}
-                            stroke="currentColor"
+                            fill= "none"
                             strokeWidth="1.5"
                             strokeLinejoin="round"
-                            className="m-auto my-2 cursor-pointer"
+                            className={`m-auto my-2 cursor-pointer ${!gridView ? "stroke-background" : "stroke-current"}`}
                         >
                             <rect x="3" y="3" width="18" height="4" />
                             <rect x="3" y="10" width="18" height="4" />
@@ -133,35 +132,34 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
 
             {/* <!-- info container --> */}
             <div className={`w-full h-max ${gridView ? "grid grid-cols-3 md:grid-cols-5 xl:grid-cols-6 gap-2" : "grid grid-cols-2 gap-4"}`}>
-                {info.length > 0 ?
+                {info.length > 0 ? (
                     info.map((Info) => (
-                        <Link href={`/${location}/` + Info.name} key={Info.id}>
-                            <div
-                                key={Info.id}
-                                className={`overflow-clip ${gridView
-                                ? "relative w-30 h-30 xl:w-40 xl:h-40 bg-white dark:bg-gray-800 shadow-md rounded-lg flex flex-col items-center justify-center cursor-pointer flex-shrink-0"
-                                : "w-full h-20 bg-white dark:bg-gray-800 shadow-md rounded-lg flex items-center pl-4 cursor-pointer flex-shrink-0"
-                                }`}
-                            >
-                                <div
-                                className={`${gridView ? "w-full h-full" : "w-12 h-12 rounded-lg"}`}
-                                style={{
-                                    backgroundImage: `url(${Info.banner})`,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    backgroundRepeat: "no-repeat",
-                                }}
-                                />
+                    <Link href={`/${location}/` + Info.name} key={Info.id}>
+                        <div
+                        className={`overflow-clip ${gridView
+                            ? "relative w-30 h-30 xl:w-40 xl:h-40 bg-white dark:bg-gray-800 shadow-md rounded-lg flex flex-col items-center justify-center cursor-pointer flex-shrink-0"
+                            : "w-full h-20 bg-white dark:bg-gray-800 shadow-md rounded-lg flex items-center pl-4 cursor-pointer flex-shrink-0"
+                        }`}
+                        >
+                        <div className={`${gridView ? "w-full h-full" : "w-12 h-12 rounded-lg"} relative`}>
+                            <Image
+                            src={Info.banner}
+                            alt={Info.name}
+                            fill
+                            className="object-cover rounded-lg"
+                            sizes={gridView ? "200px" : "48px"}
+                            />
+                        </div>
 
-                                <div className="flex px-2 items-center justify-center w-full h-full">
-                                <p className="text-center text-xs lg:text-md font-semibold line-clamp-3">
-                                    {displayTitle(Info.name)}
-                                </p>
-                                </div>
-                            </div>
-                        </Link>
-                    )
-                ):(
+                        <div className="flex px-2 items-center justify-center w-full h-full">
+                            <p className="text-center text-xs lg:text-md font-semibold line-clamp-3">
+                            {displayTitle(Info.name)}
+                            </p>
+                        </div>
+                        </div>
+                    </Link>
+                    ))
+                ) : (
                     <p>This Page does not have Any Entry.</p>
                 )}
             </div>
