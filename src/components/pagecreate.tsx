@@ -137,11 +137,11 @@ export default function PageCreate() {
 
   return (
     <form onSubmit={handleSubmit} className="w-screen h-full lg:pt-20 p-6">
-      <div className="border border-amber-50 m-auto lg:w-4/5">
-        <div className="flex flex-col lg:flex-row border border-amber-50 m-auto w-full lg:h-4/5 gap-6">
+      <div className="m-auto lg:w-4/5">
+        <div className="flex flex-col lg:flex-row m-auto w-full lg:h-4/5 gap-6">
           {/* Banner upload */}
           <div className="block w-full">
-            <div className="border border-amber-50 p-2">
+            <div className="p-2">
               <label className="font-semibold mb-2 pr-2">Banner Upload:</label>
               <input type="file" accept="image/*" onChange={handleFileChange} className="text-blue-500" />
               <div className="items-center w-full mt-2">
@@ -313,8 +313,8 @@ export default function PageCreate() {
         {/* post */}
           
         <div className="block">
-          <div className="block mt-4">
-              <button type="submit" className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+          <div className="flex justify-start mt-4">
+              <button type="submit" className="bg-green-600 w-full lg:w-xs text-white px-4 py-2 rounded hover:bg-green-700">
               Create Page
               </button>
           </div>
