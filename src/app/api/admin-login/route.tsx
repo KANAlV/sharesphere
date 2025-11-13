@@ -37,11 +37,11 @@ export async function POST(req: Request) {
     let adminCheck = false;
 
     if (!isAdmin[0].exists) {
-      return true;
+      adminCheck = true;
     }
 
     if(adminCheck){
-      NextResponse.json({ error: "Admin does not exist" }, { status: 400 });
+      return NextResponse.json({ error: "Admin does not exist" }, { status: 400 });
     }
     
     const token = jwt.sign(
