@@ -31,24 +31,25 @@ export default function Navigation({ user }: { user: User | null}) {
       {/* Toggle button */}
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className={`hidden lg:block absolute top-1/30 right-0 rounded-full ${
+        className={`hidden lg:flex absolute top-1/30 right-0 rounded-full align-middle ${
           isOpen ? "" : "w-2/3"
         } h-4/5 bg-white dark:bg-black border-gray-500 border-2 cursor-pointer`}
       >
         <svg
-          viewBox="0 0 100 80"
-          width="20"
-          height="full"
-          fill="currentColor"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
           stroke="currentColor"
-          strokeWidth="1"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="object-center m-auto"
+          className={`m-auto transform transition-transform duration-300 ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
         >
-          <rect x="15" className="w-1/10" height="100"></rect>
-          <rect x="45" className="w-1/10" height="100"></rect>
-          <rect x="75" className="w-1/10" height="100"></rect>
+          <path d="M8 4l8 8-8 8" />
         </svg>
       </div>
 
