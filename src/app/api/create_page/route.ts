@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
       await sql`
         INSERT INTO rules (page_id, page_type, rules, description, num)
-        VALUES (${pageId}, ${isCourse}, ${ruleName}, ${ruleDesc}, ${i + 1})
+        VALUES (${pageId}, ${!isCourse}, ${ruleName}, ${ruleDesc}, ${i + 1})
       `;
     }
 

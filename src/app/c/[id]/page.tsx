@@ -53,7 +53,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   }[];
 
   const rules = (await sql`
-    SELECT * FROM fetchPageRules(${id}, false);
+    SELECT * FROM fetchPageRules(${id}, ${false});
   `) as {
     rule: string;
     description: string;
