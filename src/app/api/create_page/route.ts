@@ -8,15 +8,16 @@ type Rule = {
 
 export async function POST(req: Request) {
   try {
-    let { page_name } = await req.json();
-    const { theme, pagetype, description, bannerUrl, rules } = await req.json();
+    const { page_name, theme, pagetype, description, bannerUrl, rules } = await req.json();
+
+    let normalizedName;
 
     // Normalize page_name: replace spaces with underscores
     if (page_name) {
-      page_name = page_name.trim().replace(/\s+/g, "_");
+      normalizedName = page_name.trim().replace(/\s+/g, "_");
     }
 
-    if (!page_name || !pagetype || !bannerUrl) {
+    if (!normalizedName || !pagetype || !bannerUrl) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -31,13 +32,13 @@ export async function POST(req: Request) {
     if (isCourse) {
       pageResult = await sql`
         INSERT INTO categories (category_name, theme, description, banner, created_at)
-        VALUES (${page_name}, ${theme}, ${description}, ${bannerUrl}, NOW())
+        VALUES (${normalizedName}, ${theme}, ${description}, ${bannerUrl}, NOW())
         RETURNING id;
       `;
     } else if (pagetype === "organization") {
       pageResult = await sql`
         INSERT INTO organization (name, theme, description, banner, created_at, categories_id)
-        VALUES (${page_name}, ${theme}, ${description}, ${bannerUrl}, NOW(), NULL)
+        VALUES (${normalizedName}, ${theme}, ${description}, ${bannerUrl}, NOW(), NULL)
         RETURNING id;
       `;
     } else {
