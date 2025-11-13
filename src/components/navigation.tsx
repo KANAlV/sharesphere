@@ -7,13 +7,15 @@ type User = {
     id: string;
     username: string;
     email: string;
+    udata: string;
 }
-export default function Navigation({ user, admin }: { user: User | null, admin: boolean}) {
+export default function Navigation({ user }: { user: User | null}) {
   const [isUser, setUser] = useState<User | null>(user);
   const pathname = usePathname()?.replace(/\/$/, "");
   const isHidden =
     pathname === "/login" ||
     pathname === "/signup" ||
+    pathname === "/admin-login"||
     pathname === "/forgot-password";
 
   const [isOpen, setIsOpen] = useState(false);
@@ -210,9 +212,9 @@ export default function Navigation({ user, admin }: { user: User | null, admin: 
           <Link
             href="/page_creation"
             onClick={() => setIsOpen(false)}
-            className={`${admin ? "hidden":"flex"} flex-col pt-2 items-center justify-center min-w-[22%] h-full hover:bg-gray-500/50 select-none
+            className={`${user?.udata != "1"  ? "hidden":"flex"} flex-col pt-2 items-center justify-center min-w-[22%] h-full hover:bg-gray-500/50 select-none
               lg:flex-row lg:justify-start lg:my-4 cursor-pointer
-              ${isOpen ? "lg:flex" : "lg:hidden"}
+              ${isOpen ? `${user?.udata != "1" ? "lg:hidden":"lg:flex"}` : "lg:hidden"}
             `}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

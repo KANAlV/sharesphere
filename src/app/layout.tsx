@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import "flowbite";
 import Navigation from "@/components/navigation";
 import Topbar from "@/components/topbar";
-import { sql } from "@/lib/db";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,7 +33,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
-  let user: null | { id: string; username: string; email: string } = null;
+  let user: null | { id: string; username: string; email: string; udata: string; } = null;
 
   if (token) {
     try {
@@ -42,28 +41,17 @@ export default async function RootLayout({
         id: string;
         username: string;
         email: string;
+        udata: string;
       };
     } catch {
       user = null;
     }
   }  
 
-  //check if user exist in adminDB
-  let admin = false;
-  const result = await sql`
-  SELECT EXISTS(
-      SELECT 1 FROM admins WHERE admin_id = ${user?.id}
-  ) AS "exists";
-  `;
-  
-  if (!result[0].exists) {
-      admin = true;
-  }
-
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}>
-        <Navigation user={user ? { ...user } : null} admin={admin}/>
+        <Navigation user={user ? { ...user } : null}/>
         <Topbar user={user ? { ...user } : null}/>
         {children}
       </body>
