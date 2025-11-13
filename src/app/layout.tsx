@@ -52,7 +52,7 @@ export default async function RootLayout({
   let admin = false;
   const result = await sql`
   SELECT EXISTS(
-      SELECT 1 FROM admins WHERE admin_name = ${user?.username} AND admin_id = ${user?.id} AND admin_email = ${user?.email}
+      SELECT 1 FROM admins WHERE admin_id = ${user?.id}
   ) AS "exists";
   `;
   

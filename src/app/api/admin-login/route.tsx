@@ -27,13 +27,28 @@ export async function POST(req: Request) {
     if (!isMatch) {
       return NextResponse.json({ error: "Invalid password" }, { status: 401 });
     }
+
+    const isAdmin = await sql`
+      SELECT EXISTS(
+        SELECT 1 FROM admins WHERE admin_id = ${user.admin_id}
+      ) AS "exists";
+    `;
+
+    let adminCheck = false;
+
+    if (!isAdmin[0].exists) {
+      return true;
+    }
+
+    if(adminCheck){
+      NextResponse.json({ error: "Admin does not exist" }, { status: 400 });
+    }
     
     const token = jwt.sign(
       { id: user.admin_id, email: user.admin_email, username: user.admin_name},
       process.env.JWT_SECRET!,
       { expiresIn: "1h" }
     );
-
     
     const res = NextResponse.json({
       success: true,
