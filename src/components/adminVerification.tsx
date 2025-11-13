@@ -8,7 +8,7 @@ export async function AdminVerification() {
     const cookieStore = await cookies();
     const token = cookieStore.get("session")?.value;
 
-    let user: null | { id: string; email: string; username: string } = null;
+    let user: null | { id: string; email: string; username: string; udata: string } = null;
 
     if (token) {
         try {
@@ -16,16 +16,21 @@ export async function AdminVerification() {
             id: string;
             username: string;
             email: string;
+            udata: string;
             };
 
             //check if user exist in adminDB
             const result = await sql`
             SELECT EXISTS(
-                SELECT 1 FROM admins WHERE admin_name = ${user.username} AND admin_id = ${user.id} AND admin_email = ${user.email}
+                SELECT 1 FROM admins WHERE admin_id = ${user.id}
             ) AS "exists";
             `;
             
             if (!result[0].exists) {
+                redirect("/");
+            }
+
+            if(user.udata != "1"){
                 redirect("/");
             }
         } catch {
