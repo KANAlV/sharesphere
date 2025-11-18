@@ -1,41 +1,51 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import LoadingScreen from "@/components/loadingscreen";
 import { sql } from "@/lib/db";
 import TextCarousel from "@/components/home";
 import Posts from "@/components/posts";
 
-export default async function CourseCarouselWrapper() {
-  
-  // --- courses ---
-  const courses = (await sql`
-    SELECT * FROM fetchCourses()
-  `) as {
-    id: string;
-    name: string;
-    description: string;
-  }[];
+export default function CourseCarouselWrapper() {
+  const [loading, setLoading] = useState(true);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([]);
 
-  // --- posts ---
-  const postsRaw = await (sql`
-    SELECT * FROM fetchAllPosts(10, 0);
-  `) as {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  likes: number;
-  dislikes: number;
-  category: string,
-  organization: string,
-  username?: string;
-}[];
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // You can call your own API routes instead of SQL directly
+        // because client components cannot access SQL directly.
+        const [coursesRes, postsRes] = await Promise.all([
+          fetch("/api/courses"),
+          fetch("/api/posts?offset=0"),
+        ]);
 
-  const posts = JSON.parse(JSON.stringify(postsRaw));
+        const [coursesData, postsData] = await Promise.all([
+          coursesRes.json(),
+          postsRes.json(),
+        ]);
 
-  console.log("Fetched courses:", courses);
+        setCourses(coursesData);
+        setPosts(postsData);
+      } catch (error) {
+        console.error("Error loading homepage:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
-      <TextCarousel/>
-      <Posts courses={courses} posts={posts}/>
+      <TextCarousel />
+      <Posts courses={courses} posts={posts} />
     </>
   );
 }
