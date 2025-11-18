@@ -74,10 +74,11 @@ export default function Login() {
   };
 
   const GoogleSignInButton = () => (
-    <button
+    <button type="button"
       onClick={() => signIn("google", { callbackUrl: "/" })}
-      className={`w-full flex items-center justify-center gap-2 border py-2 rounded ${
-        darkMode
+      className={`w-full flex items-center justify-center gap-2 border py-2 rounded 
+        hover:cursor-pointer
+        ${darkMode
           ? "border-gray-600 hover:bg-gray-800 text-gray-300"
           : "border-gray-300 hover:bg-gray-100 text-gray-700"
       }`}
@@ -172,7 +173,7 @@ export default function Login() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 hover:cursor-pointer"
           >
             Log-in
           </button>
