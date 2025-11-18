@@ -3,7 +3,7 @@
 export default function CreatePostPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-[#1a1a1a] dark:to-[#0e0e0e] flex justify-center py-10">
-      <div className="w-full max-w-4xl bg-white dark:bg-[#222] rounded-2xl shadow-lg p-8">
+      <div className="mt-15 w-full max-w-4xl bg-white dark:bg-[#222] rounded-2xl shadow-lg p-8">
         {/* Header */}
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
           Create a Post
