@@ -1,9 +1,7 @@
 import jwt from "jsonwebtoken";
-import { sql } from "@/lib/db";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Navigation from "@/components/settings-navigation";
-import Accounts from "@/components/settings/account";
 
 export default async function Account(){
   const cookieStore = await cookies();
@@ -18,34 +16,16 @@ export default async function Account(){
         username: string;
         email: string;
         udata: string;
-        gender: string;
       };
     } catch {
       user = null;
       redirect("/");
     }
-  } else {
-    user = null;
-    redirect("/");
-  }
-
-  // --- check if user has data ---
-  await sql`
-    SELECT ensure_user_exists(${user?.id});
-  `;
-
-  const account = (await sql`
-    SELECT * FROM FetchAccount(${user?.id}); 
-  `) as {
-    id: string;
-    email: string;
-    auth: boolean;
-    gender: string;
-  }[]
-  return(
-      <div className="m-auto mt-20 lg:px-20 w-3/4 min-h-full">
-          <Navigation />
-          <Accounts account={account}/>
-      </div>
-  )
+  }  
+    return(
+        <div className="m-auto mt-20 lg:px-20 w-3/4 min-h-screen">
+            <Navigation />
+            test
+        </div>
+    )
 }

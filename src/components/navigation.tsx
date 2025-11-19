@@ -68,7 +68,7 @@ export default function Navigation({ user }: { user: User | null}) {
           {/* User Pc view */}
           {isUser ? (
             <Link
-                href="/u"
+                href="/settings/account"
                 onClick={() => setIsOpen(false)}
                 className={`${user != null ? "lg:block":"lg:hidden"} hidden flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
                 lg:flex-row lg:justify-start lg:my-4
@@ -189,7 +189,7 @@ export default function Navigation({ user }: { user: User | null}) {
           {/* User mobile view */}
           {isUser ? (
             <Link
-                href="/u"
+                href="/settings/account"
                 onClick={() => setIsOpen(false)}
                 className={`${user != null ? "flex":"hidden"} lg:hidden flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
                 lg:flex-row lg:justify-start lg:my-4
