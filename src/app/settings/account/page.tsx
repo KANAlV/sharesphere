@@ -43,7 +43,7 @@ export default async function Account(){
     gender: string;
   }[]
   return(
-      <div className="m-auto mt-20 lg:px-20 w-3/4 min-h-full">
+      <div className="m-auto mt-20 lg:px-20 w-19/20 lg:w-3/4 min-h-full">
           <Navigation />
           <Accounts account={account}/>
       </div>

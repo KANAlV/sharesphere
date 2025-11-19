@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import { Pool } from "pg";
 import jwt from "jsonwebtoken";
+import { sql } from "@/lib/db";
 import { cookies } from "next/headers"; // ✅ for setting cookies manually in App Router
 
 const pool = new Pool({
@@ -43,6 +44,10 @@ const handler = NextAuth({
         );
 
         const dbUser = result.rows[0];
+
+        await sql`
+          SELECT ensure_user_exists(${dbUser.id});
+        `;
 
         // ✅ Create JWT manually (like your normal login)
         const token = jwt.sign(

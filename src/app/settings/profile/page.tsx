@@ -23,7 +23,7 @@ export default async function Account(){
     }
   }  
     return(
-        <div className="m-auto mt-20 lg:px-20 w-3/4 min-h-screen">
+        <div className="m-auto mt-20 lg:px-20 w-19/20 lg:w-3/4 min-h-full">
             <Navigation />
             test
         </div>

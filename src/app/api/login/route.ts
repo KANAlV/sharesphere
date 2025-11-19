@@ -47,6 +47,10 @@ export async function POST(req: Request) {
     );
 
     
+    await sql`
+      SELECT ensure_user_exists(${user.id});
+    `;
+    
     const res = NextResponse.json({
       message: "Login successful",
       user: {
@@ -61,7 +65,7 @@ export async function POST(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: 3 * 60 * 60, // 3 hours
     });
 
     return res;
