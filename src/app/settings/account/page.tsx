@@ -22,11 +22,11 @@ export default async function Account(){
       };
     } catch {
       user = null;
-      redirect("/");
+      window.location.href = "/";
     }
   } else {
     user = null;
-    redirect("/");
+    window.location.href = "/";
   }
 
   // --- check if user has data ---

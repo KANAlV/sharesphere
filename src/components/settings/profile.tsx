@@ -18,9 +18,9 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [username, setUsername] = useState(profile[0].username);
     const [surname, setSurname] = useState(profile[0].surname);
     const [firstname, setFirstname] = useState(profile[0].firstname);
-    const [middlename, setMiddlename] = useState(profile[0]?.middlename || false);
-    const [suffix, setSuffix] = useState(profile[0]?.suffix || false);
-    const [description, setDescription] = useState(profile[0]?.description || false);
+    const [middlename, setMiddlename] = useState(profile[0]?.middlename || null);
+    const [suffix, setSuffix] = useState(profile[0]?.suffix || null);
+    const [description, setDescription] = useState(profile[0]?.description || null);
 
     // --- use states --- //
     const [loading, setLoading] = useState(false);
@@ -102,6 +102,17 @@ export default function Profile({ profile }: { profile: Profile[] }) {
         setSfxCount(text.length);
     };
 
+    const descriptioncounter = (e: React.ChangeEvent<HTMLTextAreaElement>, limit: number) => {
+        let text = e.target.value;
+
+        if (text.length > limit) {
+            text = text.substring(0, limit); // trim extra chars
+        }
+
+        setNewDescription(text);
+        setDescriptionCount(text.length);
+    };
+
     // --- username change --- //
     const checkUsername = async () => {
         if (loading) return;
@@ -169,6 +180,35 @@ export default function Profile({ profile }: { profile: Profile[] }) {
         }
     }
 
+    // --- changeDescription --- //
+    const changeDescription = async() => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/settings/updateDescription`,{
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({
+                    id: profile[0].id,
+                    description: newDescription
+                })
+            })
+            const result = await response.json();
+            if (response.ok) {
+                alert("about description successfully.");
+                showDescriptionWindow(false);
+                setDescription(newDescription);
+                setNewDescription("");
+            } else {
+                alert(result.error || "Failed to update about description.");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return(
         <>
             {/* Username */}
@@ -212,12 +252,11 @@ export default function Profile({ profile }: { profile: Profile[] }) {
             {/* about description */}
             <div
                 onMouseEnter={() => setDescriptionHover(true)} onMouseLeave={() => setDescriptionHover(false)}
-                onClick={() => showDescriptionWindow(true)}
+                onClick={() => {showDescriptionWindow(true), setNewDescription(description ? description:"")}}
                 className="flex mt-4 px-6 hover:cursor-pointer"
             >
                 <div className="flex w-full justify-between pr-5">
-                    <div className="content-center-safe">Name:</div>
-                    <div className="content-center-safe">{description}</div>
+                    <div className="content-center-safe">About description:</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${descriptionHover ? "bg-gray-500/50":null}`}
@@ -302,110 +341,166 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 className="text-current p-6 border-2 bg-background border-gray-500 rounded-xl shadow-xl w-96 relative"
                 onClick={(e) => e.stopPropagation()}
                 >
-                <div className="flex justify-between">
-                    <div className="text-lg font-semibold mb-4">Change Name</div>
-                    {/* Close button */}
-                    <div onClick={() => {showNameWindow(false),
-                                setNewSurname(""), 
-                                setNewFirstname(""), 
-                                setNewMiddlename(""),  
-                                setNewSuffix(""), 
-                                setsCount(0), 
-                                setfCount(0), 
-                                setmCount(0), 
-                                setSfxCount(0)
-                            }}
-                        className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer">
-                    <button
-                        type="button"
-                        className="text-xl font-bold"
-                    >
-                        ×
-                    </button>
-                    </div>
-                </div>
-
-                <div className="w-full">
-                    <input
-                    id="sname"
-                    name="surname"
-                    type="text"
-                    placeholder="Surname *"
-                    value={newSurname}
-                    onChange={(e) => {setNewSurname(e.target.value), scounter(e, 50)}}
-                    className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
-                    />
-                    <div className="flex w-full justify-end text-gray-500">{scount}/50</div>
-                </div>
-
-                <div className="w-full">
-                    <input
-                    id="fname"
-                    name="firstname"
-                    type="text"
-                    placeholder="First name *"
-                    value={newFirstname}
-                    onChange={(e) => {setNewFirstname(e.target.value), fcounter(e, 50)}}
-                    className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
-                    />
-                    <div className="flex w-full justify-end text-gray-500">{fcount}/50</div>
-                </div>
-
-                <div className="flex w-full justify-between">
-                    <div className="w-3/5">
-                        <input
-                        id="mname"
-                        name="middlename"
-                        type="text"
-                        placeholder="Middle name"
-                        value={newMiddlename}
-                        onChange={(e) => {setNewMiddlename(e.target.value), mcounter(e, 50)}}
-                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
-                        />
-                        <div className="flex w-full justify-end text-gray-500">{mcount}/50</div>
-                    </div>
-
-                    <div className="w-2/6">
-                        <input
-                        id="sfx"
-                        name="suffix"
-                        type="text"
-                        placeholder="Suffix"
-                        value={newSuffix}
-                        onChange={(e) => {setNewSuffix(e.target.value), sfxcounter(e, 30)}}
-                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
-                        />
-                        <div className="flex w-full justify-end text-gray-500">{sfxcount}/30</div>
-                    </div>
-                </div>
-                
-                {/* save & cancel buttons */}
-                <div className="flex mt-4 w-full justify-end-safe gap-2">
-                    <button 
-                    type="button"
-                    onClick={() => {showNameWindow(false),
+                    <div className="flex justify-between">
+                        <div className="text-lg font-semibold mb-4">Change Name</div>
+                        {/* Close button */}
+                        <div onClick={() => {showNameWindow(false),
                                     setNewSurname(""), 
                                     setNewFirstname(""), 
-                                    setNewMiddlename(""), 
+                                    setNewMiddlename(""),  
                                     setNewSuffix(""), 
                                     setsCount(0), 
                                     setfCount(0), 
-                                    setmCount(0),
+                                    setmCount(0), 
                                     setSfxCount(0)
-                            }}
-                    className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
-                    >
-                    Cancel
-                    </button>
-                    <button 
-                    type="button"
-                    onClick={ () => updateName() }
-                    className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
-                                ${loading ? "opacity-70 cursor-wait" : ""}`}
-                    >
-                    Save
-                    </button>
+                                }}
+                            className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer">
+                        <button
+                            type="button"
+                            className="text-xl font-bold"
+                        >
+                            ×
+                        </button>
+                        </div>
+                    </div>
+
+                    <div className="w-full">
+                        <input
+                        id="sname"
+                        name="surname"
+                        type="text"
+                        placeholder="Surname *"
+                        value={newSurname}
+                        onChange={(e) => {setNewSurname(e.target.value), scounter(e, 50)}}
+                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                        />
+                        <div className="flex w-full justify-end text-gray-500">{scount}/50</div>
+                    </div>
+
+                    <div className="w-full">
+                        <input
+                        id="fname"
+                        name="firstname"
+                        type="text"
+                        placeholder="First name *"
+                        value={newFirstname}
+                        onChange={(e) => {setNewFirstname(e.target.value), fcounter(e, 50)}}
+                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                        />
+                        <div className="flex w-full justify-end text-gray-500">{fcount}/50</div>
+                    </div>
+
+                    <div className="flex w-full justify-between">
+                        <div className="w-3/5">
+                            <input
+                            id="mname"
+                            name="middlename"
+                            type="text"
+                            placeholder="Middle name"
+                            value={newMiddlename}
+                            onChange={(e) => {setNewMiddlename(e.target.value), mcounter(e, 50)}}
+                            className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                            />
+                            <div className="flex w-full justify-end text-gray-500">{mcount}/50</div>
+                        </div>
+
+                        <div className="w-2/6">
+                            <input
+                            id="sfx"
+                            name="suffix"
+                            type="text"
+                            placeholder="Suffix"
+                            value={newSuffix}
+                            onChange={(e) => {setNewSuffix(e.target.value), sfxcounter(e, 30)}}
+                            className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                            />
+                            <div className="flex w-full justify-end text-gray-500">{sfxcount}/30</div>
+                        </div>
+                    </div>
+                    
+                    {/* save & cancel buttons */}
+                    <div className="flex mt-4 w-full justify-end-safe gap-2">
+                        <button 
+                        type="button"
+                        onClick={() => {showNameWindow(false),
+                                        setNewSurname(""), 
+                                        setNewFirstname(""), 
+                                        setNewMiddlename(""), 
+                                        setNewSuffix(""), 
+                                        setsCount(0), 
+                                        setfCount(0), 
+                                        setmCount(0),
+                                        setSfxCount(0)
+                                }}
+                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
+                        >
+                        Cancel
+                        </button>
+                        <button 
+                        type="button"
+                        onClick={ () => updateName() }
+                        className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                                    ${loading ? "opacity-70 cursor-wait" : ""}`}
+                        >
+                        Save
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            {/* description window */}
+            <div
+                onClick={() => {showDescriptionWindow(false), setNewDescription(""), setDescriptionCount(0)}}
+                className={`${descriptionWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
+            >
+                <div
+                className="text-current p-6 border-2 bg-background border-gray-500 rounded-xl shadow-xl w-96 relative"
+                onClick={(e) => e.stopPropagation()}
+                >
+                    <div className="flex justify-between">
+                        <div className="text-lg font-semibold mb-4">About Description</div>
+                        {/* Close button */}
+                        <div onClick={() => {showDescriptionWindow(false), setNewDescription(""), setDescriptionCount(0)}} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8  hover:cursor-pointer">
+                        <button
+                            type="button"
+                            className="text-xl font-bold"
+                        >
+                            ×
+                        </button>
+                        </div>
+                    </div>
+
+                    <div className="w-full">
+                        <textarea
+                            id="desc"
+                            name="description"
+                            placeholder="Write things about yourself"
+                            value={newDescription}
+                            onChange={(e) => { setNewDescription(e.target.value), descriptioncounter(e, 300) }}
+                            className="w-full m-1.5 px-2 h-32 border-2 border-gray-500 rounded-md hover:cursor-pointer"
+                        />
+                        <div className="flex w-full justify-end text-gray-500">{descriptioncount}/300</div>
+                    </div>
+
+
+                    {/* save & cancel buttons */}
+                    <div className="flex mt-4 w-full justify-end-safe gap-2">
+                        <button 
+                        type="button"
+                        onClick={() => {showDescriptionWindow(false), setNewDescription(""), setDescriptionCount(0)}}
+                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+                        >
+                        Cancel
+                        </button>
+                        <button 
+                        type="button"
+                        onClick={changeDescription}
+                        className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                                    ${loading ? "opacity-70 cursor-wait" : ""}`}
+                        >
+                        Save
+                        </button>
+                    </div>
                 </div>
             </div>
         </>
