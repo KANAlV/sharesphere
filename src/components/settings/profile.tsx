@@ -1,6 +1,7 @@
 "use client"
 import { useState } from "react";
 import ImageCrop from "@/components/ImageCrop";
+import BannerCrop from "@/components/BannerCrop";
 
 type Profile = {
     id: string;
@@ -49,12 +50,15 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     // --- Image States --- //
     const [imageHover, setImageHover] = useState(false);
     const [imageWindow, showImageWindow] = useState(false);
-    const [newImage, setNewImage] = useState("");
 
-    // --- bDate States --- //
+    // --- BDate States --- //
     const [bDateHover, setBDateHover] = useState(false);
     const [bDateWindow, showBDateWindow] = useState(false);
     const [newBDate, setNewBDate] = useState("");
+
+    // --- Banner States --- //
+    const [bannerHover, setBannerHover] = useState(false);
+    const [bannerWindow, showBannerWindow] = useState(false);
 
     // --- counters --- //
     const [count, setCount] = useState(0);
@@ -288,7 +292,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
             >
                 <div className="flex w-full justify-between pr-5">
                     <div className="content-center-safe">Name</div>
-                    <div className="content-center-safe">{surname? surname+",":null} {firstname} {middlename} {suffix}</div>
+                    <div className="content-center-safe text-end">{surname? surname+",":null} {firstname} {middlename} {suffix}</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${nameHover ? "bg-gray-500/50":null}`}
@@ -328,6 +332,24 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${imageHover ? "bg-gray-500/50":null}`}
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                </div>
+            </div>
+
+            {/* banner */}
+            <div
+                onMouseEnter={() => setBannerHover(true)} onMouseLeave={() => setBannerHover(false)}
+                onClick={() => {showBannerWindow(true)}}
+                className="flex mt-4 px-6 hover:cursor-pointer"
+            >
+                <div className="flex w-full justify-between pr-5">
+                    <div className="content-center-safe">Banner</div>
+                </div>
+                <div className={`box-border size-9 rounded-full content-center-safe 
+                ${bannerHover ? "bg-gray-500/50":null}`}
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6"/>
@@ -593,7 +615,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
 
             {/* Image window */}
             <div
-                onClick={() => {showImageWindow(false), setNewImage("")}}
+                onClick={() => {showImageWindow(false)}}
                 className={`${imageWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
             >
                 <div
@@ -602,14 +624,35 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 >
                     {imageWindow && (
                     <ImageCrop
-                        userId={profile[0].id ?? ""} // make sure `user` is defined
+                        userId={profile[0].id ?? ""}
                         onSave={(url) => { 
-                            setNewImage(url); 
                             showImageWindow(false); 
                         }}
                         onCancel={() => { 
-                            showImageWindow(false); 
-                            setNewImage(""); 
+                            showImageWindow(false);
+                        }}
+                    />
+                    )}
+                </div>
+            </div>
+
+            {/* Banner window */}
+            <div
+                onClick={() => {showBannerWindow(false)}}
+                className={`${bannerWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
+            >
+                <div
+                className="text-current p-6 border-2 bg-background border-gray-500 rounded-xl shadow-xl relative"
+                onClick={(e) => e.stopPropagation()}
+                >
+                    {bannerWindow && (
+                    <BannerCrop
+                        userId={profile[0].id ?? ""}
+                        onSave={(url) => { 
+                            showBannerWindow(false); 
+                        }}
+                        onCancel={() => { 
+                            showBannerWindow(false);
                         }}
                     />
                     )}

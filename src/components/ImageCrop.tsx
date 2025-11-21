@@ -9,6 +9,7 @@ type ImageCropProps = {
 };
 
 export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) {
+  const [loading, setLoading] = useState(false);
   const [imgSrc, setImgSrc] = useState<string | null>(null);
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 });
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
@@ -125,6 +126,8 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
   };
 
   const handleSave = async () => {
+    if(loading) return;
+    setLoading(true);
     if (!canvasRef.current) return;
     const base64 = canvasRef.current.toDataURL("image/jpeg", 0.9);
 
@@ -142,6 +145,8 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
       }
     } catch (err) {
         console.error("Failed to save image:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -154,7 +159,7 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Crop Image</h2>
+          <h2 className="text-lg font-semibold">Upload Profile</h2>
           <button onClick={onCancel} className="text-xl font-bold hover:cursor-pointer">×</button>
         </div>
 
@@ -188,7 +193,7 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
 
         <div className="flex justify-end gap-2 mt-4">
           <button type="button" onClick={onCancel} className="px-6 py-2 border-2 border-gray-500 rounded-xl hover:bg-gray-400 hover:cursor-pointer">Cancel</button>
-          <button type="button" onClick={handleSave} className="px-6 py-2 bg-[#1F1E3D] text-white rounded-xl hover:cursor-pointer">Save</button>
+          <button type="button" onClick={handleSave} className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl hover:cursor-pointer ${loading ? "opacity-70 cursor-wait" : ""}`}>Save</button>
         </div>
       </div>
     </div>

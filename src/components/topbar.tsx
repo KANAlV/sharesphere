@@ -14,8 +14,8 @@ export default function Topbar({ user }: { user: User | null }) {
     const pathname = usePathname();
     const isHidden = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/forgot-password");
     return (
-        <nav className={`bg-[#1F1E3D] fixed w-full z-20 top-0 start-0 dark:border-gray-600`}>
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <nav className={`bg-[#1F1E3D] fixed w-full z-20 top-0 start-0 border-b-2 border-gray-500`}>
+          <div className="w-screen px-4 lg:px-20 flex flex-wrap items-center justify-between p-4">
           <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
               <Image width={32} height={32} src="/sharesphere_logo.png" className="h-8" alt="Flowbite Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">SHARESPHERE</span>

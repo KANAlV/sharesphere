@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import Navigation from "@/components/settings-navigation";
 import Profile from "@/components/settings/profile";
 import TokenChecker from "@/components/TokenCheker";
+import { redirect } from "next/navigation";
 
 export default async function Account() {
   const cookieStore = await cookies();
@@ -21,7 +22,10 @@ export default async function Account() {
       };
     } catch {
       user = null;
+      redirect("/");
     }
+  } else {
+    redirect("/");
   }
 
   // --- check if user has data ---
