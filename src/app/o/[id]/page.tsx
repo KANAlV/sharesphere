@@ -1,9 +1,18 @@
 import { sql } from "@/lib/db";
 import CoursePageClient from "@/components/o/pages";
 import Sidebar from "@/components/sidebar";
+import { redirect } from "next/navigation";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
+
+  const exists = (await sql`
+    SELECT 1 FROM organization WHERE name=${id} LIMIT 1;
+  `)
+
+  if(exists.length === 0) {
+    redirect("/");
+  }
 
   const posts = (await sql`
     SELECT * FROM fetchOrgPosts(${id}, 10, 0);

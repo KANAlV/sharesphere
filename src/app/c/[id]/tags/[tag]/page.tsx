@@ -1,10 +1,19 @@
 import { sql } from "@/lib/db";
 import CoursePageClient from "@/components/c/tag/pages";
 import Sidebar from "@/components/sidebar";
+import { redirect } from "next/navigation";
 
 export default async function Page(props: { params: Promise<{ id: string, tag: string }> }) {
   const { id, tag } = await props.params;
   const tag_id = decodeURIComponent(tag);
+
+  const exists = (await sql`
+    SELECT 1 FROM categories WHERE category_name=${id} LIMIT 1;
+  `)
+
+  if(exists.length === 0) {
+    redirect("/");
+  }
   
   const posts = (await sql`
     SELECT * FROM fetchTagPosts(${id}, ${tag_id}, 10, 0);
