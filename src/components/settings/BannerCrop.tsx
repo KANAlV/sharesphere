@@ -15,7 +15,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
   const [imgPosition, setImgPosition] = useState({ top: 0, left: 0 });
 
-  const [crop, setCrop] = useState({ x: 0, y: 0, width: 160, height: 90 });
+  const [crop, setCrop] = useState({ x: 0, y: 0, width: 160, height: 84 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -24,7 +24,9 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   const [dragging, setDragging] = useState(false);
   const [resizing, setResizing] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [startCrop, setStartCrop] = useState({ width: 160, height: 90 });
+  const [startCrop, setStartCrop] = useState({ width: 160, height: 84 });
+
+  const aspectRatio = 1.91;
 
   /** Normalizes pointer position for mouse + touch */
   const getPos = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -66,9 +68,9 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
       left: (container.clientWidth - w) / 2,
     });
 
-    // Center initial crop (16:9)
+    // Center initial crop (1.91:1)
     const cropHeight = h * 0.6;
-    const cropWidth = cropHeight * (16 / 9);
+    const cropWidth = cropHeight * aspectRatio;
 
     setCrop({
       x: (container.clientWidth - cropWidth) / 2,
@@ -122,9 +124,9 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
       const delta = Math.max(pos.x - startPos.x, pos.y - startPos.y);
 
       let newHeight = startCrop.height + delta;
-      let newWidth = newHeight * (16 / 9);
+      let newWidth = newHeight * aspectRatio;
 
-      newHeight = Math.max(newHeight, 90);
+      newHeight = Math.max(newHeight, 84);
       newWidth = Math.max(newWidth, 160);
 
       const maxWidth = imgPosition.left + displaySize.width - crop.x;
@@ -132,11 +134,11 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
 
       if (crop.x + newWidth > imgPosition.left + displaySize.width) {
         newWidth = maxWidth;
-        newHeight = newWidth * (9 / 16);
+        newHeight = newWidth / aspectRatio;
       }
       if (crop.y + newHeight > imgPosition.top + displaySize.height) {
         newHeight = maxHeight;
-        newWidth = newHeight * (16 / 9);
+        newWidth = newHeight * aspectRatio;
       }
 
       setCrop({ ...crop, width: newWidth, height: newHeight });
@@ -159,7 +161,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     if (!ctx) return;
 
     canvas.width = 1600;
-    canvas.height = 900;
+    canvas.height = 1600 / aspectRatio;
 
     const img = imgRef.current;
 
@@ -172,8 +174,8 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     const sWidth = (crop.width / displaySize.width) * imageSize.width;
     const sHeight = (crop.height / displaySize.height) * imageSize.height;
 
-    ctx.clearRect(0, 0, 1600, 900);
-    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 1600, 900);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvas.width, canvas.height);
   }, [crop, imgSrc, displaySize, imageSize, imgPosition]);
 
   const handleSave = async () => {
@@ -223,7 +225,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
           </button>
         </div>
 
-        <input type="file" accept="image/*" onChange={handleFileChange} className="text-blue-500 hover:text-blue-300 hover:cursor-pointer"/>
+        <input type="file" accept="image/*" className="text-blue-500 hover:text-blue-300 hover:cursor-pointer" onChange={handleFileChange}/>
 
         {imgSrc && (
           <div
@@ -273,10 +275,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
           <button
             type="button"
             onClick={handleSave}
-            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl
-              border-2 border-background hover:cursor-pointer hover:border-gray-500
-              ${loading ? "opacity-70 cursor-wait" : ""}`
-            }
+            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500 ${loading ? "opacity-70 cursor-wait" : ""}`}
           >
             Save
           </button>

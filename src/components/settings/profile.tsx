@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
-import ImageCrop from "@/components/ImageCrop";
-import BannerCrop from "@/components/BannerCrop";
+import ImageCrop from "@/components/settings/ImageCrop";
+import BannerCrop from "@/components/settings/BannerCrop";
 
 type Profile = {
     id: string;
