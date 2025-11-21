@@ -27,10 +27,11 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   const [startCrop, setStartCrop] = useState({ width: 160, height: 90 });
 
   /** Normalizes pointer position for mouse + touch */
-  const getPos = (e: any) => {
-    if (e.touches?.length)
+  const getPos = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if ("touches" in e && e.touches.length > 0) {
       return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    return { x: e.clientX, y: e.clientY };
+    }
+    return { x: (e as React.MouseEvent<HTMLDivElement>).clientX, y: (e as React.MouseEvent<HTMLDivElement>).clientY };
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,10 +85,11 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   }, [imgSrc]);
 
   /** START drag or resize */
-  const handleStart = (e: any) => {
+  const handleStart = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const pos = getPos(e);
+    const target = e.target as HTMLElement;
 
-    if ((e.target as HTMLElement).classList.contains("resize-handle")) {
+    if (target.classList.contains("resize-handle")) {
       setResizing(true);
       setStartPos({ x: pos.x, y: pos.y });
       setStartCrop({ width: crop.width, height: crop.height });
@@ -100,7 +102,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   };
 
   /** MOVE drag or resize */
-  const handleMove = (e: any) => {
+  const handleMove = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const pos = getPos(e);
 
     if (dragging) {

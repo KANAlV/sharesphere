@@ -26,11 +26,11 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
   const [startSize, setStartSize] = useState(100);
 
   // Unified function for mouse + touch
-  const getPoint = (e: any) => {
-    if (e.touches) {
+  const getPoint = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if ("touches" in e && e.touches.length > 0) {
       return { x: e.touches[0].clientX, y: e.touches[0].clientY };
     }
-    return { x: e.clientX, y: e.clientY };
+    return { x: (e as React.MouseEvent<HTMLDivElement>).clientX, y: (e as React.MouseEvent<HTMLDivElement>).clientY };
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,7 +80,7 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
     return () => window.removeEventListener("resize", handleResize);
   }, [imgSrc]);
 
-  const startAction = (e: any) => {
+  const startAction = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const point = getPoint(e);
 
     if ((e.target as HTMLElement).classList.contains("resize-handle")) {
@@ -93,7 +93,7 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
     }
   };
 
-  const moveAction = (e: any) => {
+  const moveAction = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const point = getPoint(e);
 
     if (dragging) {
