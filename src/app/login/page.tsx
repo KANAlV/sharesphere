@@ -11,7 +11,6 @@ interface FormData {
   password: string;
 }
 
-// ✅ Inline SVG Icons
 const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="currentColor" className="w-5 h-5">
     <path d="M572.52 241.4C518.8 135.7 407.8 64 288 64S57.2 135.7 3.48 241.4a48.3 48.3 0 000 29.1C57.2 376.3 168.2 448 288 448s230.8-71.7 284.5-177.4a48.3 48.3 0 000-29.2zM288 400c-79.4 0-144-64.6-144-144s64.6-144 144-144 144 64.6 144 144-64.6 144-144 144z" />
@@ -41,6 +40,13 @@ export default function Login() {
   const [message, setMessage] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [darkMode, setDarkMode] = useState<boolean>(false);
+
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [otpMessage, setOtpMessage] = useState("");
+
+  const [otpEmail, setOtpEmail] = useState("");
+
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -55,15 +61,24 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("Loading...");
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+
       const data = await res.json();
+
+      if (data.auth === true) {
+        setOtpEmail(data.email); 
+        setShowOtpModal(true);
+        setMessage("");
+        return;
+      }
+
       if (res.ok) {
-        setMessage(`Login successful! Welcome, ${data.user.username}`);
         window.location.href = "/";
       } else {
         setMessage(data.error || "Error logging in");
@@ -73,20 +88,37 @@ export default function Login() {
     }
   };
 
-  const GoogleSignInButton = () => (
-    <button type="button"
-      onClick={() => signIn("google", { callbackUrl: "/" })}
-      className={`w-full flex items-center justify-center gap-2 border py-2 rounded 
-        hover:cursor-pointer
-        ${darkMode
-          ? "border-gray-600 hover:bg-gray-800 text-gray-300"
-          : "border-gray-300 hover:bg-gray-100 text-gray-700"
-      }`}
-    >
-      <Image src="/google.png" alt="Google" width={20} height={20} className="inline-block" />
-      <span>Sign in with Google</span>
-    </button>
-  );
+  const handleOtpVerify = async () => {
+    setOtpMessage("Verifying...");
+
+    const res = await fetch("/api/login", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: otpEmail, otp }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      setOtpMessage("Success! Redirecting...");
+      window.location.href = "/";
+    } else {
+      setOtpMessage(data.error || "Invalid code");
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpMessage("Sending new OTP...");
+
+    const res = await fetch("/api/login", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: otpEmail }),
+    });
+
+    const data = await res.json();
+    setOtpMessage(data.message || data.error);
+  };
 
   return (
     <div
@@ -94,7 +126,7 @@ export default function Login() {
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
       } min-h-screen flex flex-col md:flex-row transition-all duration-300`}
     >
-      {/* Left Panel */}
+      {/* LEFT PANEL */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
         <Image src="/sharesphere_logo.png" alt="Logo" width={250} height={250} />
         <h1 className="text-4xl font-bold font-playfair mt-4">ShareSphere</h1>
@@ -103,9 +135,9 @@ export default function Login() {
         </p>
       </div>
 
-      {/* Right Panel */}
+      {/* RIGHT PANEL */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6 relative">
-        {/* Dark/Light Mode Toggle */}
+        {/* DARK MODE TOGGLE */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           className={`absolute top-4 right-4 p-2 rounded-full border ${
@@ -117,11 +149,10 @@ export default function Login() {
           {darkMode ? <SunIcon /> : <MoonIcon />}
         </button>
 
+        {/* LOGIN FORM */}
         <form
           onSubmit={handleSubmit}
-          className={`w-full max-w-md space-y-4 ${
-            darkMode ? "text-gray-200" : "text-gray-800"
-          }`}
+          className={`w-full max-w-md space-y-4 ${darkMode ? "text-gray-200" : "text-gray-800"}`}
         >
           <h2 className="text-2xl font-bold mb-4">Log into ShareSphere</h2>
 
@@ -162,51 +193,98 @@ export default function Login() {
             </button>
           </div>
 
-          <div
-            className={`flex justify-between text-sm ${
-              darkMode ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
+          <div className={`flex justify-between text-sm ${darkMode ? "text-gray-400" : "text-gray-600"}`}>
             <Link href="/forgot-password">Forgot Password?</Link>
             <Link href="/signup">Sign Up</Link>
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 hover:cursor-pointer"
-          >
+          <button type="submit" className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 hover:cursor-pointer">
             Log-in
           </button>
 
-          <div
-            className={`flex items-center justify-center ${
-              darkMode ? "text-gray-500" : "text-gray-400"
-            }`}
-          >
+          <div className={`flex items-center justify-center ${darkMode ? "text-gray-500" : "text-gray-400"}`}>
             <span className="mx-2">OR</span>
           </div>
 
-          <GoogleSignInButton />
+      
+          <button
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+            className={`w-full flex items-center justify-center gap-2 border py-2 rounded 
+        hover:cursor-pointer
+        ${darkMode
+          ? "border-gray-600 hover:bg-gray-800 text-gray-300"
+          : "border-gray-300 hover:bg-gray-100 text-gray-700"
+        }`}
+          >
+            <Image src="/google.png" alt="Google" width={20} height={20} className="inline-block" />
+            <span>Sign in with Google</span>
+          </button>
 
-         <p
-  className={`text-center text-sm mt-2 ${
-    darkMode ? "text-gray-400" : "text-gray-500"
-  }`}
->
-  <Link
-    href="/admin-login"
-    className={`font-medium ${
-      darkMode
-        ? "text-blue-400 hover:text-blue-300"
-        : "text-blue-600 hover:text-blue-800"
-    } hover:underline`}
-  >
-    Log-in as Admin
-  </Link>
-</p>
+          <p className={`text-center text-sm mt-2 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+            <Link
+              href="/admin-login"
+              className={`font-medium ${
+                darkMode
+                  ? "text-blue-400 hover:text-blue-300"
+                  : "text-blue-600 hover:text-blue-800"
+              } hover:underline`}
+            >
+              Log-in as Admin
+            </Link>
+          </p>
+
           {message && <p className="text-center text-red-500">{message}</p>}
         </form>
       </div>
+
+      {showOtpModal && (
+  <div
+    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
+    onClick={() => setShowOtpModal(false)}   
+  >
+    <div
+      className={`p-6 rounded-lg shadow-lg w-80 ${
+        darkMode ? "bg-gray-800 text-white" : "bg-white text-black"
+      }`}
+      onClick={(e) => e.stopPropagation()}  
+    >
+      <h3 className="text-xl font-bold mb-3 text-center">Enter OTP Code</h3>
+
+      <input
+        type="text"
+        maxLength={6}
+        value={otp}
+        onChange={(e) => setOtp(e.target.value)}
+        className={`border p-3 w-full rounded text-center tracking-widest text-lg ${
+          darkMode
+            ? "bg-gray-700 border-gray-600 text-white placeholder-gray-300"
+            : "bg-gray-100 border-gray-300 text-black placeholder-gray-500"
+        }`}
+        placeholder="••••••"
+      />
+
+      <button
+        onClick={handleOtpVerify}
+        className="w-full bg-blue-600 text-white mt-4 py-2 rounded hover:bg-blue-700"
+      >
+        Verify Code
+      </button>
+
+      <button
+        onClick={handleResendOtp}
+        className="w-full text-sm text-blue-500 mt-3 hover:underline"
+      >
+        Resend OTP
+      </button>
+
+      {otpMessage && (
+        <p className="text-center mt-2 text-sm text-red-400">{otpMessage}</p>
+      )}
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
