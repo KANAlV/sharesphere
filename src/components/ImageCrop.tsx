@@ -180,10 +180,10 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upload Profile</h2>
-          <button onClick={onCancel} className="text-xl font-bold">×</button>
+          <button onClick={onCancel} className="text-xl font-bold hover:cursor-pointer">×</button>
         </div>
 
-        <input type="file" accept="image/*" onChange={handleFileChange} className="text-blue-500 hover:text-blue-300" />
+        <input type="file" accept="image/*" onChange={handleFileChange} className="text-blue-500 hover:text-blue-300 hover:cursor-pointer" />
 
         {imgSrc && (
           <div
@@ -231,16 +231,17 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 border-2 border-gray-500 rounded-xl"
+            className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 rounded-xl hover:cursor-pointer"
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${
-              loading ? "opacity-70 cursor-wait" : ""
-            }`}
+            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl
+              border-2 border-background hover:cursor-pointer hover:border-gray-500
+              ${loading ? "opacity-70 cursor-wait" : ""}`
+            }
           >
             Save
           </button>
