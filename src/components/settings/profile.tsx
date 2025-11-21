@@ -206,7 +206,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
             })
             const result = await response.json();
             if (response.ok) {
-                alert("about description successfully.");
+                alert("updated about description successfully.");
                 showDescriptionWindow(false);
                 setDescription(newDescription);
                 setNewDescription("");
@@ -244,7 +244,12 @@ export default function Profile({ profile }: { profile: Profile[] }) {
             {/* name */}
             <div
                 onMouseEnter={() => setNameHover(true)} onMouseLeave={() => setNameHover(false)}
-                onClick={() => showNameWindow(true)}
+                onClick={() => {showNameWindow(true), 
+                                setNewSurname(surname),
+                                setNewFirstname(firstname),
+                                setNewMiddlename(middlename? middlename:""),
+                                setNewSuffix(suffix? suffix:"")
+                            }}
                 className="flex mt-4 px-6 hover:cursor-pointer"
             >
                 <div className="flex w-full justify-between pr-5">
@@ -336,14 +341,14 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                     <button 
                     type="button"
                     onClick={() => {showUsernameWindow(false), setNewUsername(""), setCount(0)}}
-                    className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+                    className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 rounded-xl"
                     >
                     Cancel
                     </button>
                     <button 
                     type="button"
                     onClick={checkUsername}
-                    className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                    className={`px-6 py-2 bg-[#1F1E3D] rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
                                 ${loading ? "opacity-70 cursor-wait" : ""}`}
                     >
                     Save
@@ -461,14 +466,14 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                                         setmCount(0),
                                         setSfxCount(0)
                                 }}
-                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
+                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 rounded-xl hover:cursor-pointer"
                         >
                         Cancel
                         </button>
                         <button 
                         type="button"
                         onClick={ () => updateName() }
-                        className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                        className={`px-6 py-2 bg-[#1F1E3D] rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
                                     ${loading ? "opacity-70 cursor-wait" : ""}`}
                         >
                         Save
@@ -506,7 +511,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                             placeholder="Write things about yourself"
                             value={newDescription}
                             onChange={(e) => { setNewDescription(e.target.value), descriptioncounter(e, 300) }}
-                            className="w-full m-1.5 px-2 h-32 border-2 border-gray-500 rounded-md hover:cursor-pointer"
+                            className="w-full m-1.5 px-2 h-32 border-2 border-gray-500 rounded-md"
                         />
                         <div className="flex w-full justify-end text-gray-500">{descriptioncount}/300</div>
                     </div>
@@ -517,14 +522,14 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                         <button 
                         type="button"
                         onClick={() => {showDescriptionWindow(false), setNewDescription(""), setDescriptionCount(0)}}
-                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+                        className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 rounded-xl"
                         >
                         Cancel
                         </button>
                         <button 
                         type="button"
                         onClick={changeDescription}
-                        className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                        className={`px-6 py-2 bg-[#1F1E3D] rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
                                     ${loading ? "opacity-70 cursor-wait" : ""}`}
                         >
                         Save

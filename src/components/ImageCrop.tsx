@@ -137,23 +137,25 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
       const data = await res.json();
 
       if (data.url) {
+        alert("Profile updated successfully.");
         if (onSave) onSave(data.url); // optional callback
       }
     } catch (err) {
-      console.error("Failed to save image:", err);
+        console.error("Failed to save image:", err);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
+    <div onClick={onCancel} className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
       <div
         className="bg-background p-6 rounded-xl shadow-xl w-11/12 max-w-md"
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Crop Image</h2>
-          <button onClick={onCancel} className="text-xl font-bold">×</button>
+          <button onClick={onCancel} className="text-xl font-bold hover:cursor-pointer">×</button>
         </div>
 
         <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -185,8 +187,8 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={onCancel} className="px-6 py-2 border-2 border-gray-500 rounded-xl">Cancel</button>
-          <button type="button" onClick={handleSave} className="px-6 py-2 bg-[#1F1E3D] text-white rounded-xl">Save</button>
+          <button type="button" onClick={onCancel} className="px-6 py-2 border-2 border-gray-500 rounded-xl hover:bg-gray-400 hover:cursor-pointer">Cancel</button>
+          <button type="button" onClick={handleSave} className="px-6 py-2 bg-[#1F1E3D] text-white rounded-xl hover:cursor-pointer">Save</button>
         </div>
       </div>
     </div>
