@@ -26,8 +26,6 @@ export async function POST(req: Request) {
         if (users.length === 0) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
-    
-        const user = users[0];
 
         await sql`
             UPDATE users SET username = ${username}, updated_at = now() WHERE id = ${id}

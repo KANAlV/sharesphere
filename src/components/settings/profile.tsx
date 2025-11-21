@@ -19,14 +19,10 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [surname, setSurname] = useState(profile[0].surname);
     const [firstname, setFirstname] = useState(profile[0].firstname);
     const [middlename, setMiddlename] = useState(profile[0]?.middlename || false);
+    const [suffix, setSuffix] = useState(profile[0]?.suffix || false);
 
     // --- use states --- //
     const [loading, setLoading] = useState(false);
-    const [count, setCount] = useState(0);
-    const [scount, setsCount] = useState(0);
-    const [fcount, setfCount] = useState(0);
-    const [mcount, setmCount] = useState(0);
-
     const [usernameHover, setUsernameHover] = useState(false);
     const [usernameWindow, showUsernameWindow] = useState(false);
     const [newUsername, setNewUsername] = useState("");
@@ -36,8 +32,15 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [newSurname, setNewSurname] = useState("");
     const [newFirstname, setNewFirstname] = useState("");
     const [newMiddlename, setNewMiddlename] = useState("");
+    const [newSuffix, setNewSuffix] = useState("");
 
     // --- counters --- //
+    const [count, setCount] = useState(0);
+    const [scount, setsCount] = useState(0);
+    const [fcount, setfCount] = useState(0);
+    const [mcount, setmCount] = useState(0);
+    const [sfxcount, setSfxCount] = useState(0);
+
     const counter = (e: React.ChangeEvent<HTMLInputElement>, limit: number) => {
         let text = e.target.value;
 
@@ -82,6 +85,17 @@ export default function Profile({ profile }: { profile: Profile[] }) {
         setmCount(text.length);
     };
 
+    const sfxcounter = (e: React.ChangeEvent<HTMLInputElement>, limit: number) => {
+        let text = e.target.value;
+
+        if (text.length > limit) {
+            text = text.substring(0, limit); // trim extra chars
+        }
+
+        setNewSuffix(text);
+        setSfxCount(text.length);
+    };
+
     // --- username change --- //
     const checkUsername = async () => {
         if (loading) return;
@@ -110,6 +124,44 @@ export default function Profile({ profile }: { profile: Profile[] }) {
         setLoading(false);
         }
     };
+
+    // --- name change --- //
+    const updateName = async() => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/settings/updateName`,{
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({
+                    id: profile[0].id,
+                    surname: newSurname,
+                    firstname: newFirstname,
+                    middlename: newMiddlename,
+                    suffix: newSuffix
+                })
+            })
+            const result = await response.json();
+            if (response.ok) {
+                alert("Name updated successfully.");
+                showNameWindow(false);
+                setSurname(newSurname);
+                setFirstname(newFirstname);
+                setMiddlename(newMiddlename);
+                setSuffix(newSuffix);
+                setNewSurname("");
+                setNewFirstname("");
+                setNewMiddlename("");
+                setNewSuffix("");
+            } else {
+                alert(result.error || "Failed to update name.");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return(
         <>
@@ -212,10 +264,12 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 onClick={() => {showNameWindow(false),
                                 setNewSurname(""), 
                                 setNewFirstname(""), 
-                                setNewMiddlename(""),  
+                                setNewMiddlename(""),   
+                                setNewSuffix(""), 
                                 setsCount(0), 
                                 setfCount(0), 
-                                setmCount(0)
+                                setmCount(0), 
+                                setSfxCount(0)
                             }}
                 className={`${nameWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
             >
@@ -230,9 +284,11 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                                 setNewSurname(""), 
                                 setNewFirstname(""), 
                                 setNewMiddlename(""),  
+                                setNewSuffix(""), 
                                 setsCount(0), 
                                 setfCount(0), 
-                                setmCount(0)
+                                setmCount(0), 
+                                setSfxCount(0)
                             }}
                         className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer">
                     <button
@@ -249,7 +305,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                     id="sname"
                     name="surname"
                     type="text"
-                    placeholder="Surname"
+                    placeholder="Surname *"
                     value={newSurname}
                     onChange={(e) => {setNewSurname(e.target.value), scounter(e, 50)}}
                     className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
@@ -262,7 +318,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                     id="fname"
                     name="firstname"
                     type="text"
-                    placeholder="First name"
+                    placeholder="First name *"
                     value={newFirstname}
                     onChange={(e) => {setNewFirstname(e.target.value), fcounter(e, 50)}}
                     className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
@@ -270,19 +326,34 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                     <div className="flex w-full justify-end text-gray-500">{fcount}/50</div>
                 </div>
 
-                <div className="w-full">
-                    <input
-                    id="mname"
-                    name="middlename"
-                    type="text"
-                    placeholder="Middle name"
-                    value={newMiddlename}
-                    onChange={(e) => {setNewMiddlename(e.target.value), mcounter(e, 50)}}
-                    className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
-                    />
-                    <div className="flex w-full justify-end text-gray-500">{mcount}/50</div>
-                </div>
+                <div className="flex w-full justify-between">
+                    <div className="w-3/5">
+                        <input
+                        id="mname"
+                        name="middlename"
+                        type="text"
+                        placeholder="Middle name"
+                        value={newMiddlename}
+                        onChange={(e) => {setNewMiddlename(e.target.value), mcounter(e, 50)}}
+                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                        />
+                        <div className="flex w-full justify-end text-gray-500">{mcount}/50</div>
+                    </div>
 
+                    <div className="w-2/6">
+                        <input
+                        id="sfx"
+                        name="suffix"
+                        type="text"
+                        placeholder="Suffix"
+                        value={newSuffix}
+                        onChange={(e) => {setNewSuffix(e.target.value), sfxcounter(e, 30)}}
+                        className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl"
+                        />
+                        <div className="flex w-full justify-end text-gray-500">{sfxcount}/30</div>
+                    </div>
+                </div>
+                
                 {/* save & cancel buttons */}
                 <div className="flex mt-4 w-full justify-end-safe gap-2">
                     <button 
@@ -291,9 +362,11 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                                     setNewSurname(""), 
                                     setNewFirstname(""), 
                                     setNewMiddlename(""), 
+                                    setNewSuffix(""), 
                                     setsCount(0), 
                                     setfCount(0), 
-                                    setmCount(0)
+                                    setmCount(0),
+                                    setSfxCount(0)
                             }}
                     className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
                     >
@@ -301,6 +374,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                     </button>
                     <button 
                     type="button"
+                    onClick={ () => updateName() }
                     className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
                                 ${loading ? "opacity-70 cursor-wait" : ""}`}
                     >
