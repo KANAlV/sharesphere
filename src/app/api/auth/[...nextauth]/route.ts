@@ -53,7 +53,7 @@ const handler = NextAuth({
         const token = jwt.sign(
           { id: dbUser.id, email: dbUser.email, username: dbUser.username },
           process.env.JWT_SECRET!,
-          { expiresIn: "1h" }
+          { expiresIn: "3h" }
         );
 
         const cookieStore = await cookies(); // 👈 add await
@@ -61,7 +61,7 @@ const handler = NextAuth({
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 60 * 60, // 1 hour
+        maxAge: 3 * 60 * 60, // 3 hours
         });
 
 

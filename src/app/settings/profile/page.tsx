@@ -1,10 +1,9 @@
-// app/settings/account/page.tsx
 import jwt from "jsonwebtoken";
+import { sql } from "@/lib/db";
 import { cookies } from "next/headers";
 import Navigation from "@/components/settings-navigation";
-import { sql } from "@/lib/db";
 import Profile from "@/components/settings/profile";
-import RedirectToHome from "@/components/redirectToHome";
+import TokenChecker from "@/components/TokenCheker";
 
 export default async function Account() {
   const cookieStore = await cookies();
@@ -22,19 +21,16 @@ export default async function Account() {
       };
     } catch {
       user = null;
-      return <RedirectToHome />;
     }
-  } else {
-    return <RedirectToHome />;
   }
 
   // --- check if user has data ---
   await sql`
-    SELECT ensure_user_exists(${user.id});
+    SELECT ensure_user_exists(${user?.id});
   `;
 
   const profile = (await sql`
-    SELECT * FROM FetchProfile(${user.id})
+    SELECT * FROM FetchProfile(${user?.id})
   `) as {
     id: string;
     username: string;
@@ -50,9 +46,12 @@ export default async function Account() {
   }[];
 
   return (
-    <div className="m-auto mt-20 lg:px-20 w-19/20 lg:w-3/4 min-h-full">
-      <Navigation />
-      <Profile profile={profile} />
-    </div>
+    <>
+      <TokenChecker />
+      <div className="m-auto mt-20 lg:px-20 w-19/20 lg:w-3/4 min-h-full">
+        <Navigation />
+        <Profile profile={profile} />
+      </div>
+    </>
   );
 }
