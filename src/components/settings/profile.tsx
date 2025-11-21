@@ -24,6 +24,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [middlename, setMiddlename] = useState(profile[0]?.middlename || null);
     const [suffix, setSuffix] = useState(profile[0]?.suffix || null);
     const [description, setDescription] = useState(profile[0]?.description || null);
+    const [bDate, setBDate] = useState(profile[0]?.dateofbirth || null);
 
     const [loading, setLoading] = useState(false);
 
@@ -49,6 +50,11 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [imageHover, setImageHover] = useState(false);
     const [imageWindow, showImageWindow] = useState(false);
     const [newImage, setNewImage] = useState("");
+
+    // --- bDate States --- //
+    const [bDateHover, setBDateHover] = useState(false);
+    const [bDateWindow, showBDateWindow] = useState(false);
+    const [newBDate, setNewBDate] = useState("");
 
     // --- counters --- //
     const [count, setCount] = useState(0);
@@ -220,6 +226,34 @@ export default function Profile({ profile }: { profile: Profile[] }) {
         }
     }
 
+    const updateBDate = async() => {
+        if (loading) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`/api/settings/updateBDate`,{
+                method: "POST",
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({
+                    id: profile[0].id,
+                    bDate: newBDate
+                })
+            })
+            const result = await response.json();
+            if (response.ok) {
+                alert("updated date of birth successfully.");
+                setBDate(newBDate);
+                setNewBDate("");
+                showBDateWindow(false);
+            } else {
+                alert(result.error || "Failed to update date of birth.");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return(
         <>
             {/* Username */}
@@ -253,7 +287,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 className="flex mt-4 px-6 hover:cursor-pointer"
             >
                 <div className="flex w-full justify-between pr-5">
-                    <div className="content-center-safe">Name:</div>
+                    <div className="content-center-safe">Name</div>
                     <div className="content-center-safe">{surname? surname+",":null} {firstname} {middlename} {suffix}</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
@@ -272,7 +306,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 className="flex mt-4 px-6 hover:cursor-pointer"
             >
                 <div className="flex w-full justify-between pr-5">
-                    <div className="content-center-safe">About description:</div>
+                    <div className="content-center-safe">About description</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${descriptionHover ? "bg-gray-500/50":null}`}
@@ -290,10 +324,29 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 className="flex mt-4 px-6 hover:cursor-pointer"
             >
                 <div className="flex w-full justify-between pr-5">
-                    <div className="content-center-safe">Profile Image:</div>
+                    <div className="content-center-safe">Profile Image</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${imageHover ? "bg-gray-500/50":null}`}
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                </div>
+            </div>
+
+            {/* birth date */}
+            <div
+                onMouseEnter={() => setBDateHover(true)} onMouseLeave={() => setBDateHover(false)}
+                onClick={() => {showBDateWindow(true), setNewBDate(bDate? bDate:"")}}
+                className="flex mt-4 px-6 hover:cursor-pointer"
+            >
+                <div className="flex w-full justify-between pr-5">
+                    <div className="content-center-safe">Date of Birth</div>
+                    <div className="content-center-safe">{bDate}</div>
+                </div>
+                <div className={`box-border size-9 rounded-full content-center-safe 
+                ${bDateHover ? "bg-gray-500/50":null}`}
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6"/>
@@ -560,6 +613,61 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                         }}
                     />
                     )}
+                </div>
+            </div>
+
+            {/* bDate window */}
+            <div
+                onClick={() => {showBDateWindow(false), setNewBDate("")}}
+                className={`${bDateWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
+            >
+                <div
+                className="text-current p-6 border-2 bg-background border-gray-500 rounded-xl shadow-xl w-96 relative"
+                onClick={(e) => e.stopPropagation()}
+                >
+                <div className="flex justify-between">
+                    <div className="text-lg font-semibold mb-4">Change Username</div>
+                    {/* Close button */}
+                    <div onClick={() => {showBDateWindow(false), setNewBDate(bDate? bDate:"")}} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8  hover:cursor-pointer">
+                    <button
+                        type="button"
+                        className="text-xl font-bold"
+                    >
+                        ×
+                    </button>
+                    </div>
+                </div>
+
+                <div className="w-full">
+                    <input
+                    id="bDate"
+                    name="bDate"
+                    type="date"
+                    value={newBDate}
+                    onChange={(e) => {setNewBDate(e.target.value)}}
+                    className="w-full m-1.5 px-2 h-12 border-2 border-gray-500 rounded-2xl hover:cursor-pointer"
+                    />
+                    <div className="flex w-full justify-end text-gray-500">{count}/50</div>
+                </div>
+
+                {/* save & cancel buttons */}
+                <div className="flex mt-4 w-full justify-end-safe gap-2">
+                    <button 
+                    type="button"
+                    onClick={() => {showBDateWindow(false), setNewBDate("")}}
+                    className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 rounded-xl"
+                    >
+                    Cancel
+                    </button>
+                    <button 
+                    type="button"
+                    onClick={updateBDate}
+                    className={`px-6 py-2 bg-[#1F1E3D] rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                                ${loading ? "opacity-70 cursor-wait" : ""}`}
+                    >
+                    Save
+                    </button>
+                </div>
                 </div>
             </div>
         </>
