@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import ImageCrop from "@/components/ImageCrop";
 
 type Profile = {
     id: string;
@@ -9,8 +10,10 @@ type Profile = {
     middlename: string;
     suffix: string;
     description: string;
-    image: string;
+    profile: string;
     banner: string;
+    course: string;
+    dateofbirth: string;
 }
 
 export default function Profile({ profile }: { profile: Profile[] }) {
@@ -22,12 +25,14 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [suffix, setSuffix] = useState(profile[0]?.suffix || null);
     const [description, setDescription] = useState(profile[0]?.description || null);
 
-    // --- use states --- //
     const [loading, setLoading] = useState(false);
+
+    // --- Username States --- //
     const [usernameHover, setUsernameHover] = useState(false);
     const [usernameWindow, showUsernameWindow] = useState(false);
     const [newUsername, setNewUsername] = useState("");
     
+    // --- Name States --- //
     const [nameHover, setNameHover] = useState(false);
     const [nameWindow, showNameWindow] = useState(false);
     const [newSurname, setNewSurname] = useState("");
@@ -35,9 +40,15 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [newMiddlename, setNewMiddlename] = useState("");
     const [newSuffix, setNewSuffix] = useState("");
 
+    // --- Description States --- //
     const [descriptionHover, setDescriptionHover] = useState(false);
     const [descriptionWindow, showDescriptionWindow] = useState(false);
     const [newDescription, setNewDescription] = useState("");
+
+    // --- Image States --- //
+    const [imageHover, setImageHover] = useState(false);
+    const [imageWindow, showImageWindow] = useState(false);
+    const [newImage, setNewImage] = useState("");
 
     // --- counters --- //
     const [count, setCount] = useState(0);
@@ -260,6 +271,24 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${descriptionHover ? "bg-gray-500/50":null}`}
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                </div>
+            </div>
+
+            {/* profile */}
+            <div
+                onMouseEnter={() => setImageHover(true)} onMouseLeave={() => setImageHover(false)}
+                onClick={() => {showImageWindow(true)}}
+                className="flex mt-4 px-6 hover:cursor-pointer"
+            >
+                <div className="flex w-full justify-between pr-5">
+                    <div className="content-center-safe">Profile Image:</div>
+                </div>
+                <div className={`box-border size-9 rounded-full content-center-safe 
+                ${imageHover ? "bg-gray-500/50":null}`}
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6"/>
@@ -501,6 +530,31 @@ export default function Profile({ profile }: { profile: Profile[] }) {
                         Save
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {/* Image window */}
+            <div
+                onClick={() => {showImageWindow(false), setNewImage("")}}
+                className={`${imageWindow ? "flex" : "hidden"} fixed inset-0 z-50 w-full bg-black/20 items-center justify-center`}
+            >
+                <div
+                className="text-current p-6 border-2 bg-background border-gray-500 rounded-xl shadow-xl relative"
+                onClick={(e) => e.stopPropagation()}
+                >
+                    {imageWindow && (
+                    <ImageCrop
+                        userId={profile[0].id ?? ""} // make sure `user` is defined
+                        onSave={(url) => { 
+                            setNewImage(url); 
+                            showImageWindow(false); 
+                        }}
+                        onCancel={() => { 
+                            showImageWindow(false); 
+                            setNewImage(""); 
+                        }}
+                    />
+                    )}
                 </div>
             </div>
         </>

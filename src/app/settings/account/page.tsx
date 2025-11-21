@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import Navigation from "@/components/settings-navigation";
 import Accounts from "@/components/settings/account";
+import RedirectToHome from "@/components/redirectToHome";
 
 export default async function Account(){
   const cookieStore = await cookies();
@@ -18,15 +19,13 @@ export default async function Account(){
         username: string;
         email: string;
         udata: string;
-        gender: string;
       };
     } catch {
       user = null;
-      window.location.href = "/";
+      return <RedirectToHome />;
     }
   } else {
-    user = null;
-    window.location.href = "/";
+    return <RedirectToHome />;
   }
 
   // --- check if user has data ---
