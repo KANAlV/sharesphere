@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 
 type ImageCropProps = {
   userId: string;
-  onSave?: (imgUrl: string) => void; // optional callback if you want to update UI
+  onSave?: (imgUrl: string) => void;
   onCancel: () => void;
 };
 
@@ -24,6 +24,14 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
   const [resizing, setResizing] = useState(false);
   const [start, setStart] = useState({ x: 0, y: 0 });
   const [startSize, setStartSize] = useState(100);
+
+  // Unified function for mouse + touch
+  const getPoint = (e: any) => {
+    if (e.touches) {
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -53,10 +61,17 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
     }
 
     setDisplaySize({ width: w, height: h });
-    setImgPosition({ top: (container.clientHeight - h) / 2, left: (container.clientWidth - w) / 2 });
+    setImgPosition({ 
+      top: (container.clientHeight - h) / 2, 
+      left: (container.clientWidth - w) / 2 
+    });
 
     const size = Math.min(w, h);
-    setCrop({ x: (container.clientWidth - size) / 2, y: (container.clientHeight - size) / 2, size });
+    setCrop({
+      x: (container.clientWidth - size) / 2,
+      y: (container.clientHeight - size) / 2,
+      size,
+    });
   };
 
   useEffect(() => {
@@ -65,71 +80,74 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
     return () => window.removeEventListener("resize", handleResize);
   }, [imgSrc]);
 
-  useEffect(() => {
-    if (!imgRef.current || !canvasRef.current) return;
-    const ctx = canvasRef.current.getContext("2d");
-    if (!ctx) return;
+  const startAction = (e: any) => {
+    const point = getPoint(e);
 
-    const img = imgRef.current;
-    const sx = ((crop.x - imgPosition.left) / displaySize.width) * imageSize.width;
-    const sy = ((crop.y - imgPosition.top) / displaySize.height) * imageSize.height;
-    const sSize = (crop.size / displaySize.width) * imageSize.width;
-
-    canvasRef.current.width = 100;
-    canvasRef.current.height = 100;
-
-    ctx.clearRect(0, 0, 100, 100);
-    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, 100, 100);
-  }, [crop, imgSrc, displaySize, imageSize, imgPosition]);
-
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if ((e.target as HTMLElement).classList.contains("resize-handle")) {
       setResizing(true);
-      setStart({ x: e.clientX, y: e.clientY });
+      setStart(point);
       setStartSize(crop.size);
     } else {
       setDragging(true);
-      setStart({ x: e.clientX - crop.x, y: e.clientY - crop.y });
+      setStart({ x: point.x - crop.x, y: point.y - crop.y });
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const moveAction = (e: any) => {
+    const point = getPoint(e);
+
     if (dragging) {
-      let newX = e.clientX - start.x;
-      let newY = e.clientY - start.y;
+      let newX = point.x - start.x;
+      let newY = point.y - start.y;
 
       const maxX = imgPosition.left + displaySize.width - crop.size;
       const maxY = imgPosition.top + displaySize.height - crop.size;
 
-      if (newX < imgPosition.left) newX = imgPosition.left;
-      if (newY < imgPosition.top) newY = imgPosition.top;
-      if (newX > maxX) newX = maxX;
-      if (newY > maxY) newY = maxY;
+      newX = Math.max(imgPosition.left, Math.min(newX, maxX));
+      newY = Math.max(imgPosition.top, Math.min(newY, maxY));
 
       setCrop({ ...crop, x: newX, y: newY });
-    } else if (resizing) {
-      const delta = Math.max(e.clientX - start.x, e.clientY - start.y);
+    }
+
+    if (resizing) {
+      const delta = Math.max(point.x - start.x, point.y - start.y);
       let newSize = startSize + delta;
 
-      const maxSizeX = imgPosition.left + displaySize.width - crop.x;
-      const maxSizeY = imgPosition.top + displaySize.height - crop.y;
-      newSize = Math.min(newSize, maxSizeX, maxSizeY);
+      const maxX = imgPosition.left + displaySize.width - crop.x;
+      const maxY = imgPosition.top + displaySize.height - crop.y;
+
+      newSize = Math.min(newSize, maxX, maxY);
       newSize = Math.max(newSize, 50);
 
       setCrop({ ...crop, size: newSize });
     }
   };
 
-  const handleMouseUp = () => {
+  const endAction = () => {
     setDragging(false);
     setResizing(false);
   };
 
   const handleSave = async () => {
-    if(loading) return;
+    if (loading) return;
     setLoading(true);
-    if (!canvasRef.current) return;
-    const base64 = canvasRef.current.toDataURL("image/jpeg", 0.9);
+
+    if (!canvasRef.current || !imgRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d")!;
+    canvas.width = 100;
+    canvas.height = 100;
+
+    const img = imgRef.current;
+
+    const sx = ((crop.x - imgPosition.left) / displaySize.width) * imageSize.width;
+    const sy = ((crop.y - imgPosition.top) / displaySize.height) * imageSize.height;
+    const sSize = (crop.size / displaySize.width) * imageSize.width;
+
+    ctx.clearRect(0, 0, 100, 100);
+    ctx.drawImage(img, sx, sy, sSize, sSize, 0, 0, 100, 100);
+
+    const base64 = canvas.toDataURL("image/jpeg", 0.9);
 
     try {
       const res = await fetch("/api/settings/uploadImage", {
@@ -137,30 +155,32 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ image: base64, userId }),
       });
+
       const data = await res.json();
 
       if (data.url) {
         alert("Profile updated successfully.");
-        if (onSave) onSave(data.url); // optional callback
+        onSave?.(data.url);
       }
     } catch (err) {
-        console.error("Failed to save image:", err);
+      console.error("Failed to save:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div onClick={onCancel} className="fixed inset-0 flex items-center justify-center bg-black/20 z-50">
+    <div
+      onClick={onCancel}
+      className="fixed inset-0 flex items-center justify-center bg-black/20 z-50"
+    >
       <div
         className="bg-background p-6 rounded-xl shadow-xl w-11/12 max-w-md"
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Upload Profile</h2>
-          <button onClick={onCancel} className="text-xl font-bold hover:cursor-pointer">×</button>
+          <button onClick={onCancel} className="text-xl font-bold">×</button>
         </div>
 
         <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -168,23 +188,39 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
         {imgSrc && (
           <div
             ref={containerRef}
-            className="relative mt-4 w-full h-64 overflow-hidden cursor-move"
-            onMouseDown={handleMouseDown}
+            className="relative mt-4 w-full h-64 overflow-hidden"
+            onMouseDown={startAction}
+            onMouseMove={moveAction}
+            onMouseUp={endAction}
+            onMouseLeave={endAction}
+            onTouchStart={startAction}
+            onTouchMove={moveAction}
+            onTouchEnd={endAction}
           >
             <img
               ref={imgRef}
               src={imgSrc}
-              alt="To crop"
               draggable={false}
               className="absolute select-none"
-              style={{ width: displaySize.width, height: displaySize.height, top: imgPosition.top, left: imgPosition.left }}
               onLoad={handleImgLoad}
+              style={{
+                width: displaySize.width,
+                height: displaySize.height,
+                top: imgPosition.top,
+                left: imgPosition.left,
+              }}
             />
+
             <div
               className="absolute border-2 border-blue-500"
-              style={{ top: crop.y, left: crop.x, width: crop.size, height: crop.size }}
+              style={{
+                top: crop.y,
+                left: crop.x,
+                width: crop.size,
+                height: crop.size,
+              }}
             >
-              <div className="resize-handle absolute w-4 h-4 bg-blue-500 bottom-0 right-0 cursor-se-resize" />
+              <div className="resize-handle absolute w-4 h-4 bg-blue-500 bottom-0 right-0"></div>
             </div>
           </div>
         )}
@@ -192,8 +228,22 @@ export default function ImageCrop({ userId, onSave, onCancel }: ImageCropProps) 
         <canvas ref={canvasRef} className="hidden" />
 
         <div className="flex justify-end gap-2 mt-4">
-          <button type="button" onClick={onCancel} className="px-6 py-2 border-2 border-gray-500 rounded-xl hover:bg-gray-400 hover:cursor-pointer">Cancel</button>
-          <button type="button" onClick={handleSave} className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl hover:cursor-pointer ${loading ? "opacity-70 cursor-wait" : ""}`}>Save</button>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 border-2 border-gray-500 rounded-xl"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${
+              loading ? "opacity-70 cursor-wait" : ""
+            }`}
+          >
+            Save
+          </button>
         </div>
       </div>
     </div>

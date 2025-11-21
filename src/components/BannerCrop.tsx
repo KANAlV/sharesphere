@@ -15,7 +15,6 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   const [displaySize, setDisplaySize] = useState({ width: 0, height: 0 });
   const [imgPosition, setImgPosition] = useState({ top: 0, left: 0 });
 
-  // 16:9 crop
   const [crop, setCrop] = useState({ x: 0, y: 0, width: 160, height: 90 });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,6 +25,13 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   const [resizing, setResizing] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [startCrop, setStartCrop] = useState({ width: 160, height: 90 });
+
+  /** Normalizes pointer position for mouse + touch */
+  const getPos = (e: any) => {
+    if (e.touches?.length)
+      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    return { x: e.clientX, y: e.clientY };
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,19 +55,17 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     let w = container.clientWidth;
     let h = container.clientHeight;
 
-    if (imgRatio > containerRatio) {
-      h = container.clientWidth / imgRatio;
-    } else {
-      w = container.clientHeight * imgRatio;
-    }
+    if (imgRatio > containerRatio) h = container.clientWidth / imgRatio;
+    else w = container.clientHeight * imgRatio;
 
     setDisplaySize({ width: w, height: h });
+
     setImgPosition({
       top: (container.clientHeight - h) / 2,
       left: (container.clientWidth - w) / 2,
     });
 
-    // Initialize 16:9 crop centered
+    // Center initial crop (16:9)
     const cropHeight = h * 0.6;
     const cropWidth = cropHeight * (16 / 9);
 
@@ -79,35 +83,41 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     return () => window.removeEventListener("resize", resize);
   }, [imgSrc]);
 
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  /** START drag or resize */
+  const handleStart = (e: any) => {
+    const pos = getPos(e);
+
     if ((e.target as HTMLElement).classList.contains("resize-handle")) {
       setResizing(true);
-      setStartPos({ x: e.clientX, y: e.clientY });
+      setStartPos({ x: pos.x, y: pos.y });
       setStartCrop({ width: crop.width, height: crop.height });
     } else {
       setDragging(true);
-      setStartPos({ x: e.clientX - crop.x, y: e.clientY - crop.y });
+      setStartPos({ x: pos.x - crop.x, y: pos.y - crop.y });
     }
+
+    document.body.style.touchAction = "none"; // prevent scrolling while dragging
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  /** MOVE drag or resize */
+  const handleMove = (e: any) => {
+    const pos = getPos(e);
+
     if (dragging) {
-      let newX = e.clientX - startPos.x;
-      let newY = e.clientY - startPos.y;
+      let newX = pos.x - startPos.x;
+      let newY = pos.y - startPos.y;
 
       const maxX = imgPosition.left + displaySize.width - crop.width;
       const maxY = imgPosition.top + displaySize.height - crop.height;
 
-      if (newX < imgPosition.left) newX = imgPosition.left;
-      if (newY < imgPosition.top) newY = imgPosition.top;
-      if (newX > maxX) newX = maxX;
-      if (newY > maxY) newY = maxY;
+      newX = Math.max(imgPosition.left, Math.min(newX, maxX));
+      newY = Math.max(imgPosition.top, Math.min(newY, maxY));
 
       setCrop({ ...crop, x: newX, y: newY });
     }
 
     if (resizing) {
-      const delta = Math.max(e.clientX - startPos.x, e.clientY - startPos.y);
+      const delta = Math.max(pos.x - startPos.x, pos.y - startPos.y);
 
       let newHeight = startCrop.height + delta;
       let newWidth = newHeight * (16 / 9);
@@ -131,11 +141,14 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     }
   };
 
-  const handleMouseUp = () => {
+  /** END drag/resize */
+  const handleEnd = () => {
     setDragging(false);
     setResizing(false);
+    document.body.style.touchAction = "auto";
   };
 
+  /** Redraw cropped image into canvas */
   useEffect(() => {
     if (!canvasRef.current || !imgRef.current) return;
 
@@ -143,7 +156,6 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Output resolution
     canvas.width = 1600;
     canvas.height = 900;
 
@@ -163,11 +175,11 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
   }, [crop, imgSrc, displaySize, imageSize, imgPosition]);
 
   const handleSave = async () => {
-    if(loading) return;
+    if (loading) return;
     setLoading(true);
     if (!canvasRef.current) return;
 
-    const base64 = canvasRef.current.toDataURL("image/png"); // no compression
+    const base64 = canvasRef.current.toDataURL("image/png");
 
     try {
       const res = await fetch("/api/settings/uploadBanner", {
@@ -196,8 +208,10 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
     >
       <div
         className="bg-background p-6 rounded-xl shadow-xl w-11/12 max-w-md"
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
+        onMouseUp={handleEnd}
+        onMouseMove={handleMove}
+        onTouchEnd={handleEnd}
+        onTouchMove={handleMove}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
@@ -212,14 +226,15 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
         {imgSrc && (
           <div
             ref={containerRef}
-            className="relative mt-4 w-full h-64 overflow-hidden cursor-move"
-            onMouseDown={handleMouseDown}
+            className="relative mt-4 w-full h-64 overflow-hidden cursor-move touch-none"
+            onMouseDown={handleStart}
+            onTouchStart={handleStart}
           >
             <img
               ref={imgRef}
               src={imgSrc}
               draggable={false}
-              className="absolute select-none"
+              className="absolute select-none pointer-events-none"
               style={{
                 width: displaySize.width,
                 height: displaySize.height,
@@ -238,7 +253,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
                 height: crop.height,
               }}
             >
-              <div className="resize-handle absolute w-4 h-4 bg-blue-500 bottom-0 right-0 cursor-se-resize"></div>
+              <div className="resize-handle absolute w-4 h-4 bg-blue-500 bottom-0 right-0 cursor-se-resize touch-none"></div>
             </div>
           </div>
         )}
@@ -256,7 +271,9 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
           <button
             type="button"
             onClick={handleSave}
-            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${loading ? "opacity-70 cursor-wait" : ""}`}
+            className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${
+              loading ? "opacity-70 cursor-wait" : ""
+            }`}
           >
             Save
           </button>
