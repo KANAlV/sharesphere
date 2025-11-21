@@ -112,7 +112,7 @@ export default function Account({ account }: { account: Account[] }) {
       <div
         onMouseEnter={() => emlHover(true)} onMouseLeave={() => emlHover(false)}
         onClick={() => showEmailWindow(true)}
-        className="flex mt-4 px-6"
+        className="flex mt-4 px-6 hover:cursor-pointer"
       >
         <div className="flex w-full justify-between pr-5">
           <div className="content-center-safe">Email address</div>
@@ -131,7 +131,7 @@ export default function Account({ account }: { account: Account[] }) {
       <div
         onMouseEnter={() => pswrdHover(true)} onMouseLeave={() => pswrdHover(false)}
         onClick={() => showPasswordWindow(!passwordWindow)}
-        className="flex mt-4 px-6"
+        className="flex mt-4 px-6 hover:cursor-pointer"
       >
         <div className="flex w-full justify-between pr-5">
           <div className="content-center-safe">Password</div>
@@ -150,7 +150,7 @@ export default function Account({ account }: { account: Account[] }) {
         onMouseEnter={() => gndrHover(true)}
         onMouseLeave={() => gndrHover(false)}
         onClick={() => showGenderWindow(!genderWindow)}
-        className="flex mt-4 px-6"
+        className="flex mt-4 px-6 hover:cursor-pointer"
       >
         <div className="flex w-full justify-between pr-5">
           <div className="content-center-safe">gender</div>
@@ -166,7 +166,7 @@ export default function Account({ account }: { account: Account[] }) {
       </div>
 
       {/* Two-factor authentication */}
-      <div className="flex mt-4 px-6">
+      <div className="flex mt-4 px-6 hover:cursor-pointer">
         <div className="flex w-full justify-between pr-5">
           <div className="content-center-safe">Two-factor authentication</div>
           <div
@@ -198,7 +198,7 @@ export default function Account({ account }: { account: Account[] }) {
           <div className="flex justify-between">
             <div className="text-lg font-semibold mb-4">Change Email</div>
             {/* Close button */}
-            <div onClick={() => showEmailWindow(false)} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8">
+            <div onClick={() => showEmailWindow(false)} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer">
               <button
                 type="button"
                 className="text-xl font-bold"
@@ -235,13 +235,14 @@ export default function Account({ account }: { account: Account[] }) {
             <button 
               type="button"
               onClick={() => showEmailWindow(false)}
-              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="button"
-              className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${passwordLoading ? "opacity-70 cursor-wait" : ""}`}
+              className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                          ${passwordLoading ? "opacity-70 cursor-wait" : ""}`}
             >
               Save
             </button>
@@ -261,7 +262,7 @@ export default function Account({ account }: { account: Account[] }) {
           <div className="flex justify-between">
             <div className="text-lg font-semibold mb-4">Password</div>
             {/* Close button */}
-            <div onClick={() => showPasswordWindow(false)} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8">
+            <div onClick={() => showPasswordWindow(false)} className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer">
               <button
                 type="button"
                 className="text-xl font-bold"
@@ -309,14 +310,15 @@ export default function Account({ account }: { account: Account[] }) {
             <button 
               type="button"
               onClick={() => showPasswordWindow(false)}
-              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
             >
               Cancel
             </button>
             <button 
               type="button"
               onClick={checkPassword}
-              className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl ${passwordLoading ? "opacity-70 cursor-wait" : ""}`}
+              className={`px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500
+                          ${passwordLoading ? "opacity-70 cursor-wait" : ""}`}
             >
               Save
             </button>
@@ -342,7 +344,7 @@ export default function Account({ account }: { account: Account[] }) {
             <div className="text-lg font-semibold mb-4">Select Gender</div>
             {/* Close button */}
             <div 
-              className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8"
+              className="flex justify-center-safe hover:bg-gray-500 rounded-full box-border size-8 hover:cursor-pointer"
               onClick={() => {
                 setGender(account[0]?.gender || "prefer not to say"); // restore original
                 showRefer(false);
@@ -358,7 +360,7 @@ export default function Account({ account }: { account: Account[] }) {
             </div>
           </div>
 
-          <div className="flex px-6 justify-between">
+          <div className="flex px-6 justify-between hover:cursor-pointer">
             <div>Male</div>
             <input
               type="radio"
@@ -369,7 +371,7 @@ export default function Account({ account }: { account: Account[] }) {
             />
           </div><br/>
 
-          <div className="flex px-6 justify-between">
+          <div className="flex px-6 justify-between hover:cursor-pointer">
             <div>Female</div>
             <input
               type="radio"
@@ -380,7 +382,7 @@ export default function Account({ account }: { account: Account[] }) {
             />
           </div><br/>
 
-          <div className="flex px-6 justify-between">
+          <div className="flex px-6 justify-between hover:cursor-pointer">
             <div>Non-binary</div>
             <input
               type="radio"
@@ -391,7 +393,7 @@ export default function Account({ account }: { account: Account[] }) {
             />
           </div><br/>
 
-          <div className="flex px-6 justify-between">
+          <div className="flex px-6 justify-between hover:cursor-pointer">
             <div>I prefer not to say</div>
             <input
               type="radio"
@@ -402,7 +404,7 @@ export default function Account({ account }: { account: Account[] }) {
             />
           </div><br/>
 
-          <div className="flex px-6 justify-between">
+          <div className="flex px-6 justify-between hover:cursor-pointer">
             <div>I refer to myself as:</div>
             <input
               type="radio"
@@ -432,7 +434,7 @@ export default function Account({ account }: { account: Account[] }) {
                 showRefer(false);
                 showGenderWindow(false);
               }}
-              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl"
+              className="px-6 py-2 border-2 border-gray-500 hover:bg-gray-400 text-white rounded-xl hover:cursor-pointer"
             >
               Cancel
             </button>
@@ -442,7 +444,7 @@ export default function Account({ account }: { account: Account[] }) {
                 checkGender();
                 showGenderWindow(false);
               }}
-              className="px-6 py-2 bg-[#1F1E3D] text-white rounded-xl"
+              className="px-6 py-2 bg-[#1F1E3D] text-white rounded-xl border-2 border-background hover:cursor-pointer hover:border-gray-500"
             >
               Save
             </button>
