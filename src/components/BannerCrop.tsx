@@ -223,7 +223,7 @@ export default function BannerCrop({ userId, onSave, onCancel }: BannerCropProps
           </button>
         </div>
 
-        <input type="file" accept="image/*" onChange={handleFileChange} />
+        <input type="file" accept="image/*" onChange={handleFileChange} className="text-blue-500 hover:text-blue-300"/>
 
         {imgSrc && (
           <div

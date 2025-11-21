@@ -116,7 +116,7 @@ export default function Account({ account }: { account: Account[] }) {
       >
         <div className="flex w-full justify-between pr-5">
           <div className="content-center-safe">Email address</div>
-          <div className="content-center-safe">{email}</div>
+          <div className="content-center-safe text-end text-xs lg:text-base">{email}</div>
         </div>
         <div className={`box-border size-9 rounded-full content-center-safe 
           ${eml ? "bg-gray-500/50":null}`}
