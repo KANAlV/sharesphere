@@ -20,6 +20,7 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [firstname, setFirstname] = useState(profile[0].firstname);
     const [middlename, setMiddlename] = useState(profile[0]?.middlename || false);
     const [suffix, setSuffix] = useState(profile[0]?.suffix || false);
+    const [description, setDescription] = useState(profile[0]?.description || false);
 
     // --- use states --- //
     const [loading, setLoading] = useState(false);
@@ -34,12 +35,17 @@ export default function Profile({ profile }: { profile: Profile[] }) {
     const [newMiddlename, setNewMiddlename] = useState("");
     const [newSuffix, setNewSuffix] = useState("");
 
+    const [descriptionHover, setDescriptionHover] = useState(false);
+    const [descriptionWindow, showDescriptionWindow] = useState(false);
+    const [newDescription, setNewDescription] = useState("");
+
     // --- counters --- //
     const [count, setCount] = useState(0);
     const [scount, setsCount] = useState(0);
     const [fcount, setfCount] = useState(0);
     const [mcount, setmCount] = useState(0);
     const [sfxcount, setSfxCount] = useState(0);
+    const [descriptioncount, setDescriptionCount] = useState(0);
 
     const counter = (e: React.ChangeEvent<HTMLInputElement>, limit: number) => {
         let text = e.target.value;
@@ -192,10 +198,29 @@ export default function Profile({ profile }: { profile: Profile[] }) {
             >
                 <div className="flex w-full justify-between pr-5">
                     <div className="content-center-safe">Name:</div>
-                    <div className="content-center-safe">{surname? surname+",":null} {firstname} {middlename}</div>
+                    <div className="content-center-safe">{surname? surname+",":null} {firstname} {middlename} {suffix}</div>
                 </div>
                 <div className={`box-border size-9 rounded-full content-center-safe 
                 ${nameHover ? "bg-gray-500/50":null}`}
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+                </div>
+            </div>
+
+            {/* about description */}
+            <div
+                onMouseEnter={() => setDescriptionHover(true)} onMouseLeave={() => setDescriptionHover(false)}
+                onClick={() => showDescriptionWindow(true)}
+                className="flex mt-4 px-6 hover:cursor-pointer"
+            >
+                <div className="flex w-full justify-between pr-5">
+                    <div className="content-center-safe">Name:</div>
+                    <div className="content-center-safe">{description}</div>
+                </div>
+                <div className={`box-border size-9 rounded-full content-center-safe 
+                ${descriptionHover ? "bg-gray-500/50":null}`}
                 >
                 <svg xmlns="http://www.w3.org/2000/svg" className="m-auto" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6"/>
