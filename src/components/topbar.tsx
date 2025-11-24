@@ -39,9 +39,6 @@ export default function Topbar({ user }: { user: User | null }) {
                       </button>
                     </Link>
                   </div>
-                  <div className="block md:hidden">
-                    <UserDropdown user={user} />
-                  </div>
                 </div>
               )}
           </div>
