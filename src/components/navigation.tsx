@@ -37,14 +37,7 @@ export default function Navigation({ user }: { user: User | null }) {
     <>
       {/* Loading overlay */}
       {cWait && (
-        <div className="fixed top-0 flex z-50 w-screen h-screen bg-black/75 justify-center items-center">
-          <div>
-            <div>Redirecting. Please wait.</div>
-            <div className="flex items-center justify-center">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
-            </div>
-          </div>
-        </div>
+        <div className="fixed top-0 flex z-50 w-screen h-screen justify-center items-center" />
       )}
 
       <div

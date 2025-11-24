@@ -21,7 +21,7 @@ export default function UserDropdown({ user }: { user: User | null }) {
     initFlowbite();
   }, []);
   const [isDroppedDown, setIsDroppedDown] = useState(false);
-
+  const [cWait, setCWait] = useState(false);
   const loggedIn = user !== null;
 
   useEffect(() => {
@@ -50,9 +50,22 @@ export default function UserDropdown({ user }: { user: User | null }) {
 
   const [label, toggleLabel] = useState(false);
 
-  return (
+  const waitRedir = (loc: string) => {
+    setCWait(true);
+    document.body.style.cursor = "wait";
+    if (user) {window.location.href = loc;}
+    else {window.location.href = "/login";}
+    
+  };
+
+  return (<>
+    {/* Loading overlay */}
+    {cWait && (
+      <div className="fixed top-0 flex z-50 w-screen h-screen justify-center items-center" />
+    )}
+
     <div className="flex relative">
-      <Link href={"/create-post"}>
+      <div onClick={() => waitRedir("/create-post")}>
         <button onMouseEnter={()=>toggleLabel(true)} onMouseLeave={()=>toggleLabel(false)} className="block hs-dark-mode p-2 pr-5 rounded-full">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
               viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -72,7 +85,8 @@ export default function UserDropdown({ user }: { user: User | null }) {
         >
           Create Post
         </div>
-      </Link>
+      </div>
     </div>
-  );
+  
+  </>);
 }

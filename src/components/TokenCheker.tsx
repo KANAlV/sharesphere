@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function SessionChecker() {
   const [expired, setExpired] = useState(false);
+  const [count, setCount] = useState(5);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -13,22 +14,32 @@ export default function SessionChecker() {
 
         if (!data.valid) {
           setExpired(true);
-          console.log("token expired")
-          // Wait 5 seconds before redirect
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 5000);
         }
       } catch {
         setExpired(true);
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 5000);
       }
     }, 5000);
 
     return () => clearInterval(interval);
   }, []);
+
+  // Countdown effect
+  useEffect(() => {
+    if (!expired) return;
+
+    const timer = setInterval(() => {
+      setCount((prev) => {
+        if (prev <= 1) {
+          // Redirect when finished
+          window.location.href = "/";
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [expired]);
 
   return (
     <>
@@ -40,7 +51,7 @@ export default function SessionChecker() {
             Token expired. Redirecting to home page…
           </p>
 
-          <p className="text-sm opacity-70">(5 seconds)</p>
+          <p className="text-sm opacity-70">({count} seconds)</p>
         </div>
       )}
     </>
