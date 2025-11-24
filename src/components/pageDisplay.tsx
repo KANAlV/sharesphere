@@ -15,6 +15,7 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
     const pathname = usePathname();
     const location = pathname.startsWith("/organizations") ? "o" : "c";
     const [gridView, setGridView] = useState(true);
+    const [cWait, setCWait] = useState(false);
 
     const displayTitle = (title: string) => {
         let displayTitleStr = "";
@@ -84,7 +85,26 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
         if (debounceTimer) clearTimeout(debounceTimer);
     };
     }, [loadMorePosts, loading, hasMore]);
+
+    const redirect = (loc:string) => {
+        setCWait(true);
+        document.body.style.cursor = "wait";
+        window.location.href = loc;
+    }
     return (
+        <>
+        {/* Loading overlay */}
+        {cWait && (
+            <div className="fixed top-0 flex z-50 w-screen h-screen bg-black/75 justify-center items-center">
+            <div>
+                <div>Redirecting. Please wait.</div>
+                <div className="flex items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-blue-600"></div>
+                </div>
+            </div>
+            </div>
+        )}
+
         <div className="mt-20 m-auto p-1 w-full lg:w-3/5 justify-between h-max flex flex-wrap gap-4">
             {/* <!-- top-right small box --> */}
             <div className="flex items-center justify-between w-full">
@@ -134,7 +154,7 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
             <div className={`w-full h-max ${gridView ? "grid grid-cols-3 md:grid-cols-5 xl:grid-cols-6 gap-2" : "grid grid-cols-2 gap-4"}`}>
                 {info.length > 0 ? (
                     info.map((Info) => (
-                    <Link href={`/${location}/` + Info.name} key={Info.id}>
+                    <div onClick={() => redirect(`/${location}/` + Info.name)} key={Info.id}>
                         <div
                         className={`overflow-clip ${gridView
                             ? "relative w-30 h-30 xl:w-40 xl:h-40 bg-white dark:bg-gray-800 shadow-md rounded-lg flex flex-col items-center justify-center cursor-pointer flex-shrink-0"
@@ -157,7 +177,7 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
                             </p>
                         </div>
                         </div>
-                    </Link>
+                    </div>
                     ))
                 ) : (
                     <p>This Page does not have Any Entry.</p>
@@ -168,5 +188,6 @@ export default function Info({ info: initialPosts }: {info: Info[];}) {
                 <p className="text-center opacity-60 mt-2">No more info to show.</p>
             )}
         </div>
+        </>
     );
 }

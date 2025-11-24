@@ -146,8 +146,17 @@ export default function Navigation({ user }: { user: User | null }) {
   );
 }
 
+type NavItemProps = {
+  label: string;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>; // type for SVG component
+  onClick: () => void;
+  isOpen: boolean;
+  mobile?: boolean;
+  color?: string;
+};
+
 /* Helper component to reduce repetition */
-function NavItem({ label, icon: Icon, onClick, isOpen, mobile, color }: any) {
+function NavItem({ label, icon: Icon, onClick, isOpen, mobile, color }: NavItemProps) {
   return (
     <div
       onClick={onClick}
