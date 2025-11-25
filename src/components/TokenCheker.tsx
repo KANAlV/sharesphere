@@ -48,7 +48,7 @@ export default function SessionChecker() {
           <div className="h-12 w-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
 
           <p className="text-lg font-medium">
-            Token expired. Redirecting to home page…
+            Session expired. Redirecting to home page…
           </p>
 
           <p className="text-sm opacity-70">({count} seconds)</p>

@@ -68,7 +68,7 @@ export default function UserDropdown({ user }: { user: User | null }) {
       <div onClick={() => waitRedir("/create-post")}>
         <button onMouseEnter={()=>toggleLabel(true)} onMouseLeave={()=>toggleLabel(false)} className="block hs-dark-mode p-2 pr-5 rounded-full">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24" fill="none" stroke="#fff"
               strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <rect x="4" y="4" width="16" height="16" rx="4"></rect>
             <path d="M12 8v8M8 12h8"></path>
