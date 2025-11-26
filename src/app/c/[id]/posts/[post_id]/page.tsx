@@ -6,7 +6,15 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
   const { id, post_id } = await props.params;
 
   const posts = (await sql`
-    SELECT p.id::TEXT, p.title, p.content, p.created_at, u.username, p.likes, p.dislikes
+    SELECT 
+      p.id::TEXT, 
+      p.title, 
+      p.content, 
+      p.created_at, 
+      u.username, 
+      p.likes, 
+      p.dislikes, 
+      p.images
     FROM posts p
     JOIN users u ON p.author_id = u.id
     WHERE p.id = ${post_id}
@@ -18,6 +26,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     username: string;
     likes: number;
     dislikes: number;
+    images: string[]; // just an array of URLs
   }[];
 
   const post = posts[0];

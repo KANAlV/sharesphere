@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import Image from "next/image";
 
 type Post = {
   id: string;
@@ -9,6 +10,7 @@ type Post = {
   username: string;
   likes: number;
   dislikes: number;
+  images: string[];
 };
 
 export default function PostView({ post }: { post: Post }) { 
@@ -17,19 +19,75 @@ export default function PostView({ post }: { post: Post }) {
   const [dislikes] = useState(post.dislikes || 0);
   const [comment, setComment] = useState("");
 
+  const images = post.images || [];
+  const [current, setCurrent] = useState(0);
+  const length = images.length;
+
+  const nextSlide = () => setCurrent(current === length - 1 ? 0 : current + 1);
+  const prevSlide = () => setCurrent(current === 0 ? length - 1 : current - 1);
+
   return (
-    <div id="title" className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-4 rounded-lg w-full lg:max-w-7/9 lg:ml-12 mt-16 lg:mt-22">
+    <div id="title" className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-4 b-6 rounded-lg w-full lg:max-w-7/9 lg:ml-12 mt-16 lg:mt-22">
       {/* Title */}
-      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5">
+      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5 mb-6">
         <p className="text-black dark:text-white text-5xl font-bold">{post.title}</p>
         <p className="text-sm text-black dark:text-white">
           {post.username} — {new Date(post.created_at).toLocaleDateString()}
         </p>
       </div>
 
+      {/* Images Carousel */}
+      {length > 0 && (
+        <div className="relative w-full overflow-hidden mt-4 rounded-xl">
+          <div
+            className="flex transition-transform duration-500"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {images.map((img, idx) => (
+              <Image
+                key={idx}
+                src={img}
+                alt={`Slide ${idx + 1}`}
+                width={800}
+                height={600}
+                unoptimized
+                className="w-full h-64 object-contain flex-shrink-0"
+              />
+            ))}
+          </div>
+
+          {/* Prev/Next Buttons */}
+          <button
+            onClick={prevSlide}
+            className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+          >
+            ‹
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+          >
+            ›
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+            {images.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-3 h-3 rounded-full cursor-pointer ${
+                  idx === current ? "bg-yellow-300" : "bg-gray-300"
+                }`}
+                onClick={() => setCurrent(idx)}
+              ></div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Content */}
-      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 px-5 pt-10 pb-4">
-        <p className="text-xl text-black dark:text-white mb-4">{post.content}</p>
+      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 px-5 pt-4 pb-4">
+        <p className="text-lg lg:text-base text-black dark:text-white mb-4">{post.content}</p>
       </div>
 
       {/* Likes / Dislikes */}

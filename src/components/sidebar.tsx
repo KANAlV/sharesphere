@@ -220,17 +220,17 @@ export default function Sidebar({
         {/* Tags */}
         <div className=" mt-1 pl-8 py-4 lg:bg-gray-500/50">
           <p style={{ opacity: 0.9 }}>
-            {pathname.startsWith(`/c/`)||pathname.startsWith(`/o/`) ? "Most Popular Tags":"Currently showing posts for:"}
+            {/^\/[co]\/[^/]+\/posts/.test(pathname) ? "Post Tags":(pathname.startsWith(`/c/`)||pathname.startsWith(`/o/`) ? "Most Popular Tags":"Currently showing posts for:")}
           </p>
           <div className="block max-h-120 overflow-y-clip">
-            {rel.length > 0 ? (
+            {tags.length > 0 ? (
               tags.map((post, idx) => (
                 <a href={pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`} key={idx} className="block w-min">
                   <div className={`flex px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
                   style={{ backgroundColor: post.color, color: textColor(post.color) }}
                   >
                     {post.tag}
-                    {pathname !== `/c/${id}` ? (
+                    {pathname.includes("tags") ? (
                     <svg
                       width="24"
                       height="24"
