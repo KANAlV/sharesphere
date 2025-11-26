@@ -91,13 +91,39 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
   const removeTag = (dir: string) => setPostTags((prev) => prev.filter((t) => t.dir !== dir));
 
   const submitPost = async () => {
-    const imageUrls = images.map(img => img.uploadedUrl).filter(Boolean);
+    // Validation
+    if (!title.trim()) {
+      alert("Please enter a title.");
+      return;
+    }
 
-    // Determine which column to use
-    const body: any = {
+    if (!content.trim()) {
+      alert("Please enter content for your post.");
+      return;
+    }
+
+    if ((pagetype === "courses" || pagetype === "orgs") && !course_org) {
+      alert(`Please select a course/organization.`);
+      return;
+    }
+
+    // get img urls
+    const imageUrls = images
+      .map((img) => img.uploadedUrl)
+      .filter((url): url is string => Boolean(url));
+
+    // Build the request body safely and cleanly
+    const body: {
+      title: string;
+      content: string;
+      tags: string[];
+      images: string[];
+      course_id: string | null;
+      org_id: string | null;
+    } = {
       title,
       content,
-      tags: postTags.map(t => t.dir),
+      tags: postTags.map((t) => t.dir),
       images: imageUrls,
       course_id: null,
       org_id: null,
@@ -116,7 +142,12 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         body: JSON.stringify(body),
       });
 
-      const data = await res.json();
+      if (!res.ok) {
+        alert("Failed to create post.");
+        return;
+      }
+
+      const data: { success: boolean; message?: string } = await res.json();
 
       if (data.success) {
         alert("Post created!");
@@ -126,12 +157,14 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         setDisplayName("");
         setImages([]);
         setPostTags([]);
-        window.location.href = "/";
+
+        // If eslint complains about window.location, wrap it:
+        window.location.assign("/");
       } else {
         alert(data.message || "Failed to create post");
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       alert("Error creating post");
     }
   };

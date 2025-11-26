@@ -56,32 +56,37 @@ export default function PostView({ post }: { post: Post }) {
             ))}
           </div>
 
-          {/* Prev/Next Buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-          >
-            ‹
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-          >
-            ›
-          </button>
+          {length !== 1 && (
+            <>
+              {/* Prev/Next Buttons */}
+              <button
+                onClick={prevSlide}
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              >
+                ‹
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              >
+                ›
+              </button>
 
-          {/* Dots */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
-            {images.map((_, idx) => (
-              <div
-                key={idx}
-                className={`w-3 h-3 rounded-full cursor-pointer ${
-                  idx === current ? "bg-yellow-300" : "bg-gray-300"
-                }`}
-                onClick={() => setCurrent(idx)}
-              ></div>
-            ))}
-          </div>
+              {/* Dots */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-2">
+                {images.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={`w-3 h-3 rounded-full cursor-pointer ${
+                      idx === current ? "bg-yellow-300" : "bg-gray-300"
+                    }`}
+                    onClick={() => setCurrent(idx)}
+                  ></div>
+                ))}
+              </div>
+            </>
+          )}
+
         </div>
       )}
 
