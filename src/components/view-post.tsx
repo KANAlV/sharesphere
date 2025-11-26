@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 type Post = {
@@ -15,10 +15,6 @@ type Post = {
 
 export default function PostView({ post }: { post: Post }) { 
 
-  const [likes] = useState(post.likes || 0);
-  const [dislikes] = useState(post.dislikes || 0);
-  const [comment, setComment] = useState("");
-
   const images = post.images || [];
   const [current, setCurrent] = useState(0);
   const length = images.length;
@@ -26,11 +22,70 @@ export default function PostView({ post }: { post: Post }) {
   const nextSlide = () => setCurrent(current === length - 1 ? 0 : current + 1);
   const prevSlide = () => setCurrent(current === 0 ? length - 1 : current - 1);
 
+  const [likes] = useState(post.likes || 0);
+  const [dislikes] = useState(post.dislikes || 0);
+  const [comment, setComment] = useState("");
+  const [prvt, setPrivate] = useState(false);
+  const [disclamer, showDisclamer] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const postComment = async (postId: string, commentText: string, parentCommentId: unknown, anonymous: boolean) => {
+    if (!commentText.trim()) {
+      alert("Comment cannot be empty");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/posts/post_comment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId, comment: commentText, parentCommentId, anonymous }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.message || "Failed to post comment");
+        return;
+      }
+
+      const data = await res.json();
+      if (data.success) {
+        alert("Comment posted!");
+        setComment(""); // Clear the input
+        window.location.reload();
+      } else {
+        alert(data.message || "Failed to post comment");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error posting comment");
+    }
+  };
+
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setComment(e.target.value);
+    autoResize();
+  };
+
+  const autoResize = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // reset height
+      textarea.style.height = textarea.scrollHeight + "px"; // set to content height
+    }
+  };
+
+  // Resize on mount in case there's initial content
+  useEffect(() => autoResize(), []);
+
   return (
     <div id="title" className="bg-gray-500 dark:bg-neutral-700 flex-3 flex flex-col p-4 b-6 rounded-lg w-full lg:max-w-7/9 lg:ml-12 mt-16 lg:mt-22">
       {/* Title */}
-      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5 mb-6">
-        <p className="text-black dark:text-white text-5xl font-bold">{post.title}</p>
+      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 p-5 mb-3">
+        <p className="text-black dark:text-white text-3xl font-bold">{post.title}</p>
         <p className="text-sm text-black dark:text-white">
           {post.username} — {new Date(post.created_at).toLocaleDateString()}
         </p>
@@ -38,7 +93,7 @@ export default function PostView({ post }: { post: Post }) {
 
       {/* Images Carousel */}
       {length > 0 && (
-        <div className="relative w-full overflow-hidden mt-4 rounded-xl">
+        <div className="relative w-full overflow-hidden rounded-xl">
           <div
             className="flex transition-transform duration-500"
             style={{ transform: `translateX(-${current * 100}%)` }}
@@ -91,19 +146,19 @@ export default function PostView({ post }: { post: Post }) {
       )}
 
       {/* Content */}
-      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 px-5 pt-4 pb-4">
+      <div className="border-b-2 border-[#6C6C6C] border-solid flex-2 px-5 pt-2 pb-4">
         <p className="text-lg lg:text-base text-black dark:text-white mb-4">{post.content}</p>
       </div>
 
       {/* Likes / Dislikes */}
-      <div className="flex gap-6 pt-5 text-black dark:text-white items-center">
+      <div className="flex gap-6 ml-4 pt-5 text-black dark:text-white items-center">
         <div className="flex items-center gap-2">
-          <p className="text-3xl">{likes}</p>
+          <p className="text-lg">{likes}</p>
           {/* Thumbs up */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="24"
+            height="24"
             viewBox="0 0 16 16"
             fill="currentColor"
             aria-hidden="true"
@@ -114,12 +169,12 @@ export default function PostView({ post }: { post: Post }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <p className="text-3xl">{dislikes}</p>
+          <p className="text-lg">{dislikes}</p>
           {/* Thumbs down */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="32"
-            height="32"
+            width="24"
+            height="24"
             viewBox="0 0 16 16"
             fill="currentColor"
             aria-hidden="true"
@@ -131,15 +186,61 @@ export default function PostView({ post }: { post: Post }) {
       </div>
 
       {/* Comment input */}
-      <input
-        className="rounded-4xl mt-5 h-15 bg-white dark:bg-[#444] px-10 py-2 text-black dark:text-white w-full"
-        placeholder="Comment..."
-        type="text"
-        name="comment"
-        value={comment}
-        onChange={(e) => setComment(e.target.value)}
-      />
-      <div className=""> 
+      <div className="flex-grow mt-5 border-b-2 border-current dark:text-white w-full">
+        <textarea
+          ref={textareaRef}
+          placeholder="Add a comment..."
+          value={comment}
+          onChange={handleChange}
+          rows={1} // start as a single line
+          className="w-full mx-4 mb-2 resize-none overflow-hidden bg-transparent focus:outline-none"
+        />
+      </div>
+
+      {comment == "" ? "":(
+        <div className="flex mt-4 mx-4 w-full mb-2 justify-between">
+          <div className="flex">
+             Post anonymously
+            <div
+              onClick={() => setPrivate(!prvt)}
+              onMouseEnter={()=>showDisclamer(true)}
+              onMouseLeave={()=>showDisclamer(false)}
+              className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+                ${prvt ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+                  ${prvt ? "translate-x-6" : "translate-x-0"}`}
+              />
+            </div>
+
+            <div
+              id="label"
+              className={`${disclamer ? "block":"hidden"} z-50 bg-gray-300 dark:bg-gray-700 divide-y
+                rounded-lg shadow-sm w-86 text-justify  absolute mt-6 p-4`}
+            >
+              Disclaimer: Posting anyting inappropriate will allow moderators
+              to see your details even if using this feature. It is to allow
+              diciplinary action for students on this site.
+            </div>
+          </div>
+          <div>
+            <button
+              onClick={() => setComment("")}
+              type="button"
+              className="px-4 py-2 mr-4 bg-gray-500/50 rounded-full cursor-pointer"
+            >Cancel</button>
+            <button
+              onClick={() => postComment(post.id, comment, null, prvt)}
+              type="button"
+              className="px-4 py-2 mr-4 bg-blue-500 rounded-full cursor-pointer"
+            >Post</button>
+          </div>
+          
+        </div>
+      )}
+
+      <div className="mt-6"> 
         <p className="text-sm text-black dark:text-white"> Username - 01/01/9999 </p> 
         <div className="px-10"> <p className="text-sm text-black dark:text-white"> Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. Crazy? I Was Crazy Once. They Locked Me In A Room. A Rubber Room. A Rubber Room With Rats. And Rats Make Me Crazy. </p> 
       <div className="flex gap-3 pt-5 text-black dark:text-white"></div>
@@ -148,4 +249,3 @@ export default function PostView({ post }: { post: Post }) {
     </div>
   );
 }
-
