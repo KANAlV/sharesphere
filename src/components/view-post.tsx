@@ -326,13 +326,13 @@ export default function PostView({ post, comments, details, userdata }: { post: 
                 style={{ border: `0px solid ${fontcolor}` }}
                 className={`${
                   comment.has_comments ? "border-l-2!" : "border-l-none"
-                } flex-grow ml-5 p-4 pb-8 pl-8`}
+                } flex-grow ml-5.75 p-4 pb-8 pl-8`}
               >
                 <p style={{ color: fontcolor }} className="text-sm">
                   {comment.anonymous ? "anonymous" : comment.username} •{" "}
                   {new Date(comment.created_at).toLocaleString()}
                 </p>
-                <div className="px-10">
+                <div className="pt-2 pl-4">
                   <p style={{ color: fontcolor }} className="text-sm">
                     {comment.content}
                   </p>
@@ -475,22 +475,32 @@ export default function PostView({ post, comments, details, userdata }: { post: 
                       onClick={() => setReplyTo(replyTo === comment.id ? null : comment.id)}
                       className="cursor-pointer"
                     >
-                      Reply?
+                      Reply
                     </div>
                   </div>
                 </div>
                 {/* expand comments */}
-                <div /* on click here to show code */ style={{background: details[0].theme}} className={`${comment.has_comments? "":"hidden"} ml-2.25 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
+                <div /* on click here to show code */ style={{background: details[0].theme}} className={`${comment.has_comments? "":"hidden"} ml-3 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
                   <div className="flex items-center h-full justify-self-center">
                     +
                   </div>
                 </div>
             </div>
-            <div className="relative ml-13 w-full">
-              <div className="border-l-2 w-full h-10 bg-gray-700 rounded-b-2xl"/>
-
-              {/* nest code here */}
-              
+            <div className="relative ml-13.75 w-full">
+              <NestedReplies
+                parentId={comment.id}
+                fontcolor={fontcolor}
+                userdata={userdata}
+                postId={post.id}
+                setReplyTo={setReplyTo}
+                replyComment={replyComment}
+                setReplyComment={setReplyComment}
+                prvt={prvt}
+                setPrivate={setPrivate}
+                showDisclamer={showDisclamer}
+                disclamer={disclamer}
+                postComment={postComment}
+              />
             </div>
             <div className="h-6"/>
           </div>
@@ -498,6 +508,440 @@ export default function PostView({ post, comments, details, userdata }: { post: 
       ) : (
         <p>There are no comments yet</p>
       )}
+    </div>
+  );
+}
+
+type NestedRepliesProps = {
+  parentId: string;
+  fontcolor: string;
+  userdata: UserData[] | null;
+  postId: string;
+  setReplyTo: (id: string | null) => void;
+  replyComment: string;
+  setReplyComment: (val: string) => void;
+  prvt: boolean;
+  setPrivate: (val: boolean) => void;
+  showDisclamer: (val: boolean) => void;
+  disclamer: boolean;
+  postComment: (
+    postId: string,
+    commentText: string,
+    parentCommentId: unknown,
+    anonymous: boolean
+  ) => Promise<void>;
+};
+
+function NestedReplies(props: NestedRepliesProps) {
+  const {
+    parentId,
+    fontcolor,
+    userdata,
+    postId,
+    setReplyTo,
+    replyComment,
+    setReplyComment,
+    prvt,
+    setPrivate,
+    showDisclamer,
+    disclamer,
+    postComment,
+  } = props;
+
+  const [nestedComments, setNestedComments] = useState<Comments[]>([]);
+  const [likesState, setLikesState] = useState<Record<string, number>>({});
+  const [dislikesState, setDislikesState] = useState<Record<string, number>>({});
+  const [activeReply, setActiveReply] = useState<string | null>(null);
+  const replyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    async function fetchNested() {
+      try {
+        const res = await fetch(`/api/posts/comments?parentId=${parentId}&postId=${postId}`);
+        const json = await res.json();
+        const data: Comments[] = json.comments;
+        setNestedComments(data); // only 2 sub-comments
+
+        // Initialize likes/dislikes state
+        const likesInit: Record<string, number> = {};
+        const dislikesInit: Record<string, number> = {};
+        data.forEach(c => {
+          likesInit[c.id] = c.likes;
+          dislikesInit[c.id] = c.dislikes;
+        });
+        setLikesState(likesInit);
+        setDislikesState(dislikesInit);
+
+      } catch (error) {
+        console.error("Failed to fetch nested comments:", error);
+      }
+    }
+    fetchNested();
+  }, [parentId, postId]);
+
+  if (!nestedComments.length) return null;
+
+  const handleLike = (commentId: string) => {
+    setLikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  };
+
+  const handleDislike = (commentId: string) => {
+    setDislikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  };
+
+  return (
+    <div>
+      <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
+      <div className="h-1"/>
+      {nestedComments.map((comment) => (
+        <div key={comment.id} className="ml-4 w-full pb justify-between relative">
+          {/* Avatar */}
+          <div className="absolute w-10 h-10 self-start overflow-clip rounded-full">
+            <img
+              src={comment.anonymous ? "/anon.png" : comment.profile}
+              alt={comment.username}
+              className="object-cover rounded-lg"
+              sizes="80px"
+            />
+          </div>
+
+          {/* Comment content */}
+          <div className="flex-grow ml-4.75 p-4 pb-8 pl-8 border-l-2">
+            <p style={{ color: fontcolor }} className="text-sm">
+              {comment.anonymous ? "anonymous" : comment.username} •{" "}
+              {new Date(comment.created_at).toLocaleString()}
+            </p>
+            <div className="pt-2 pl-4">
+              <p style={{ color: fontcolor }} className="text-sm">
+                {comment.content}
+              </p>
+            </div>
+
+            {/* Likes / Dislikes / Reply */}
+            <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
+              <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleLike(comment.id)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  style={{ color: fontcolor}}
+                >
+                  <path d="M8.864.046C7.908-.193 7.02.53 6.956 1.466c-.072 1.051-.23 2.016-.428 2.59-.125.36-.479 1.013-1.04 1.639-.557.623-1.282 1.178-2.131 1.41C2.685 7.288 2 7.87 2 8.72v4.001c0 .845.682 1.464 1.448 1.545 1.07.114 1.564.415 2.068.723l.048.03c.272.165.578.348.97.484.397.136.861.217 1.466.217h3.5c.937 0 1.599-.477 1.934-1.064a1.86 1.86 0 0 0 .254-.912c0-.152-.023-.312-.077-.464.201-.263.38-.578.488-.901.11-.33.172-.762.004-1.149.069-.13.12-.269.159-.403.077-.27.113-.568.113-.857 0-.288-.036-.585-.113-.856a2 2 0 0 0-.138-.362 1.9 1.9 0 0 0 .234-1.734c-.206-.592-.682-1.1-1.2-1.272-.847-.282-1.803-.276-2.516-.211a10 10 0 0 0-.443.05 9.4 9.4 0 0 0-.062-4.509A1.38 1.38 0 0 0 9.125.111zM11.5 14.721H8c-.51 0-.863-.069-1.14-.164-.281-.097-.506-.228-.776-.393l-.04-.024c-.555-.339-1.198-.731-2.49-.868-.333-.036-.554-.29-.554-.55V8.72c0-.254.226-.543.62-.65 1.095-.3 1.977-.996 2.614-1.708.635-.71 1.064-1.475 1.238-1.978.243-.7.407-1.768.482-2.85.025-.362.36-.594.667-.518l.262.066c.16.04.258.143.288.255a8.34 8.34 0 0 1-.145 4.725.5.5 0 0 0 .595.644l.003-.001.014-.003.058-.014a9 9 0 0 1 1.036-.157c.663-.06 1.457-.054 2.11.164.175.058.45.3.57.65.107.308.087.67-.266 1.022l-.353.353.353.354c.043.043.105.141.154.315.048.167.075.37.075.581 0 .212-.027.414-.075.582-.05.174-.111.272-.154.315l-.353.353.353.354c.047.047.109.177.005.488a2.2 2.2 0 0 1-.505.805l-.353.353.353.354c.006.005.041.05.041.17a.9.9 0 0 1-.121.416c-.165.288-.503.56-1.066.56z" />
+                </svg>
+                {likesState[comment.id] || 0}
+              </div>
+              <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleDislike(comment.id)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  style={{ color: fontcolor}}
+                >
+                  <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682 1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1" />
+                </svg>
+                {dislikesState[comment.id] || 0}
+              </div>
+              <div className="cursor-pointer" onClick={() => setActiveReply(activeReply === comment.id ? null : comment.id)}>
+                Reply
+              </div>
+            </div>
+
+            {/* Reply input */}
+            {activeReply === comment.id && (
+              <div style={{ color: fontcolor }} className="w-full mt-2">
+                {userdata ? (
+                  <>
+                    <div className="flex mt-2 items-center w-full">
+                      <div className="w-10 h-10 self-start overflow-clip rounded-full">
+                        <img
+                          src={userdata[0].profile}
+                          alt={userdata[0].username}
+                          className="object-cover rounded-lg"
+                          sizes="80px"
+                        />
+                      </div>
+                      <textarea
+                        ref={replyTextareaRef}
+                        placeholder="Add a reply..."
+                        value={replyComment}
+                        onChange={(e) => {
+                          setReplyComment(e.target.value);
+                          const el = replyTextareaRef.current;
+                          if (el) {
+                            el.style.height = "auto";
+                            el.style.height = el.scrollHeight + "px";
+                          }
+                        }}
+                        rows={1}
+                        className="flex-grow mx-4 mb-2 resize-none overflow-hidden border-b-2 border-current bg-transparent focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex w-full justify-between items-center">
+                      <div className="flex">
+                        Post anonymously
+                        <div
+                          onClick={() => setPrivate(!prvt)}
+                          onMouseEnter={() => showDisclamer(true)}
+                          onMouseLeave={() => showDisclamer(false)}
+                          className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+                          ${prvt ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+                        >
+                          <div
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+                            ${prvt ? "translate-x-6" : "translate-x-0"}`}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplyComment("");
+                            setActiveReply(null);
+                            setReplyTo(null);
+                          }}
+                          className="mr-4 px-4 py-2 text-white bg-gray-500 rounded-full cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            postComment(postId, replyComment, comment.id, prvt);
+                            setReplyComment("");
+                            setActiveReply(null);
+                            setReplyTo(null);
+                          }}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-full cursor-pointer"
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ color: fontcolor, opacity: "50%" }}>
+                    Sign-in to post a reply
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function NestedReplies2(props: NestedRepliesProps) {
+  const {
+    parentId,
+    fontcolor,
+    userdata,
+    postId,
+    setReplyTo,
+    replyComment,
+    setReplyComment,
+    prvt,
+    setPrivate,
+    showDisclamer,
+    disclamer,
+    postComment,
+  } = props;
+
+  const [nestedComments, setNestedComments] = useState<Comments[]>([]);
+  const [likesState, setLikesState] = useState<Record<string, number>>({});
+  const [dislikesState, setDislikesState] = useState<Record<string, number>>({});
+  const [activeReply, setActiveReply] = useState<string | null>(null);
+  const replyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    async function fetchNested() {
+      try {
+        const res = await fetch(`/api/posts/comments?parentId=${parentId}&postId=${postId}`);
+        const json = await res.json();
+        const data: Comments[] = json.comments;
+        setNestedComments(data); // only 2 sub-comments
+
+        // Initialize likes/dislikes state
+        const likesInit: Record<string, number> = {};
+        const dislikesInit: Record<string, number> = {};
+        data.forEach(c => {
+          likesInit[c.id] = c.likes;
+          dislikesInit[c.id] = c.dislikes;
+        });
+        setLikesState(likesInit);
+        setDislikesState(dislikesInit);
+
+      } catch (error) {
+        console.error("Failed to fetch nested comments:", error);
+      }
+    }
+    fetchNested();
+  }, [parentId, postId]);
+
+  if (!nestedComments.length) return null;
+
+  const handleLike = (commentId: string) => {
+    setLikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  };
+
+  const handleDislike = (commentId: string) => {
+    setDislikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  };
+
+  return (
+    <div>
+      <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
+      <div className="h-1"/>
+      {nestedComments.map((comment) => (
+        <div key={comment.id} className="ml-4 w-full pb justify-between relative">
+          {/* Avatar */}
+          <div className="absolute w-10 h-10 self-start overflow-clip rounded-full">
+            <img
+              src={comment.anonymous ? "/anon.png" : comment.profile}
+              alt={comment.username}
+              className="object-cover rounded-lg"
+              sizes="80px"
+            />
+          </div>
+
+          {/* Comment content */}
+          <div className="flex-grow ml-4.75 p-4 pb-8 pl-8 border-l-2">
+            <p style={{ color: fontcolor }} className="text-sm">
+              {comment.anonymous ? "anonymous" : comment.username} •{" "}
+              {new Date(comment.created_at).toLocaleString()}
+            </p>
+            <div className="pt-2 pl-4">
+              <p style={{ color: fontcolor }} className="text-sm">
+                {comment.content}
+              </p>
+            </div>
+
+            {/* Likes / Dislikes / Reply */}
+            <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
+              <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleLike(comment.id)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  style={{ color: fontcolor}}
+                >
+                  <path d="M8.864.046C7.908-.193 7.02.53 6.956 1.466c-.072 1.051-.23 2.016-.428 2.59-.125.36-.479 1.013-1.04 1.639-.557.623-1.282 1.178-2.131 1.41C2.685 7.288 2 7.87 2 8.72v4.001c0 .845.682 1.464 1.448 1.545 1.07.114 1.564.415 2.068.723l.048.03c.272.165.578.348.97.484.397.136.861.217 1.466.217h3.5c.937 0 1.599-.477 1.934-1.064a1.86 1.86 0 0 0 .254-.912c0-.152-.023-.312-.077-.464.201-.263.38-.578.488-.901.11-.33.172-.762.004-1.149.069-.13.12-.269.159-.403.077-.27.113-.568.113-.857 0-.288-.036-.585-.113-.856a2 2 0 0 0-.138-.362 1.9 1.9 0 0 0 .234-1.734c-.206-.592-.682-1.1-1.2-1.272-.847-.282-1.803-.276-2.516-.211a10 10 0 0 0-.443.05 9.4 9.4 0 0 0-.062-4.509A1.38 1.38 0 0 0 9.125.111zM11.5 14.721H8c-.51 0-.863-.069-1.14-.164-.281-.097-.506-.228-.776-.393l-.04-.024c-.555-.339-1.198-.731-2.49-.868-.333-.036-.554-.29-.554-.55V8.72c0-.254.226-.543.62-.65 1.095-.3 1.977-.996 2.614-1.708.635-.71 1.064-1.475 1.238-1.978.243-.7.407-1.768.482-2.85.025-.362.36-.594.667-.518l.262.066c.16.04.258.143.288.255a8.34 8.34 0 0 1-.145 4.725.5.5 0 0 0 .595.644l.003-.001.014-.003.058-.014a9 9 0 0 1 1.036-.157c.663-.06 1.457-.054 2.11.164.175.058.45.3.57.65.107.308.087.67-.266 1.022l-.353.353.353.354c.043.043.105.141.154.315.048.167.075.37.075.581 0 .212-.027.414-.075.582-.05.174-.111.272-.154.315l-.353.353.353.354c.047.047.109.177.005.488a2.2 2.2 0 0 1-.505.805l-.353.353.353.354c.006.005.041.05.041.17a.9.9 0 0 1-.121.416c-.165.288-.503.56-1.066.56z" />
+                </svg>
+                {likesState[comment.id] || 0}
+              </div>
+              <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleDislike(comment.id)}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="22"
+                  height="22"
+                  viewBox="0 0 16 16"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  style={{ color: fontcolor}}
+                >
+                  <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682 1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1" />
+                </svg>
+                {dislikesState[comment.id] || 0}
+              </div>
+              <div className="cursor-pointer" onClick={() => setActiveReply(activeReply === comment.id ? null : comment.id)}>
+                Reply
+              </div>
+            </div>
+
+            {/* Reply input */}
+            {activeReply === comment.id && (
+              <div style={{ color: fontcolor }} className="w-full mt-2">
+                {userdata ? (
+                  <>
+                    <div className="flex mt-2 items-center w-full">
+                      <div className="w-10 h-10 self-start overflow-clip rounded-full">
+                        <img
+                          src={userdata[0].profile}
+                          alt={userdata[0].username}
+                          className="object-cover rounded-lg"
+                          sizes="80px"
+                        />
+                      </div>
+                      <textarea
+                        ref={replyTextareaRef}
+                        placeholder="Add a reply..."
+                        value={replyComment}
+                        onChange={(e) => {
+                          setReplyComment(e.target.value);
+                          const el = replyTextareaRef.current;
+                          if (el) {
+                            el.style.height = "auto";
+                            el.style.height = el.scrollHeight + "px";
+                          }
+                        }}
+                        rows={1}
+                        className="flex-grow mx-4 mb-2 resize-none overflow-hidden border-b-2 border-current bg-transparent focus:outline-none"
+                      />
+                    </div>
+                    <div className="flex w-full justify-between items-center">
+                      <div className="flex">
+                        Post anonymously
+                        <div
+                          onClick={() => setPrivate(!prvt)}
+                          onMouseEnter={() => showDisclamer(true)}
+                          onMouseLeave={() => showDisclamer(false)}
+                          className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+                          ${prvt ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+                        >
+                          <div
+                            className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+                            ${prvt ? "translate-x-6" : "translate-x-0"}`}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReplyComment("");
+                            setActiveReply(null);
+                            setReplyTo(null);
+                          }}
+                          className="mr-4 px-4 py-2 text-white bg-gray-500 rounded-full cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            postComment(postId, replyComment, comment.id, prvt);
+                            setReplyComment("");
+                            setActiveReply(null);
+                            setReplyTo(null);
+                          }}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-full cursor-pointer"
+                        >
+                          Post
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ color: fontcolor, opacity: "50%" }}>
+                    Sign-in to post a reply
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
