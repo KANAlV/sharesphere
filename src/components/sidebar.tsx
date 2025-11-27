@@ -74,6 +74,13 @@ export default function Sidebar({
   const [isClient, setIsClient] = useState(false);
   const [sidebarMode, setSidebarMode] = useState(true);
 
+  // --- Path logics ---
+
+  const pathname = usePathname();
+  const inOrgs = pathname.startsWith("/o/")
+  const redirectTo = (redir?: string) => encodeURIComponent((redir ?? "").replace(/ /g, '_'));
+
+
   // Mark when running on client (so window/document are safe)
   useEffect(() => {
     setIsClient(true);
@@ -113,8 +120,16 @@ export default function Sidebar({
     };
   }, [isClient]);
 
+  useEffect(() => {
+    if(/^\/[co]\/[^/]+\/posts/.test(pathname)) {
+      if (isSticky) return;
+      setIsSticky(true)
+    };
+  })
+
   // Sticky behavior
   useEffect(() => {
+    if(/^\/[co]\/[^/]+\/posts/.test(pathname)) return;
     if (!isClient) return;
 
     const handleScroll = () => {
@@ -133,13 +148,7 @@ export default function Sidebar({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isClient]);
 
-
-  // --- Path logics ---
-
-  const pathname = usePathname();
-  const inOrgs = pathname.startsWith("/o/")
-  const redirectTo = (redir?: string) => encodeURIComponent((redir ?? "").replace(/ /g, '_'));
-
+  
   // --- Font color logic ---
   const textColor = (theme: string) => {
     let fontcolor = "black";
@@ -180,7 +189,7 @@ export default function Sidebar({
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
           ${sidebarMode ?
             `${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}`:
-            `${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-22"}`
+            `${isSticky ? (/^\/[co]\/[^/]+\/posts/.test(pathname)? "lg:fixed lg:top-32":"lg:fixed lg:top-20") : "lg:absolute lg:top-22"}`
           }
           fixed top-18 h-screen lg:max-h-8/9 w-screen bg-[#111]
           lg:block lg:max-w-1/6

@@ -132,6 +132,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
       post_id = ${post_id} AND
       parent_comment_id IS NULL
     ORDER BY c.created_at DESC
+    LIMIT 20
   `) as {
       id: string,
       anonymous: boolean,

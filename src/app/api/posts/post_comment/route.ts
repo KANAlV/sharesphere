@@ -33,9 +33,17 @@ export async function POST(req: Request) {
       RETURNING id;
     `;
 
+    const update = await sql`
+      UPDATE comments
+      SET has_comments = true
+      WHERE id = ${parentCommentId};
+    `;
+
     const commentId = result[0]?.id;
     if (!commentId) throw new Error("Failed to create comment");
-
+    if (!parentCommentId == null) {
+      if(!update) throw new Error("Failed to update parent comment");
+    }
     return NextResponse.json({ success: true, id: commentId });
   } catch (error: unknown) {
     console.error("Failed to post comment:", error);
