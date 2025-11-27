@@ -28,8 +28,8 @@ export async function POST(req: Request) {
 
     // Insert comment
     const result = await sql`
-      INSERT INTO comments (post_id, author_id, parent_comment_id, content)
-      VALUES (${postId}, ${userId}, ${parentCommentId ?? null}, ${comment})
+      INSERT INTO comments (post_id, author_id, parent_comment_id, content, anonymous)
+      VALUES (${postId}, ${userId}, ${parentCommentId ?? null}, ${comment}, ${anonymous})
       RETURNING id;
     `;
 
