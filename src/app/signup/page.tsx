@@ -16,6 +16,13 @@ export default function SignupPage() {
   const [resending, setResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
+  // 🔵 FORMAT SECONDS TO MM:SS
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
   // ⏱️ Cooldown timer for resending OTP
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -24,8 +31,17 @@ export default function SignupPage() {
   }, [cooldown]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const { name, value } = e.target;
+
+  if (name === "otp") {
+    const cleaned = value.replace(/[^a-zA-Z0-9]/g, "");
+    setForm({ ...form, otp: cleaned });
+    return;
+  }
+
+  setForm({ ...form, [name]: value });
+};
+
 
   // 📩 Handle Signup / Verify OTP
   const handleSubmit = async (e: React.FormEvent) => {
@@ -79,7 +95,7 @@ export default function SignupPage() {
       const data = await res.json();
       if (res.ok) {
         setMessage("🔁 New OTP sent! Please check your email.");
-        setCooldown(30);
+        setCooldown(180); // 3 minutes
       } else {
         setMessage(data.error || "❌ Failed to resend OTP.");
       }
@@ -92,6 +108,7 @@ export default function SignupPage() {
 
   return (
     <div className="bg-gray-100 text-black min-h-screen flex flex-col md:flex-row">
+
       {/* Left Panel */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
         <Image src="/sharesphere_logo.png" alt="Logo" width={300} height={300} />
@@ -189,7 +206,7 @@ export default function SignupPage() {
                 {resending
                   ? "Resending..."
                   : cooldown > 0
-                  ? `Resend OTP (${cooldown}s)`
+                  ? `Resend OTP (${formatTime(cooldown)})`   // 🔵 UPDATED
                   : "Resend OTP"}
               </button>
             </>

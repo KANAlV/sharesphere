@@ -33,18 +33,51 @@ async function sendOTPEmail(email: string, otp: string) {
   });
 
   await transporter.sendMail({
-    from: `"ShareSphere Security" <${user}>`,
-    to: email,
-    subject: "Your Login OTP Code",
-    html: `
-      <h2>Login Verification</h2>
-      <p>Your OTP code is:</p>
-      <div style="font-size:24px;font-weight:bold;letter-spacing:3px;">
-        ${otp}
+  from: `"ShareSphere Security Team" <${user}>`,
+  to: email,
+  subject: "🔐 Your ShareSphere Login Verification Code",
+  html: `
+    <div style="font-family:Arial, sans-serif; background:#f4f4f7; padding:20px;">
+      <div style="max-width:480px; margin:auto; background:white; padding:25px; border-radius:8px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+
+        <h2 style="color:#1E1E3F; text-align:center; margin-bottom:10px;">
+          ShareSphere Login Verification
+        </h2>
+
+        <p style="font-size:15px; color:#444;">
+          Dear User,  
+          <br><br>
+          We received a request to log in to your ShareSphere account.  
+          Please use the One-Time Password (OTP) below to verify your identity:
+        </p>
+
+        <div style="margin:25px 0; text-align:center;">
+          <span style="
+            font-size:32px; 
+            font-weight:bold; 
+            letter-spacing:10px; 
+            color:#1E1E3F;
+            display:inline-block;
+          ">
+            ${otp}
+          </span>
+        </div>
+
+        <p style="font-size:14px; color:#444;">
+          This verification code is valid for <strong>5 minutes</strong>.  
+          Do not share this code with anyone. ShareSphere staff will never ask for your OTP.
+        </p>
+
+        <hr style="border:none; border-top:1px solid #e5e5e5; margin:25px 0;" />
+
+        <p style="font-size:12px; color:#777; text-align:center;">
+          If you did not attempt to log in, you can safely ignore this message.
+        </p>
+
       </div>
-      <p>This OTP expires in 5 minutes.</p>
-    `,
-  });
+    </div>
+  `,
+});
 }
 
 export async function POST(req: Request) {
