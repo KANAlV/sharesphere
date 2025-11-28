@@ -13,6 +13,11 @@ type Post = {
   images: string[];
 };
 
+type userReacted = {
+  liked: string,
+  disliked: string
+}
+
 type Details = {
   description: string;
   theme: string;
@@ -48,6 +53,7 @@ type Comments = {
 
 let theme:string;
 let userid:string;
+
 
 export default function PostView({ post, comments, details, userdata }: { post: Post, comments:Comments[], details:Details[], userdata: UserData[] | null}) { 
   theme = details[0].theme;
@@ -443,7 +449,8 @@ export default function PostView({ post, comments, details, userdata }: { post: 
                   }))
                 }
 
-                style={{background: details[0].theme}} className={`${comment.has_comments? "":"hidden"} ml-3 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
+                style={{color: fontcolor, background: theme,  border: `2px solid ${fontcolor}`}}
+                className={`${comment.has_comments? "":"hidden"} ml-3 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
                 <div className="flex items-center h-full justify-self-center">
                   {openReplies[comment.id] ? "—" : "+"}
                 </div>
@@ -619,6 +626,10 @@ function NestedReplies(props: NestedRepliesProps) {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
 
+  const [userReactState, setUserReactState] = useState<{
+    [commentId: string]: { liked: boolean; disliked: boolean }
+  }>({});
+
   async function fetchNested() {
     try {
       const res = await fetch(
@@ -656,6 +667,8 @@ function NestedReplies(props: NestedRepliesProps) {
     }
   }
 
+  
+
   useEffect(() => {
     fetchNested();
   }, [parentId, postId]);
@@ -667,20 +680,57 @@ function NestedReplies(props: NestedRepliesProps) {
 
   if (!nestedComments.length) return null;
 
-  const handleLike = (commentId: string) => {
-    setLikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  const handleLike = async (commentId: string) => {
+    const res = await fetch("/api/comments/react", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commentId, action: "like" })
+    });
+
+    const json = await res.json();
+    if (!res.ok) return;
+
+    setLikesState(prev => ({ ...prev, [commentId]: json.likes }));
+    setDislikesState(prev => ({ ...prev, [commentId]: json.dislikes }));
+
+    setUserReactState(prev => ({
+      ...prev,
+      [commentId]: {
+        liked: json.userReacted.liked,
+        disliked: json.userReacted.disliked
+      }
+    }));
   };
 
-  const handleDislike = (commentId: string) => {
-    setDislikesState(prev => ({ ...prev, [commentId]: (prev[commentId] || 0) + 1 }));
+  const handleDislike = async (commentId: string) => {
+    const res = await fetch("/api/comments/react", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commentId, action: "dislike" })
+    });
+
+    const json = await res.json();
+    if (!res.ok) return;
+
+    setLikesState(prev => ({ ...prev, [commentId]: json.likes }));
+    setDislikesState(prev => ({ ...prev, [commentId]: json.dislikes }));
+
+    setUserReactState(prev => ({
+      ...prev,
+      [commentId]: {
+        liked: json.userReacted.liked,
+        disliked: json.userReacted.disliked
+      }
+    }));
   };
+
 
   return (
     <div>
-      <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
+      <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
       <div className="h-1"/>
       {nestedComments.map((comment, idx) => (
-        <div key={`lvl2-${parentId}-${comment.id}-${idx}`}className="ml-4 w-full justify-between relative select-none">
+        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="ml-4 w-full justify-between relative select-none">
           {/* Avatar */}
           <div className="absolute bg-black w-10 h-10 self-start overflow-clip rounded-full">
             <img
@@ -692,7 +742,7 @@ function NestedReplies(props: NestedRepliesProps) {
           </div>
 
           {/* Comment content */}
-          <div className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
+          <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
             <p 
               onClick={() => gotoUser(comment.username, comment.anonymous)}
               style={{ color: fontcolor }}
@@ -710,7 +760,7 @@ function NestedReplies(props: NestedRepliesProps) {
             <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
               <div className="flex items-center gap-1 cursor-pointer"
                 onClick={() => handleLike(comment.id)}>
-                {userid && comment.lnd?.likes?.[userid] ? (
+                {userReactState[comment.id]?.liked ? (
                   <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
                       <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
                           <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill={fontcolor}>
@@ -736,17 +786,29 @@ function NestedReplies(props: NestedRepliesProps) {
                 {likesState[comment.id] || 0}
               </div>
               <div className="flex items-center gap-1 cursor-pointer" onClick={() => handleDislike(comment.id)}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="22"
-                  height="22"
-                  viewBox="0 0 16 16"
-                  fill={fontcolor}
-                  aria-hidden="true"
-                  style={{ color: fontcolor}}
-                >
-                  <path d="M8.864 15.674c-.956.24-1.843-.484-1.908-1.42-.072-1.05-.23-2.015-.428-2.59-.125-.36-.479-1.012-1.04-1.638-.557-.624-1.282-1.179-2.131-1.41C2.685 8.432 2 7.85 2 7V3c0-.845.682-1.464 1.448-1.546 1.07-.113 1.564-.415 2.068-.723l.048-.029c.272-.166.578-.349.97-.484C6.931.08 7.395 0 8 0h3.5c.937 0 1.599.478 1.934 1.064.164.287.254.607.254.913 0 .152-.023.312-.077.464.201.262.38.577.488.9.11.33.172.762.004 1.15.069.13.12.268.159.403.077.27.113.567.113.856s-.036.586-.113.856c-.035.12-.08.244-.138.363.394.571.418 1.2.234 1.733-.206.592-.682 1.1-1.2 1.272-.847.283-1.803.276-2.516.211a10 10 0 0 1-.443-.05 9.36 9.36 0 0 1-.062 4.51c-.138.508-.55.848-1.012.964zM11.5 1H8c-.51 0-.863.068-1.14.163-.281.097-.506.229-.776.393l-.04.025c-.555.338-1.198.73-2.49.868-.333.035-.554.29-.554.55V7c0 .255.226.543.62.65 1.095.3 1.977.997 2.614 1.709.635.71 1.064 1.475 1.238 1.977.243.7.407 1.768.482 2.85.025.362.36.595.667.518l.262-.065c.16-.04.258-.144.288-.255a8.34 8.34 0 0 0-.145-4.726.5.5 0 0 1 .595-.643h.003l.014.004.058.013a9 9 0 0 0 1.036.157c.663.06 1.457.054 2.11-.163.175-.059.45-.301.57-.651.107-.308.087-.67-.266-1.021L12.793 7l.353-.354c.043-.042.105-.14.154-.315.048-.167.075-.37.075-.581s-.027-.414-.075-.581c-.05-.174-.111-.273-.154-.315l-.353-.354.353-.354c.047-.047.109-.176.005-.488a2.2 2.2 0 0 0-.505-.804l-.353-.354.353-.354c.006-.005.041-.05.041-.17a.9.9 0 0 0-.121-.415C12.4 1.272 12.063 1 11.5 1" />
-                </svg>
+                {userReactState[comment.id]?.disliked ? (
+                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill={fontcolor}>
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                ) : (
+                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
+                          </path>
+                        </g>
+                      </g>
+                    </g>
+                  </svg>
+                )}
                 {dislikesState[comment.id] || 0}
               </div>
               <div className="cursor-pointer" onClick={() => setActiveReply(activeReply === comment.id ? null : comment.id)}>
@@ -843,7 +905,7 @@ function NestedReplies(props: NestedRepliesProps) {
                 [comment.id]: !prev[comment.id]
               }))
             }
-            style={{background: theme}} className={`${comment.has_comments? "":"hidden"} ml-2 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
+            style={{color: fontcolor, background: theme,  border: `2px solid ${fontcolor}`}} className={`${comment.has_comments? "":"hidden"} ml-2 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
             <div className="flex items-center h-full justify-self-center">
               {openReplies1[comment.id] ? "—" : "+"}
             </div>
@@ -865,7 +927,7 @@ function NestedReplies(props: NestedRepliesProps) {
                 postComment={postComment}
               />
             </div>
-            <div className=" border-l-2 h-4" />
+            <div style={{ borderLeft: `2px solid ${fontcolor}` }} className=" border-l-2 h-4" />
           </div>
         </div>
       ))}
@@ -873,18 +935,19 @@ function NestedReplies(props: NestedRepliesProps) {
         {hasMore? (
           <div
             onClick={() => loadMore()}
+            style={{color: fontcolor, border: `2px solid ${fontcolor}`}}
             className="absolute ml-12 mt-1.5 justify-self-start border-2 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-500/50 select-none"
           >
             load more comments
           </div>
         ):(
           <div
-            className="absolute ml-12 mt-1.5 justify-self-start border-2 border-gray-500 px-3 py-1 rounded-full select-none"
+            className="absolute ml-12 mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
           >
             no more comments
           </div>
         )}
-        <div className="ml-8.75 border-l-2 h-6 rounded-b-2xl" />
+        <div style={{borderLeft: `2px solid ${fontcolor}`}} className="ml-8.75 border-l-2 h-6 rounded-b-2xl" />
       </div>
     </div>
   );
@@ -978,9 +1041,9 @@ function NestedReplies2(props: NestedRepliesProps) {
 
   return (
     <div>
-      <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
+      <div style={{borderLeft: `2px solid ${fontcolor}`}} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
       <div className="h-1"/>
-      <div className="border-l-2">
+      <div style={{borderLeft: `2px solid ${fontcolor}`}} className="border-l-2">
           {nestedComments.map((comment, idx) => (
             <div key={`lvl2-${parentId}-${comment.id}-${idx}`}className="ml-4 w-full justify-between relative select-none">
               {/* Avatar */}
@@ -994,7 +1057,7 @@ function NestedReplies2(props: NestedRepliesProps) {
               </div>
 
               {/* Comment content */}
-              <div className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
+              <div style={{borderLeft: `2px solid ${fontcolor}`}} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
                 <p 
                   onClick={() => gotoUser(comment.username, comment.anonymous)}
                   style={{ color: fontcolor }}
@@ -1155,13 +1218,13 @@ function NestedReplies2(props: NestedRepliesProps) {
                 onClick={() =>
                   window.location.href = `${pathname}/comment/${comment.id}`
                 }
-                style={{background: theme}} className={`${comment.has_comments? "":"hidden"} ml-2 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
+                style={{color: fontcolor, background: theme,  border: `2px solid ${fontcolor}`}} className={`${comment.has_comments? "":"hidden"} ml-2 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
                 <div className="flex items-center h-full justify-self-center">
                   +
                 </div>
               </div>
               <div className="ml-4.75">
-                <div className=" border-l-2 h-4" />
+                <div style={{borderLeft: `2px solid ${fontcolor}`}} className=" border-l-2 h-4" />
               </div>
             </div>
           ))}
@@ -1175,12 +1238,12 @@ function NestedReplies2(props: NestedRepliesProps) {
             </div>
           ):(
             <div
-              className="absolute ml-12 mt-1.5 justify-self-start border-2 border-gray-500 px-3 py-1 rounded-full select-none"
+              className="absolute ml-12 mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
             >
               no more comments
             </div>
           )}
-          <div className="ml-8.75 border-l-2 h-6 rounded-b-2xl" />
+          <div style={{borderLeft: `2px solid ${fontcolor}`}} className="ml-8.75 border-l-2 h-6 rounded-b-2xl" />
         </div>
       </div>
     </div>
