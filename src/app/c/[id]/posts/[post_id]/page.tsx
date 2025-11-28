@@ -44,6 +44,10 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     userdata = null;
   }
   
+  type LikesDislikesDetails = {
+    likes: Record<string, { timestamp: string }>;
+    dislikes: Record<string, { timestamp: string }>;
+  };
 
   const posts = (await sql`
     SELECT 
@@ -53,7 +57,8 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
       p.created_at, 
       u.username, 
       p.likes, 
-      p.dislikes, 
+      p.dislikes,
+      p.lnd,
       p.images
     FROM posts p
     JOIN users u ON p.author_id = u.id
@@ -66,6 +71,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     username: string;
     likes: number;
     dislikes: number;
+    lnd: LikesDislikesDetails;
     images: string[]; // just an array of URLs
   }[];
 
@@ -111,11 +117,6 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     description: string;
     num: string;
   }[];
-
-  type LikesDislikesDetails = {
-    likes: Record<string, { timestamp: string }>;
-    dislikes: Record<string, { timestamp: string }>;
-  };
 
   return (
     <div style={{ backgroundColor: details[0].theme}}>
