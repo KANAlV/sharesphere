@@ -112,6 +112,11 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     num: string;
   }[];
 
+  type LikesDislikesDetails = {
+    likes: Record<string, { timestamp: string }>;
+    dislikes: Record<string, { timestamp: string }>;
+  };
+
   const comments = (await sql`
     SELECT
       c.id::TEXT,
@@ -143,6 +148,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
       has_comments:boolean,
       likes: number,
       dislikes: number,
+      lnd: LikesDislikesDetails,
       user_deleted: boolean,
       mod_deleted: boolean
   }[];

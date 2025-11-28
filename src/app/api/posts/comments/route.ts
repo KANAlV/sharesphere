@@ -27,6 +27,7 @@ export async function GET(req: Request) {
         c.has_comments,
         c.likes,
         c.dislikes,
+        c.lnd,
         c.user_deleted,
         c.mod_deleted
       FROM comments c
