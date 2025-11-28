@@ -33,8 +33,8 @@ export async function GET(req: Request) {
       LEFT JOIN users u ON u.id = ud.id
       WHERE
         c.post_id = ${postId}
-        AND c.parent_comment_id = ${parentId}
-      ORDER BY c.created_at ASC
+        AND c.parent_comment_id IS NULL
+      ORDER BY c.created_at DESC
       OFFSET ${offset}
       LIMIT 11
     `;

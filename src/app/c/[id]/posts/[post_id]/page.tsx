@@ -117,45 +117,9 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     dislikes: Record<string, { timestamp: string }>;
   };
 
-  const comments = (await sql`
-    SELECT
-      c.id::TEXT,
-      c.anonymous,
-      ud.profile,
-      u.username,
-      c.created_at::TEXT,
-      c.content,
-      c.has_comments,
-      c.likes,
-      c.dislikes,
-      c.user_deleted,
-      c.mod_deleted
-    FROM comments c
-    LEFT JOIN userdata ud ON ud.id = c.author_id
-    LEFT JOIN users u ON u.id = ud.id
-    WHERE
-      post_id = ${post_id} AND
-      parent_comment_id IS NULL
-    ORDER BY c.created_at DESC
-    LIMIT 20
-  `) as {
-      id: string,
-      anonymous: boolean,
-      profile: string,
-      username:string,
-      created_at: string,
-      content: string,
-      has_comments:boolean,
-      likes: number,
-      dislikes: number,
-      lnd: LikesDislikesDetails,
-      user_deleted: boolean,
-      mod_deleted: boolean
-  }[];
-
   return (
     <div style={{ backgroundColor: details[0].theme}}>
-      <PostView post={post} comments={comments} details={details} userdata={userdata} />
+      <PostView post={post} details={details} userdata={userdata} />
       <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
     </div>
   );
