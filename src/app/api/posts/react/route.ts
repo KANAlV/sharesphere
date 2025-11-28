@@ -34,7 +34,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
 
-  let lnd = result[0].lnd || { likes: {}, dislikes: {} };
+  const lnd = result[0].lnd || { likes: {}, dislikes: {} };
 
   // --- Ensure structure exists ---
   if (!lnd.likes) lnd.likes = {};
