@@ -234,7 +234,7 @@ export default function Sidebar({
           <div className="block max-h-120 overflow-y-clip">
             {tags.length > 0 ? (
               tags.map((post, idx) => (
-                <a href={pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`} key={idx} className="block w-min">
+                <a href={pathname.startsWith("/c")? (pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`):(pathname !== `/o/${id}` ? `/o/${id}`:`/o/${id}/tags/${redirectTo(post.tag)}`)} key={idx} className="block w-min">
                   <div className={`flex px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
                   style={{ backgroundColor: post.color, color: textColor(post.color) }}
                   >
