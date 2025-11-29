@@ -152,7 +152,7 @@ export async function POST(req: Request) {
         udata: "0",
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "1h" }
+      { expiresIn: "3h" }
     );
 
     await sql`SELECT ensure_user_exists(${user.id});`;

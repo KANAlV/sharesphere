@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import UserDropdown from "./UserDropdownWrapper";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 type User = {
   id: string;
@@ -13,9 +14,23 @@ type User = {
 export default function Topbar({ user }: { user: User | null }) {
     const pathname = usePathname();
     const isHidden = pathname.startsWith("/login") || pathname.startsWith("/signup") || pathname.startsWith("/forgot-password");
+    const [cWait, setCWait] = useState(false);
+
+    const waitRedir = (loc: string) => {
+      setCWait(true);
+      document.body.style.cursor = "wait";
+      window.location.href = loc;
+    };
+
     return (
-        <nav className={`bg-[#1F1E3D] fixed w-full z-20 top-0 start-0 dark:border-gray-600`}>
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+        <>
+        {/* Loading overlay */}
+        {cWait && (
+          <div className="fixed top-0 flex z-50 w-screen h-screen justify-center items-center" />
+        )}
+        
+        <nav className={`bg-[#1F1E3D] fixed w-full z-20 top-0 start-0 border-b-2 border-gray-500`}>
+          <div className="w-screen px-4 lg:px-20 flex flex-wrap items-center justify-between p-4">
           <Link href="/" className="flex items-center space-x-3 rtl:space-x-reverse">
               <Image width={32} height={32} src="/sharesphere_logo.png" className="h-8" alt="Flowbite Logo" />
               <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">SHARESPHERE</span>
@@ -24,10 +39,11 @@ export default function Topbar({ user }: { user: User | null }) {
           <div className={`${isHidden ? "hidden":"flex"} md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse`}>
               {user ? (
                 <UserDropdown user={user} />
-              ) : (
+              ) : (<>
+                <UserDropdown user={null} />
                 <div className="inline-flex">
                   <div className="hidden md:block">
-                    <Link href="/login">
+                    <div onClick={() => waitRedir("/login")}>
                       <button
                         type="button"
                         className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 
@@ -37,15 +53,13 @@ export default function Topbar({ user }: { user: User | null }) {
                       >
                         Login
                       </button>
-                    </Link>
-                  </div>
-                  <div className="block md:hidden">
-                    <UserDropdown user={user} />
+                    </div>
                   </div>
                 </div>
-              )}
+              </>)}
           </div>
           </div>
         </nav>
+      </>
     );
 }

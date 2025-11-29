@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
 import { sql } from "@/lib/db";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import Navigation from "@/components/settings-navigation";
 import Accounts from "@/components/settings/account";
+import TokenChecker from "@/components/TokenCheker";
+import { redirect } from "next/navigation";
 
 export default async function Account(){
   const cookieStore = await cookies();
@@ -18,14 +19,12 @@ export default async function Account(){
         username: string;
         email: string;
         udata: string;
-        gender: string;
       };
     } catch {
       user = null;
       redirect("/");
     }
   } else {
-    user = null;
     redirect("/");
   }
 
@@ -43,9 +42,12 @@ export default async function Account(){
     gender: string;
   }[]
   return(
+    <>
+      <TokenChecker />
       <div className="m-auto mt-20 lg:px-20 w-19/20 lg:w-3/4 min-h-full">
           <Navigation />
           <Accounts account={account}/>
       </div>
+    </>
   )
 }
