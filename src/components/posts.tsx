@@ -8,6 +8,11 @@ type Course = {
   description: string;
 };
 
+type LikesDislikesDetails = {
+    likes: Record<string, { timestamp: string }>;
+    dislikes: Record<string, { timestamp: string }>;
+  };
+
 type Post = {
   id: string;
   title: string;
@@ -15,8 +20,9 @@ type Post = {
   created_at: string;
   likes: number;
   dislikes: number;
-  category: string,
-  organization: string,
+  category: string;
+  lnd: LikesDislikesDetails;
+  organization: string;
   username?: string;
 };
 
@@ -142,7 +148,7 @@ export default function Posts({
                   >
                     <path d="M14 9V5a2 2 0 0 0-2-2l-3 7v8h8.5A2.5 2.5 0 0 0 20 17.5V12a2 2 0 0 0-2-2h-2zM7 22V9H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3z" />
                   </svg>
-                  {post.likes}
+                  {post.lnd.likes ? Object.keys(post.lnd.likes).length : 0}
                 </div>
 
                 <div className="flex items-center gap-1 ml-4">
@@ -159,7 +165,7 @@ export default function Posts({
                   >
                     <path d="M10 15v4a2 2 0 0 0 2 2l3-7V6H6.5A2.5 2.5 0 0 0 4 8.5V14a2 2 0 0 0 2 2h2zM17 2v13h3a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1h-3z" />
                   </svg>
-                  {post.dislikes}
+                  {post.lnd.likes ? Object.keys(post.lnd.dislikes).length : 0}
                 </div>
               </div>
             </Link>

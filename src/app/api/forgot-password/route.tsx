@@ -3,10 +3,10 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcrypt";
 import { neon } from "@neondatabase/serverless";
 
-// Temporary in-memory OTP store
+
 const otpStore: Record<string, { otp: string; expires: number; lastSent?: number }> = {};
 
-// Generate random 6-character OTP
+
 function generateOTP(): string {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
@@ -17,17 +17,17 @@ export async function POST(req: Request) {
     const { email, otp, newPassword, action } = await req.json();
     const sql = neon(process.env.DATABASE_URL!);
 
-    // --- STEP 1: SEND or RESEND OTP ---
+    
     if (email && !otp && !newPassword) {
-      // Cooldown: 30 seconds before resend
+     
       const lastSent = otpStore[email]?.lastSent || 0;
-      if (Date.now() - lastSent < 30 * 1000) {
-        const secondsLeft = Math.ceil((30 * 1000 - (Date.now() - lastSent)) / 1000);
-        return NextResponse.json(
-          { error: `Please wait ${secondsLeft}s before requesting again.` },
-          { status: 429 }
-        );
-      }
+if (Date.now() - lastSent < 3 * 60 * 1000) {
+  const secondsLeft = Math.ceil((3 * 60 * 1000 - (Date.now() - lastSent)) / 1000);
+  return NextResponse.json(
+    { error: `Please wait ${secondsLeft}s before requesting again.` },
+    { status: 429 }
+  );
+}
 
       // Check if email exists
       const existingUser = await sql`SELECT email FROM users WHERE email = ${email}`;
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "OTP sent successfully" });
     }
 
-    // --- STEP 2: VERIFY OTP ---
+    
     if (email && otp && !newPassword) {
       const record = otpStore[email];
       if (!record) return NextResponse.json({ error: "No OTP found for this email" }, { status: 400 });
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "OTP verified" });
     }
 
-    // --- STEP 3: RESET PASSWORD ---
+    
     if (email && otp && newPassword) {
       const record = otpStore[email];
       if (!record)

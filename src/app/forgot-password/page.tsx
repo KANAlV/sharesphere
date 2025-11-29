@@ -10,11 +10,19 @@ export default function ForgotPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [step, setStep] = useState<"email" | "otp" | "reset">("email");
   const [isResending, setIsResending] = useState(false);
 
-  // 🕒 Cooldown countdown
+ 
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  // Cooldown countdown
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setTimeout(() => setCooldown((prev) => prev - 1), 1000);
@@ -22,10 +30,10 @@ export default function ForgotPassword() {
     }
   }, [cooldown]);
 
-  // 📨 Step 1: Send OTP
+  // Send OTP
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cooldown > 0 || loading) return;
+    if (loading) return;
 
     setLoading(true);
     setMessage("");
@@ -36,26 +44,29 @@ export default function ForgotPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ OTP sent! Please check your email.");
+        setMessage("✅ OTP sent! Check your email.");
         setStep("otp");
-        setCooldown(30);
         localStorage.setItem("resetEmail", email);
+
+        // Start cooldown (3 minutes)
+        setCooldown(180);
       } else {
         setMessage(data.error || "❌ Failed to send OTP.");
       }
     } catch {
-      setMessage("❌ Network error. Try again later.");
+      setMessage("❌ Network error.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 🔁 Step 2: Resend OTP
+  // Resend OTP
   const handleResendOTP = async () => {
-    if (cooldown > 0 || loading || isResending) return;
+    if (loading || isResending || cooldown > 0) return;
 
     setIsResending(true);
     setLoading(true);
@@ -65,52 +76,55 @@ export default function ForgotPassword() {
       const res = await fetch("/api/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, resend: true }),
+        body: JSON.stringify({ email }), 
       });
+
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("🔁 New OTP sent. Previous OTP is now invalid.");
-        setCooldown(30);
+        setMessage("🔁 New OTP sent!");
+        setCooldown(180); 
       } else {
         setMessage(data.error || "❌ Failed to resend OTP.");
       }
     } catch {
-      setMessage("❌ Network error. Try again later.");
+      setMessage("❌ Network error.");
     } finally {
       setLoading(false);
-      setTimeout(() => setIsResending(false), 500);
+      setIsResending(false);
     }
   };
 
-  // ✅ Step 3: Verify OTP
+  // Verify OTP
   const handleVerifyOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  e.preventDefault();
+  setIsVerifying(true);
+  setMessage("");
 
-    try {
-      const res = await fetch("/api/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp, newPassword: "" }),
-      });
-      const data = await res.json();
+  try {
+    const res = await fetch("/api/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, otp }),
+    });
 
-      if (res.ok) {
-        setMessage("✅ OTP verified! Now set a new password.");
-        setStep("reset");
-      } else {
-        setMessage(data.error || "❌ Invalid or expired OTP.");
-      }
-    } catch {
-      setMessage("❌ Network error. Try again later.");
-    } finally {
-      setLoading(false);
+    const data = await res.json();
+
+    if (res.ok) {
+      setMessage("✅ OTP verified!");
+      setStep("reset");
+      
+    } else {
+      setMessage(data.error || "❌ Invalid or expired OTP.");
     }
-  };
+  } catch {
+    setMessage("❌ Network error.");
+  } finally {
+    setIsVerifying(false);
+  }
+};
 
-  // 🔐 Step 4: Reset Password & Redirect
+  // Reset Password
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -122,20 +136,17 @@ export default function ForgotPassword() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, otp, newPassword }),
       });
+
       const data = await res.json();
 
       if (res.ok) {
-        setMessage("✅ Password successfully changed! Redirecting...");
-        setStep("email");
-        setEmail("");
-        setOtp("");
-        setNewPassword("");
-        setTimeout(() => (window.location.href = "/login"), 2000);
+        setMessage("✅ Password updated! Redirecting...");
+        setTimeout(() => (window.location.href = "/login"), 1500);
       } else {
         setMessage(data.error || "❌ Failed to reset password.");
       }
     } catch {
-      setMessage("❌ Network error. Try again later.");
+      setMessage("❌ Network error.");
     } finally {
       setLoading(false);
     }
@@ -143,7 +154,6 @@ export default function ForgotPassword() {
 
   return (
     <div className="bg-gray-100 text-black min-h-screen flex flex-col">
-      {/* 🔷 Navigation Bar */}
       <nav className="flex justify-between items-center px-8 py-4 bg-[#1E1E3F] text-white">
         <div className="flex items-center gap-2">
           <Image src="/sharesphere_logo.png" alt="Logo" width={40} height={40} />
@@ -157,7 +167,6 @@ export default function ForgotPassword() {
         </Link>
       </nav>
 
-      {/* 🔹 Main Section */}
       <div className="flex flex-col md:flex-row flex-grow">
         {/* Left Panel */}
         <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
@@ -204,18 +213,14 @@ export default function ForgotPassword() {
                 />
                 <button
                   type="submit"
-                  disabled={loading || cooldown > 0}
+                  disabled={loading}
                   className={`w-full py-2 rounded text-white ${
-                    loading || cooldown > 0
+                    loading
                       ? "bg-gray-500 cursor-not-allowed"
                       : "bg-black hover:bg-gray-800"
                   }`}
                 >
-                  {loading
-                    ? "Sending OTP..."
-                    : cooldown > 0
-                    ? `Resend OTP in ${cooldown}s`
-                    : "Send OTP"}
+                  {loading ? "Sending OTP..." : "Send OTP"}
                 </button>
               </>
             )}
@@ -223,26 +228,30 @@ export default function ForgotPassword() {
             {/* STEP 2 - OTP */}
             {step === "otp" && (
               <>
-                <p className="text-sm text-gray-500">
-                  Enter the OTP sent to your email.
-                </p>
+                <p className="text-sm text-gray-500">Enter the OTP sent to your email.</p>
+
                 <input
                   type="text"
                   placeholder="Enter OTP"
                   value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
+                    setOtp(cleaned);
+                  }}
                   className="border p-3 w-full rounded"
                   required
                 />
+
+                {/* FIXED Verify Button */}
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={isVerifying}
                   className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
                 >
-                  {loading ? "Verifying..." : "Verify OTP"}
+                  {isVerifying ? "Verifying..." : "Verify OTP"}
                 </button>
 
-                {/* 🔁 Resend OTP */}
+                {/* Resend OTP button with countdown */}
                 <button
                   type="button"
                   onClick={handleResendOTP}
@@ -254,7 +263,7 @@ export default function ForgotPassword() {
                   }`}
                 >
                   {cooldown > 0
-                    ? `Resend in ${cooldown}s`
+                    ? `Resend in ${formatTime(cooldown)}`
                     : isResending
                     ? "Resending..."
                     : "Resend OTP"}
@@ -262,12 +271,10 @@ export default function ForgotPassword() {
               </>
             )}
 
-            {/* STEP 3 - Reset */}
+            {/* STEP 3 - Reset Password */}
             {step === "reset" && (
               <>
-                <p className="text-sm text-gray-500">
-                  Enter your new password below.
-                </p>
+                <p className="text-sm text-gray-500">Enter your new password below.</p>
                 <input
                   type="password"
                   placeholder="Enter new password"
@@ -286,7 +293,7 @@ export default function ForgotPassword() {
               </>
             )}
 
-            {/* 📩 Message */}
+            {/* Message */}
             {message && (
               <p
                 className={`text-center mt-3 text-sm ${

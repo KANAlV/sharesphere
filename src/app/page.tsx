@@ -12,6 +12,11 @@ export default async function CourseCarouselWrapper() {
     name: string;
     description: string;
   }[];
+  
+  type LikesDislikesDetails = {
+    likes: Record<string, { timestamp: string }>;
+    dislikes: Record<string, { timestamp: string }>;
+  };
 
   // --- posts ---
   const postsRaw = await (sql`
@@ -23,6 +28,7 @@ export default async function CourseCarouselWrapper() {
   created_at: string;
   likes: number;
   dislikes: number;
+  lnd: LikesDislikesDetails;
   category: string,
   organization: string,
   username?: string;
