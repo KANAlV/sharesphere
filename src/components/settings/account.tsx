@@ -297,7 +297,7 @@ export default function Account({ account }: { account: Account[] }) {
 
   {/* BANNER RENDER */}
   const renderModalBanner = () => {
-    if (!modalMessage) return null;
+    if (!modalMessage) return <></>;
     const base = "w-full text-sm px-3 py-2 rounded-md mb-3 text-left";
 
     if (modalMessageType === "success")
@@ -378,22 +378,56 @@ export default function Account({ account }: { account: Account[] }) {
       </div>
 
       {/* TWO AUTH SECTION */}
-      <div className="flex mt-4 px-6">
-        <div className="flex w-full justify-between pr-5">
-          <div>Two-factor authentication</div>
+<div className="flex mt-4 px-6">
+  <div className="flex w-full justify-between pr-5 items-center">
+    <div>Two-factor authentication</div>
 
-          <div
-            onClick={twoAuth}
-            className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors
-              ${on ? "bg-[#1F1E3D]" : "bg-gray-500"} `}
+    <div
+      onClick={!loading ? twoAuth : undefined}
+      className={`
+        w-12 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors relative
+        ${on ? "bg-[#1F1E3D]" : "bg-gray-500"}
+        ${loading ? "opacity-60 cursor-not-allowed" : ""}
+      `}
+    >
+      {/* LOADING SPINNER INSIDE THE SWITCH */}
+      {loading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <svg
+            className="animate-spin h-4 w-4 text-white"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
           >
-            <div
-              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
-                ${on ? "translate-x-6" : ""}`}
-            ></div>
-          </div>
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 100 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+            ></path>
+          </svg>
         </div>
-      </div>
+      )}
+
+      {/* SWITCH CIRCLE */}
+      <div
+        className={`
+          bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+          ${on ? "translate-x-6" : ""}
+          ${loading ? "opacity-0" : ""}
+        `}
+      ></div>
+    </div>
+  </div>
+</div>
+
 
       {/* Email Window */}
 <div

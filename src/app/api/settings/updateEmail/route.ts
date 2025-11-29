@@ -98,9 +98,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ error: "Invalid request format" }, { status: 400 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ Update Email Error:", err);
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ error: (err as Error).message || "Server error" }, { status: 500 });
   }
 }
 
@@ -128,9 +128,9 @@ export async function PUT(req: Request) {
     await sendOTPEmail(record.newEmail, record.username, newOTP);
 
     return NextResponse.json({ message: "A new OTP has been sent." });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("❌ Resend OTP Error:", err);
-    return NextResponse.json({ error: err.message || "Server error" }, { status: 500 });
+    return NextResponse.json({ error: (err as Error).message || "Server error" }, { status: 500 });
   }
 }
 
