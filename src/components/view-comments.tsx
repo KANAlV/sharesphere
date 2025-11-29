@@ -50,7 +50,7 @@ type Comments = {
 let theme: string;
 let userid: string;
 
-export default function PostView({ post, details, userdata }: { post: Post, details: Details[], userdata: UserData[] | null }) {
+export default function PostView({ comment_id, post, details, userdata }: { comment_id: string, post: Post, details: Details[], userdata: UserData[] | null }) {
   theme = details[0].theme;
   userid = userdata ? userdata[0].id : "";
 
@@ -176,159 +176,9 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
         </p>
       </div>
 
-      {/* Images */}
-      {length > 0 && (
-        <div className="relative w-full overflow-hidden rounded-xl">
-          <div className="flex bg-gray-500/30 transition-transform duration-500" style={{ transform: `translateX(-${current * 100}%)` }}>
-            {images.map((img, idx) => (
-              <img key={idx} src={img} alt={`Slide ${idx}`} className="w-full h-64 object-contain flex-shrink-0" />
-            ))}
-          </div>
-          {length > 1 && (
-            <>
-              <button onClick={prevSlide} className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">‹</button>
-              <button onClick={nextSlide} className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition">›</button>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Content */}
-      <div className="border-b-2 border-[#6C6C6C] flex-2 px-5 pt-2 pb-4">
-        <p style={{ color: fontcolor }} className="text-lg">{post.content}</p>
-      </div>
-
-      {/* Likes / Dislikes */}
-      <div className="flex gap-6 ml-4 pt-5 items-center">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => reactPost("like")}>
-          {userReacted.liked ? (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                      <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                          <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill={fontcolor}>
-                              <g id="icons" transform="translate(56.000000, 160.000000)">
-                                  <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
-                                  </path>
-                              </g>
-                          </g>
-                      </g>
-                  </svg>
-                ) : (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                      <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                          <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
-                              <g id="icons" transform="translate(56.000000, 160.000000)">
-                                  <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
-                                  </path>
-                              </g>
-                          </g>
-                      </g>
-                  </svg>
-                )}
-          <p className="text-lg">{postLikes}</p>
-        </div>
-
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => reactPost("dislike")}>
-          {userReacted.disliked ? (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill={fontcolor}>
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
-                          </path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                ) : (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
-                          </path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                )}
-          <p className="text-lg">{postDislikes}</p>
-        </div>
-      </div>
-
-      {/* Comment input */}
-      <div style={{ color: fontcolor}} className="flex mt-5 mb-8 items-center w-full">
-        {userdata? (<>
-          <div className="w-12 h-12 self-start overflow-clip rounded-full">
-            <img
-              src={userdata[0].profile}
-              alt={userdata[0].username}
-              className="object-cover rounded-lg"
-              sizes="96px"
-            />
-          </div>
-
-          <textarea
-            ref={textareaRef}
-            placeholder="Add a comment..."
-            value={comment}
-            onChange={handleChange}
-            rows={1} // start as a single line
-            className="flex-grow mx-4 mb-2 resize-none overflow-hidden border-b-2 border-current bg-transparent focus:outline-none"
-          />
-        </>):(<div style={{ color: fontcolor, opacity: "50%"}}>
-          Sign-in to post a comment
-        </div>)}
-      </div>
-
-      {comment == "" ? "":(
-        <div className="flex mt-4 mx-4 w-full mb-2 justify-between">
-          <div style={{ color: fontcolor}} className="flex">
-             Post anonymously
-            <div
-              onClick={() => setPrivate(!prvt)}
-              onMouseEnter={()=>showDisclamer(true)}
-              onMouseLeave={()=>showDisclamer(false)}
-              className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
-                ${prvt ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
-            >
-              <div
-                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
-                  ${prvt ? "translate-x-6" : "translate-x-0"}`}
-              />
-            </div>
-
-            <div
-              id="label"
-              style={{ color: fontcolor}}
-              className={`${disclamer ? "block":"hidden"}
-                          ${fontcolor == "lightgray" ? "bg-gray-700":"bg-gray-300"}
-                          z-50 divide-y
-                          rounded-lg shadow-sm w-86 text-justify  absolute mt-6 p-4`}
-            >
-              Disclaimer: Posting anyting inappropriate will allow moderators
-              to see your details even if using this feature. It is to allow
-              diciplinary action for students on this site.
-            </div>
-          </div>
-          <div>
-            <button
-              onClick={() => setComment("")}
-              type="button"
-              className="px-4 py-2 mr-4 bg-gray-500/50 rounded-full cursor-pointer"
-            >Cancel</button>
-            <button
-              onClick={() => postComment(post.id, comment, null, prvt)}
-              type="button"
-              className="px-4 py-2 mr-4 bg-blue-500 rounded-full cursor-pointer"
-            >Post</button>
-          </div>
-          
-        </div>
-      )}
-
       {/* Comments Section */}
       <MainComments
-        parentId={post.id}
+        parentId={comment_id}
         fontcolor={fontcolor}
         userdata={userdata}
         postId={post.id}
@@ -404,7 +254,7 @@ function MainComments(props: NestedRepliesProps) {
   async function fetchNested() {
     try {
       const res = await fetch(
-        `/api/posts/main_comments?parentId=${parentId}&postId=${postId}&offset=${offset}`
+         `/api/posts/comments?parentId=${parentId}&postId=${postId}&offset=${offset}`
       );
       const json = await res.json();
 

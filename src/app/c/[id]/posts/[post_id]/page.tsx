@@ -4,7 +4,7 @@ import Sidebar from "@/components/sidebar";
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
-export default async function PostPage(props: { params: Promise<{ id: string, post_id: string }> }) {
+export default async function PostPage(props: { params: Promise<{ id: string, post_id: string,  }> }) {
   const { id, post_id } = await props.params;
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
