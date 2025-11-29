@@ -28,6 +28,11 @@ export default async function DispalyUser(props: { params: Promise<{ id: string 
         dateofbirth: string;
     }[];
 
+    type LikesDislikesDetails = {
+        likes: Record<string, { timestamp: string }>;
+        dislikes: Record<string, { timestamp: string }>;
+    };
+
     const posts = (await sql`
         SELECT * FROM fetchUserPosts(${id}); 
     `) as {
@@ -37,6 +42,7 @@ export default async function DispalyUser(props: { params: Promise<{ id: string 
         posted: string;
         likes: number;
         dislikes: number;
+        lnd: LikesDislikesDetails;
     }[];
 
     return (

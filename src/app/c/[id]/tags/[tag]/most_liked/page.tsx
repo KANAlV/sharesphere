@@ -2,10 +2,50 @@ import { sql } from "@/lib/db";
 import CoursePageClient from "@/components/c/tag/most_liked/pages";
 import Sidebar from "@/components/sidebar";
 import { redirect } from "next/navigation";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 export default async function Page(props: { params: Promise<{ id: string, tag: string }> }) {
   const { id, tag } = await props.params;
   const tag_id = decodeURIComponent(tag);
+
+  const cookieStore = await cookies();
+    const token = cookieStore.get("session")?.value;
+  
+    let user: null | { id: string; username: string; email: string; udata: string; } = null;
+  
+    if (token) {
+      try {
+        user = jwt.verify(token, process.env.JWT_SECRET!) as {
+          id: string;
+          username: string;
+          email: string;
+          udata: string;
+        };
+      } catch {
+        user = null;
+      }
+    }
+  
+    let userdata;
+    if (user) {
+      userdata = (await sql`
+        SELECT
+          u.id::TEXT,
+          u.username,
+          ud.profile
+        FROM users u
+        LEFT JOIN userdata ud ON ud.id = u.id
+        WHERE
+          u.id = ${user.id}
+      `) as {
+        id: string;
+        username: string;
+        profile: string
+      }[];
+    } else {
+      userdata = null;
+    }
   
   const exists = (await sql`
     SELECT 1 FROM categories WHERE category_name=${id} LIMIT 1;
@@ -15,15 +55,22 @@ export default async function Page(props: { params: Promise<{ id: string, tag: s
     redirect("/");
   }
 
+  type LikesDislikesDetails = {
+    likes: Record<string, { timestamp: string }>;
+    dislikes: Record<string, { timestamp: string }>;
+  };
+
   const posts = (await sql`
     SELECT * FROM fetchMostLikedTagPosts(${id}, ${tag_id}, 10, 0);
   `) as {
     dir: string;
+    username: string;
     title: string;
     content: string;
     posted: string;
     likes: number;
     dislikes: number;
+    lnd:LikesDislikesDetails
   }[];
 
   const announcements = (await sql`
@@ -72,7 +119,7 @@ export default async function Page(props: { params: Promise<{ id: string, tag: s
 
   return (
     <>
-      <CoursePageClient id={id} tag={tag} posts={posts} details={details} announcements={announcements} />
+      <CoursePageClient id={id} userdata={userdata} tag={tag} posts={posts} details={details} announcements={announcements} />
       <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
     </>
   );

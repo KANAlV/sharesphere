@@ -202,56 +202,56 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
       <div className="flex gap-6 ml-4 pt-5 items-center">
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => reactPost("like")}>
           {userReacted.liked ? (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                      <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                          <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill={fontcolor}>
-                              <g id="icons" transform="translate(56.000000, 160.000000)">
-                                  <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
-                                  </path>
-                              </g>
-                          </g>
-                      </g>
-                  </svg>
-                ) : (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                      <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                          <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
-                              <g id="icons" transform="translate(56.000000, 160.000000)">
-                                  <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
-                                  </path>
-                              </g>
-                          </g>
-                      </g>
-                  </svg>
-                )}
-          <p className="text-lg">{postLikes}</p>
+            <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                    <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill={fontcolor}>
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                            <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
+                            </path>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                    <g id="Dribbble-Light-Preview" transform="translate(-259.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                            <path d="M203,620 L207.200006,620 L207.200006,608 L203,608 L203,620 Z M223.924431,611.355 L222.100579,617.89 C221.799228,619.131 220.638976,620 219.302324,620 L209.300009,620 L209.300009,608.021 L211.104962,601.825 C211.274012,600.775 212.223214,600 213.339366,600 C214.587817,600 215.600019,600.964 215.600019,602.153 L215.600019,608 L221.126177,608 C222.97313,608 224.340232,609.641 223.924431,611.355 L223.924431,611.355 Z" id="like-[#1385]">
+                            </path>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+          )}
+          <p style={{color: fontcolor}} className="text-lg">{postLikes}</p>
         </div>
 
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => reactPost("dislike")}>
           {userReacted.disliked ? (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill={fontcolor}>
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
-                          </path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                ) : (
-                  <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                      <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                          <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
-                          </path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg>
-                )}
-          <p className="text-lg">{postDislikes}</p>
+            <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+              <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill={fontcolor}>
+                  <g id="icons" transform="translate(56.000000, 160.000000)">
+                    <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          ) : (
+            <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
+              <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                <g id="Dribbble-Light-Preview" transform="translate(-179.000000, -760.000000)" fill="none" stroke={fontcolor} strokeWidth="1.5">
+                  <g id="icons" transform="translate(56.000000, 160.000000)">
+                    <path d="M139.800374,612 L144.00037,612 L144.00037,600 L139.800374,600 L139.800374,612 Z M127.698085,600 L137.700376,600 L137.700376,611.979 L135.894378,618.174 C135.725328,619.224 134.776129,620 133.66103,620 C132.412581,620 131.400381,619.036 131.400381,617.847 L131.400381,612 L125.873186,612 C124.026238,612 122.659139,610.358 123.074939,608.644 L124.899837,602.109 C125.200137,600.868 126.360386,600 127.698085,600 L127.698085,600 Z" id="dislike-[#1387]">
+                    </path>
+                  </g>
+                </g>
+              </g>
+            </svg>
+          )}
+          <p style={{color: fontcolor}} className="text-lg">{postDislikes}</p>
         </div>
       </div>
 
@@ -527,7 +527,7 @@ function MainComments(props: NestedRepliesProps) {
           </div>
 
           {/* Comment content */}
-          <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
+          <div style={{ borderLeft: `${comment.has_comments? `2px solid ${fontcolor}`:"0 none black"}` }} className="flex-grow ml-4.75 pt-4 pl-8">
             <p 
               onClick={() => gotoUser(comment.username, comment.anonymous)}
               style={{ color: fontcolor }}
@@ -712,7 +712,7 @@ function MainComments(props: NestedRepliesProps) {
                 postComment={postComment}
               />
             </div>
-            <div style={{ borderLeft: `2px solid ${fontcolor}` }} className=" border-l-2 h-4" />
+            <div className="h-4" />
           </div>
         </div>
       ))}
@@ -732,7 +732,6 @@ function MainComments(props: NestedRepliesProps) {
             no more comments
           </div>
         )}
-        <div style={{borderLeft: `2px solid ${fontcolor}`}} className="ml-8.75 border-l-2 h-6 rounded-b-2xl" />
       </div>
     </div>
   );
@@ -889,7 +888,7 @@ function NestedReplies(props: NestedRepliesProps) {
       <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
       <div className="h-1"/>
       {nestedComments.map((comment, idx) => (
-        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="pl-4 w-full border-l-2 justify-between relative select-none">
+        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="pl-4 w-full justify-between relative select-none">
           {/* Avatar */}
           <div className="absolute bg-black w-10 h-10 self-start overflow-clip rounded-full">
             <img
@@ -1106,7 +1105,7 @@ function NestedReplies(props: NestedRepliesProps) {
             no more comments
           </div>
         )}
-        <div style={{borderLeft: `2px solid ${fontcolor}`}} className=" border-l-2 h-6">
+        <div className=" h-6">
           <div style={{borderLeft: `2px solid ${fontcolor}`}} className="ml-8.75 border-l-2 h-6 rounded-b-xl" />
         </div>
       </div>
