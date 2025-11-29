@@ -48,9 +48,9 @@ export default function Navigation({ user }: { user: User | null }) {
         {/* Toggle button */}
         <div
           onClick={() => setIsOpen(!isOpen)}
-          className={`hidden lg:flex absolute top-1/30 right-0 rounded-full align-middle ${
+          className={`hidden lg:flex absolute right-0 align-middle ${
             isOpen ? "" : "w-2/3"
-          } h-4/5 bg-white dark:bg-black border-gray-500 border-2 cursor-pointer`}
+          } h-full bg-slate-300 dark:bg-slate-800 border-gray-500 border-2 cursor-pointer`}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -72,13 +72,13 @@ export default function Navigation({ user }: { user: User | null }) {
 
         {/* Navigation panel */}
         <div
-          className={`bg-white/80 dark:bg-black/80 ${
+          className={`bg-slate-300 dark:bg-slate-800 ${
             isOpen ? "lg:w-13/14" : "lg:w-8/12"
           } h-screen lg:border-r border-gray-500`}
         >
           <div
             className={`flex lg:block w-full lg:pt-2 ${
-              isOpen ? "lg:px-8" : "lg:px-2"
+              isOpen ? "lg:px-8" : "lg:hidden"
             } items-center overflow-x-auto lg:overflow-x-clip scrollbar-track-black/0 whitespace-nowrap gap-4 px-4`}
           >
             {/* User PC view */}
