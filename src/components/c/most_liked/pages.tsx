@@ -276,7 +276,7 @@ export default function CoursePage({
                         </g>
                     </svg>
                   )}
-                  {post.lnd.likes ? Object.keys(post.lnd.likes).length : 0}
+                  <p style={{color: fontcolor}} className="pl-2 text-lg">{post.lnd.likes ? Object.keys(post.lnd.likes).length : 0}</p>
                   <span className="w-4" />
                   {post.lnd?.dislikes?.[userID] ? (
                     <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -301,7 +301,7 @@ export default function CoursePage({
                       </g>
                     </svg>
                   )}
-                  {post.lnd.likes ? Object.keys(post.lnd.dislikes).length : 0}
+                  <p style={{color: fontcolor}} className="pl-2 text-lg">{post.lnd.likes ? Object.keys(post.lnd.dislikes).length : 0}</p>
                   </div>
               </div>
             ))
