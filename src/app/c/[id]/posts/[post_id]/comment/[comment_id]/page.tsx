@@ -62,7 +62,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
       p.images
     FROM posts p
     JOIN users u ON p.author_id = u.id
-    WHERE p.id = ${comment_id}
+    WHERE p.id = ${post_id}
   `) as {
     id: string;
     title: string;
