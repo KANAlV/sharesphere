@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
 export default async function PostPage(props: { params: Promise<{ id: string, post_id: string, comment_id: string }> }) {
-  const { id, post_id, comment_id } = await props.params;
+  const { id, post_id, comment_id } = await props.params; //problem?
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
