@@ -1,0 +1,567 @@
+"use client";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { fail } from "assert";
+
+type UserData = {
+  id: string;
+  username: string;
+  profile: string;
+};
+
+type Details = {
+  description: string;
+  theme: string;
+  banner: string;
+  created_at: string;
+};
+
+type Mod = {
+  userId: string;
+  username: string;
+  role: string;
+  perms: {
+    all: boolean;
+    mute: boolean;
+    announce: boolean;
+    pagedetails: boolean;
+    delete_posts: boolean;
+    delete_comments: boolean;
+    roles_management: boolean;
+  };
+};
+
+type Rel = {
+  dir: string;
+  title: string;
+  theme: string;
+};
+
+type Tags = {
+  dir: string;
+  tag: string;
+  color: string;
+};
+
+type Rule = {
+  rule: string;
+  description: string;
+  num: string;
+};
+
+export default function AdminControls({
+  id,
+  userdata,
+  moderators,
+  details,
+  rel,
+  tags,
+  rules
+}: {
+  id: string;
+  userdata: UserData[] | null;
+  moderators: Mod[];
+  details: Details[];
+  rel: Rel[];
+  tags: Tags[];
+  rules: Rule[];
+}) {
+  const [page, setPage] = useState(true);
+  const [mods, setMods] = useState(false);
+  const [reports, setReports] = useState(false);
+  const [muted, setMuted] = useState(false);
+
+  // moderator expand state
+  const [openMods, setOpenMods] = useState<Record<number, boolean>>({});
+  const [editMods, setEditMods] =useState(false);
+  const [addModOpen, setAddModOpen] = useState(false);
+  const [addModTextBoxValue, setAddModTextBoxValue] = useState("");
+  const [addModShowResults, setAddModShowResults] = useState(false);
+  const [addModResults, setAddModResults] = useState<{ username: string, id: string }[]>([]);
+  const [addModLoading, setAddModLoading] = useState(false);
+
+  
+  const myModData = moderators.find(
+    (m) => m.userId === userdata?.[0]?.id
+  );
+
+  console.log(myModData);
+
+  const toggleTab = (tab: string) => {
+    tab == "page"? setPage(true):setPage(false);
+    tab == "mods"? setMods(true):setMods(false);
+    tab == "reports"? setReports(true):setReports(false);
+    tab == "muted"? setMuted(true):setMuted(false);
+  }
+
+  const toggleMod = (idx: number) => {
+    setOpenMods(prev => ({
+      ...prev,
+      [idx]: !prev[idx]
+    }));
+  };
+
+
+  // Format course name
+  let categoryName = "";
+  for (let i = 0; i < id.length; i++) {
+    if (i === 0) categoryName = id.charAt(0).toUpperCase();
+    else if (id.charAt(i) === "_") categoryName += " ";
+    else if (id.charAt(i - 1) === "_") categoryName += id.charAt(i).toUpperCase();
+    else categoryName += id.charAt(i);
+  }
+
+  function OrgName(name: string) {
+    let categoryName = "";
+    for (let i = 0; i < name.length; i++) {
+      if (i === 0) categoryName = name.charAt(0).toUpperCase();
+      else if (name.charAt(i) === "_") categoryName += " ";
+      else if (name.charAt(i - 1) === "_") categoryName += name.charAt(i).toUpperCase();
+      else categoryName += name.charAt(i);
+    }
+    return categoryName;
+  }
+
+  const pageDetails = details[0];
+  const dateCreated = new Date(pageDetails.created_at).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+  });
+
+  // responsive sidebar state
+  const [isOpen, setIsOpen] = useState(false);
+
+  // --- Path logics ---
+
+  const pathname = usePathname();
+  const inOrgs = pathname.startsWith("/o/")
+  const redirectTo = (redir?: string) => encodeURIComponent((redir ?? "").replace(/ /g, '_'));
+  
+  // --- Font color logic ---
+  const textColor = (theme: string) => {
+    let fontcolor = "black";
+    const hexColor = theme.startsWith("#")
+      ? theme.slice(1)
+      : theme;
+    const r = parseInt(hexColor.substring(0, 2), 16);
+    const g = parseInt(hexColor.substring(2, 4), 16);
+    const b = parseInt(hexColor.substring(4, 6), 16);
+    const brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    if (brightness < 128) fontcolor = "lightgray";
+
+    return fontcolor;
+  }
+
+  // --- rules ---
+  const [openRules, setOpenRules] = useState<number[]>([]);
+
+  const toggleRule = (idx: number) => {
+    setOpenRules((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  // --- moderator tab functions ---
+  async function addModTextBox(value: string) {
+  setAddModTextBoxValue(value);
+
+  if (value.length < 3) {
+    setAddModResults([]);      // always an array
+    setAddModShowResults(false);
+    return;
+  }
+
+  try {
+    setAddModLoading(true);
+
+    const res = await fetch(
+      `/api/moderator/searchUser?user=${value}&pageId=${id}&pageType=organization`
+    );
+    const json = await res.json();
+
+    // Ensure json.filteredUsers exists and is an array
+    const results = Array.isArray(json.filteredUsers) ? json.filteredUsers : [];
+
+    setAddModResults(results);
+    setAddModLoading(false);
+    setAddModShowResults(true);
+  } catch (err) {
+    console.error("Failed to fetch users:", err);
+    setAddModResults([]); // fallback to empty array
+    setAddModShowResults(true);
+  }
+}
+
+  async function addModerator(userId: string) {
+    try {
+      const res = await fetch(`/api/moderator/addModerator`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, pageId: id, pageType: "organization" }),
+      });
+
+      if (res.ok) {
+        // Successfully added moderator
+        alert("Moderator added successfully!"); 
+        setAddModOpen(false);
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to add moderator: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to add moderator:", err);
+      alert("An error occurred while adding the moderator.");
+    }
+  }
+
+  const EditMod = (modId: string) => {
+
+  }
+
+  return (
+    <>
+      {/* MODAL BOXES */}
+
+      {/* Add Moderators */}
+      <div 
+      onClick={() => setAddModOpen(false)}
+        className={`${addModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+        >
+          <h1 className="font-bold text-2xl mb-4">Add Moderator</h1>
+
+          <input
+            type="text"
+            value={addModTextBoxValue}
+            onChange={(e) => addModTextBox(e.target.value)}
+            placeholder="search username"
+            className="w-full p-2 mb-4 border-2 border-gray-500 rounded-lg bg-slate-100 dark:bg-slate-700"
+          />
+          <p className="text-gray-500 overflow-clip">
+          {addModLoading ? "Loading..." : 
+            (addModTextBoxValue.length > 2 ? `Showing results for "${addModTextBoxValue}"`:
+            addModTextBoxValue.length == 0? "":`Add ${3 - addModTextBoxValue.length} more characters.`)
+          }</p>
+          <div className={`${addModShowResults? "":"hidden"} max-h-60 overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}>
+            {addModShowResults && addModResults.length > 0 ? (
+              addModResults.map((user, idx) => (
+                <div key={idx}
+                  onClick={() => addModerator(user.id)}
+                  className="mt-2 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                  <h2 className="font-bold">{user.username}</h2>
+                </div>
+              ))
+            ) : (
+              <p style={{ opacity: 0.5 }}>No users found.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Moderators */}
+      <div 
+      onClick={() => setAddModOpen(false)}
+        className={`${addModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+        >
+
+        </div>
+      </div>
+
+      {/* SIDE BAR */}
+      <div>
+        {/* MOBILE TOGGLE */}
+        <div
+          className="z-30 lg:hidden fixed top-22 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
+          onClick={() => setIsOpen(true)}
+        >
+          ≡
+        </div>
+
+        {/* SIDEBAR CONTAINER */}
+        <div
+          className={`transition-opacity duration-500 ease-in-out lg:opacity-100
+            ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
+            fixed top-18 right-0 h-screen lg:h-screen w-screen bg-slate-300 dark:bg-slate-800
+            lg:block lg:max-w-1/6
+            overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
+            `}
+          style={{
+            zIndex: 30,
+          }}
+        >
+          {/* MOBILE CLOSE BUTTON */}
+          <div className="lg:hidden h-5 w-screen">
+            <div className="fixed right-7 w-5 h-5 text-3xl" onClick={() => setIsOpen(false)}>
+              ≡
+            </div>
+          </div>
+
+          {/* --- TABS --- */}
+          <div className="flex h-14 overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
+            <div onClick={() => toggleTab("page")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${page? "border-blue-600":"border-blue-600/0"} `}>
+              Page
+            </div>
+            <div onClick={() => toggleTab("mods")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${mods? "border-blue-600":"border-blue-600/0"} `}>
+              Mods
+            </div>
+            <div onClick={() => toggleTab("reports")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${reports? "border-blue-600":"border-blue-600/0"} `}>
+              Reports
+            </div>
+            <div onClick={() => toggleTab("muted")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${muted? "border-blue-600":"border-blue-600/0"} `}>
+              Muted
+            </div>
+          </div>
+
+          {/* --- PAGE CONTENT --- */}
+          <div className={`${page ? "block" : "hidden"} `}>
+            {/* MAIN CONTENT */}
+            <div className="px-8 pt-8 pb-4 lg:rounded-t-2xl border-t-2 border-gray-500/50">
+              <h1 className="font-bold">{categoryName}</h1>
+              <p style={{ opacity: 0.8 }}>{pageDetails.description}</p>
+              <div style={{ opacity: 0.8 }} className="flex">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
+                  <title>Calendar</title>
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="currentColor" strokeWidth="1.6"/>
+                  <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                  <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
+                  <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="1.6"/>
+                </svg>
+                <span className="w-2" />
+                Created {dateCreated}
+              </div>
+            </div>
+
+            {/* Tags */}
+            <div className=" mt-1 pl-8 py-4 border-t-2 border-gray-500/50">
+              <p style={{ opacity: 0.9 }}>
+                {/^\/[co]\/[^/]+\/posts/.test(pathname) ? "Post Tags":(pathname.startsWith(`/c/`)||pathname.startsWith(`/o/`) ? "Most Popular Tags":"Currently showing posts for:")}
+              </p>
+              <div className="block max-h-120 overflow-y-clip">
+                {tags.length > 0 ? (
+                  tags.map((post, idx) => (
+                    <a href={pathname.startsWith("/c")? (pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`):(pathname !== `/o/${id}` ? `/o/${id}`:`/o/${id}/tags/${redirectTo(post.tag)}`)} key={idx} className="block w-min">
+                      <div className={`flex px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
+                      style={{ backgroundColor: post.color, color: textColor(post.color) }}
+                      >
+                        {post.tag}
+                        {pathname.includes("tags") ? (
+                        <svg
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                          focusable="false"
+                          className="pl-2"
+                        >
+                          <path
+                            d="M6 6L18 18M6 18L18 6"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      ) : null}
+                      </div>
+                    </a>
+                  ))
+                  ) : (
+                    <p style={{ opacity: 0.9 }}>No Tags found.</p>
+                  )
+                }
+              </div>
+            </div>
+
+            {/* Rules */}
+            <div className="mt-1 px-8 py-4 border-t-2 border-gray-500/50">
+              <p style={{ opacity: 0.9 }}>Rules</p>
+                {rules.length > 0 ? (
+                  rules.map((post, idx) => {
+                    const isOpen = openRules.includes(idx);
+                    return (
+                      <div key={idx}>
+                        <div
+                          onClick={() => toggleRule(idx)}
+                          className="flex mt-2 py-1 w-full hover:bg-gray-500/50 cursor-pointer"
+                        >
+                          <span className=" flex">
+                            <div className="text-center w-12">{post.num}</div> <div>{post.rule}</div>
+                          </span>
+                          <svg
+                            width="24px"
+                            height="24px"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            className={`ml-auto transition-transform duration-300 ${
+                              isOpen ? "rotate-180" : ""
+                            }`}
+                          >
+                            <path d="M7 10l5 5 5-5" />
+                          </svg>
+                        </div>
+                        {isOpen && (
+                          <div className={`block pl-10 pr-5 py-2 text-sm opacity-70 transition-all duration-500 ease-in-out ${
+                              isOpen ? "max-h-40 opacity-100 mt-1" : "max-h-0 opacity-0"
+                            }`}>
+                            {post.description}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p style={{ opacity: 0.5 }}>No Rules found.</p>
+                )}
+            </div>
+
+            {/* Related Orgs/Clubs */}
+            <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4 lg:bg-gray-500/50`}>
+              <p style={{ opacity: 0.9 }}>Related Orgs / Clubs</p>
+              {rel.length > 0 ? (
+                rel.map((post, idx) => (
+                  <div key={idx} className={`mt-2 px-5 py-1 w-min whitespace-nowrap`}>
+                    <a
+                      href={`/o/${redirectTo(post.title)}`}
+                      className="hover:underline"
+                    >
+                      {OrgName(post.title)}
+                    </a>
+                  </div>
+                ))
+                ) : (
+                  <p style={{ opacity: 0.5 }}>No related orgs/clubs found.</p>
+                )
+              }
+            </div>
+          </div>
+          
+          {/* Moderators */}
+          <div className={`${mods ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl border-t-2 border-gray-500/50
+                            overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
+          `}>
+            <div className="flex justify-between w-full">
+              <h1 className="font-bold">Moderators</h1>
+              {myModData?.perms.all ? (
+                <svg onClick={() => setEditMods(!editMods)} className="cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 21H21" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ):(myModData?.perms.roles_management ? (
+                <svg onClick={() => setEditMods(!editMods)} className="cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 21H21" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ):"")}
+              
+            </div>
+            
+            {/* add moderator */}
+            <div 
+              onClick={() => setAddModOpen(true)}
+              className={`${editMods? "":"hidden"} flex mt-4 px-4 py-2 border-2 justify-center border-gray-500 rounded-lg cursor-pointer hover:bg-gray-500/50`}
+            >
+              Add Moderator
+              <svg className="ml-2" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" strokeWidth="1.5" className="stroke-current"/>
+              <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15" strokeWidth="1.5" strokeLinecap="round" className="stroke-current"/>
+              </svg>
+            </div>
+
+            {/* mapped mods */}
+            {moderators.length > 0 ? (
+              moderators.map((mod, idx) => (
+                <div key={idx} className="mt-4 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                  {/* ROW HEADER */}
+                  <div
+                    
+                    onClick={() => (editMods? EditMod(mod.userId):toggleMod(idx))}
+                    className="flex cursor-pointer"
+                  >
+                    <div className="w-9/10">
+                      <h2 className="font-bold">{mod.username}</h2>
+                      <p className="text-gray-500 select-none">{mod.role}</p>
+                    </div>
+
+                    <div
+                      className={`flex items-middle justify-center h-full cursor-pointer`}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className={`m-auto transform transition-transform duration-300 ${
+                          openMods[idx] ? "rotate-270" : "rotate-90"
+                        }`}
+                      >
+                        <path d="M8 4l8 8-8 8" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* SHOW WHEN EXPANDED */}
+                  {openMods[idx] && (
+                    <div className="mt-2 select-none">
+                      <p className="font-semibold">Permissions:</p>
+                      <ul className="list-disc list-inside">
+                        {mod.perms.all && <li>All Permissions</li>}
+
+                        {!mod.perms.all && (
+                          <>
+                            {mod.perms.mute && <li>Mute Users</li>}
+                            {mod.perms.announce && <li>Make Announcements</li>}
+                            {mod.perms.pagedetails && <li>Edit Page Details</li>}
+                            {mod.perms.delete_posts && <li>Delete Posts</li>}
+                            {mod.perms.delete_comments && <li>Delete Comments</li>}
+                            {mod.perms.roles_management && <li>Manage Roles</li>}
+
+                            {/* If no perms */}
+                            {!mod.perms.mute &&
+                            !mod.perms.announce &&
+                            !mod.perms.pagedetails &&
+                            !mod.perms.delete_posts && 
+                            !mod.perms.delete_comments && 
+                            !mod.perms.roles_management && <li>No Perms</li>}
+                          </>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                </div>
+              ))
+            ) : (
+              <p style={{ opacity: 0.5 }}>No moderators found.</p>
+            )}
+          </div>
+
+          <div className="p-2 mt-50 lg:m-0 w-inherit rounded-b-2xl" />
+        </div>
+      </div>
+    </>
+  );
+}
