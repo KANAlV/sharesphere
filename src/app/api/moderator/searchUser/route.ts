@@ -41,9 +41,7 @@ export async function GET(req: Request) {
 
     // Search for users whose usernames start with the provided string
 
-    let users;
-    
-    users = await sql`
+    const users = await sql`
       SELECT username, id::TEXT
       FROM users
       WHERE username ILIKE ${user+"%"}
