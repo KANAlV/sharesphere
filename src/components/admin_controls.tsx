@@ -74,6 +74,7 @@ export default function AdminControls({
   // moderator expand state
   const [openMods, setOpenMods] = useState<Record<number, boolean>>({});
   const [editMods, setEditMods] =useState(false);
+  const [editModOpen, setEditModOpen] =useState(false);
   const [addModOpen, setAddModOpen] = useState(false);
   const [addModTextBoxValue, setAddModTextBoxValue] = useState("");
   const [addModShowResults, setAddModShowResults] = useState(false);
@@ -266,8 +267,8 @@ export default function AdminControls({
 
       {/* Edit Moderators */}
       <div 
-      onClick={() => setAddModOpen(false)}
-        className={`${addModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      onClick={() => setEditModOpen(false)}
+        className={`${editModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
       >
         <div
           onClick={(e) => e.stopPropagation()}
