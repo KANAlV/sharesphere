@@ -1,6 +1,7 @@
 import { sql } from "@/lib/db";
 import CoursePageClient from "@/components/o/pages";
 import Sidebar from "@/components/sidebar";
+import AdminControls from "@/components/admin_controls";
 import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
@@ -45,6 +46,44 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   } else {
     userdata = null;
   }
+  
+  // Fetch moderator data
+  type Mod = {
+    userId: string;
+    username: string;
+    role: string;
+    perms: {
+      all: boolean;
+      mute: boolean;
+      announce: boolean;
+      pagedetails: boolean;
+      delete_posts: boolean;
+      delete_comments: boolean;
+      roles_management: boolean;
+    };
+  };
+
+  // Fetch moderators as an array
+  const moderators = (await sql`
+    SELECT 
+      mod.user_id AS "userId",
+      u.username,
+      (mod.info->>'role')::TEXT AS role,
+      (mod.info->'perms')::JSONB AS perms
+    FROM roles roles_table
+    CROSS JOIN LATERAL jsonb_each(roles_table.data) AS mod(user_id, info)
+    JOIN users u ON u.id = mod.user_id::uuid
+    WHERE roles_table.page_id = (
+      SELECT id FROM organization WHERE name = ${id}
+    )
+      AND roles_table.page_type = 'organization';
+  `) as Mod[];
+
+  // Check if current user is a moderator
+  const isModerator = user && moderators.some(mod => mod.userId === user.id);
+
+
+  // ------------------------------------
 
   const exists = (await sql`
     SELECT 1 FROM organization WHERE name=${id} LIMIT 1;
@@ -119,7 +158,11 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <CoursePageClient id={id} userdata={userdata} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
+      {isModerator ? (
+        <AdminControls id={id} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
+      ):(
+        <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
+      )}
     </>
   );
 }
