@@ -73,14 +73,26 @@ export default function AdminControls({
 
   // moderator expand state
   const [openMods, setOpenMods] = useState<Record<number, boolean>>({});
-  const [editMods, setEditMods] =useState(false);
-  const [editModOpen, setEditModOpen] =useState(false);
   const [addModOpen, setAddModOpen] = useState(false);
   const [addModTextBoxValue, setAddModTextBoxValue] = useState("");
   const [addModShowResults, setAddModShowResults] = useState(false);
   const [addModResults, setAddModResults] = useState<{ username: string, id: string }[]>([]);
   const [addModLoading, setAddModLoading] = useState(false);
-  const [editModWindow, setEditModWindow] = useState(false);
+
+  //edit mod states
+  const [editMods, setEditMods] = useState(false);
+  const [editModOpen, setEditModOpen] = useState(false);
+  const [editID, setEditID] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [all, setAll] = useState(false);
+  const [mute, setMute] = useState(false);
+  const [announce, setAnnounce] = useState(false);
+  const [pagedetails, setPagedetails] = useState(false);
+  const [delete_posts, setDelete_posts] = useState(false);
+  const [delete_comments, setDelete_comments]= useState(false);
+  const [roles_management, setRoles_management]= useState(false);
+  const [editChanged, setEditChanged] = useState(false);
+  const [editRoleName, setEditRoleName] = useState("");
 
   // delete mod states
   const [removeModWindow, setRemoveModWindow] = useState(false);
@@ -171,35 +183,35 @@ export default function AdminControls({
 
   // --- moderator tab functions ---
   async function addModTextBox(value: string) {
-  setAddModTextBoxValue(value);
+    setAddModTextBoxValue(value);
 
-  if (value.length < 3) {
-    setAddModResults([]);      // always an array
-    setAddModShowResults(false);
-    return;
+    if (value.length < 3) {
+      setAddModResults([]);      // always an array
+      setAddModShowResults(false);
+      return;
+    }
+
+    try {
+      setAddModLoading(true);
+      const pageType = pathname.startsWith("/o")? "organization":"categories";
+
+      const res = await fetch(
+        `/api/moderator/searchUser?user=${value}&pageId=${id}&pageType=${pageType}`
+      );
+      const json = await res.json();
+
+      // Ensure json.filteredUsers exists and is an array
+      const results = Array.isArray(json.filteredUsers) ? json.filteredUsers : [];
+
+      setAddModResults(results);
+      setAddModLoading(false);
+      setAddModShowResults(true);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+      setAddModResults([]); // fallback to empty array
+      setAddModShowResults(true);
+    }
   }
-
-  try {
-    setAddModLoading(true);
-    const pageType = pathname.startsWith("/o")? "organization":"categories";
-
-    const res = await fetch(
-      `/api/moderator/searchUser?user=${value}&pageId=${id}&pageType=${pageType}`
-    );
-    const json = await res.json();
-
-    // Ensure json.filteredUsers exists and is an array
-    const results = Array.isArray(json.filteredUsers) ? json.filteredUsers : [];
-
-    setAddModResults(results);
-    setAddModLoading(false);
-    setAddModShowResults(true);
-  } catch (err) {
-    console.error("Failed to fetch users:", err);
-    setAddModResults([]); // fallback to empty array
-    setAddModShowResults(true);
-  }
-}
 
   async function addModerator(userId: string) {
     try {
@@ -266,9 +278,143 @@ export default function AdminControls({
   }
 
   // edit mod function
-  const EditMod = (modId: string) => {
+  const EditMod = (userId: string) => {
     setEditModOpen(true);
+    const editModData = moderators.find(
+      (m) => m.userId === userId
+    );
+    setEditID(editModData? editModData.userId :"")
+    setEditUsername(editModData? editModData.username :"")
+    setEditRoleName(editModData? editModData.role:"")
+    setAll(editModData? editModData.perms.all : false)
+    setMute(editModData? editModData.perms.mute : false)
+    setAnnounce(editModData? editModData.perms.announce : false)
+    setPagedetails(editModData? editModData.perms.pagedetails : false)
+    setDelete_posts(editModData? editModData.perms.delete_posts : false)
+    setDelete_comments(editModData? editModData.perms.delete_comments : false)
+    setRoles_management(editModData? editModData.perms.roles_management : false)
+  }
 
+  const closeEditWindow = () => {
+    setEditModOpen(false)
+    setEditID("")
+    setEditUsername("")
+  }
+
+  const editFilter = (value: string) => {
+    const filtered = value.replace(/[^a-zA-Z0-9 -]/g, "");
+    setEditRoleName(filtered);
+    setEditChanged(true);
+  };
+
+  const editPerms = (perm: string) => {
+    const next = {
+      mute,
+      announce,
+      pagedetails,
+      delete_posts,
+      delete_comments,
+      roles_management,
+    };
+    setEditChanged(true)
+    switch (perm) {
+      case "7": {
+        const newVal = !all;
+        setAll(newVal);
+        setMute(newVal);
+        setAnnounce(newVal);
+        setPagedetails(newVal);
+        setDelete_posts(newVal);
+        setDelete_comments(newVal);
+        setRoles_management(newVal);
+        return; // done
+      }
+
+      case "1":
+        next.mute = !mute;
+        setMute(v => !v);
+        break;
+
+      case "2":
+        next.announce = !announce;
+        setAnnounce(v => !v);
+        break;
+
+      case "3":
+        next.pagedetails = !pagedetails;
+        setPagedetails(v => !v);
+        break;
+
+      case "4":
+        next.delete_posts = !delete_posts;
+        setDelete_posts(v => !v);
+        break;
+
+      case "5":
+        next.delete_comments = !delete_comments;
+        setDelete_comments(v => !v);
+        break;
+
+      case "6":
+        next.roles_management = !roles_management;
+        setRoles_management(v => !v);
+        break;
+    }
+
+    // Compute "all" **using next values**, not stale state
+    const shouldAllBeOn =
+      next.mute &&
+      next.announce &&
+      next.pagedetails &&
+      next.delete_posts &&
+      next.delete_comments &&
+      next.roles_management;
+
+    setAll(shouldAllBeOn);
+  };
+
+  async function submitEditMod(userId: string) {
+    try {
+      const pageType = pathname.startsWith("/o")? "organization":"categories";
+
+      const modData = {
+        [userId]: {
+          role: editRoleName,
+          perms: {
+            all: all,
+            mute: mute,
+            announce: announce,
+            pagedetails: pagedetails,
+            delete_posts: delete_posts,
+            delete_comments: delete_comments,
+            roles_management: roles_management,
+          }
+        }
+      }
+
+      const res = await fetch(`/api/moderator/updateModerator`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({modData, pageId: id, pageType: pageType }),
+      });
+
+      if (res.ok) {
+        // Successfully updated moderator
+        alert("Moderator updated successfully!"); 
+        setEditModOpen(false);
+        setEditID("");
+        setEditUsername("");
+        setEditRoleName("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to update moderator: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to update moderator:", err);
+      alert("An error occurred while updating the moderator.");
+    }
   }
 
   return (
@@ -321,10 +467,54 @@ export default function AdminControls({
       >
         <div
           onClick={(e) => e.stopPropagation()}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-fit "
         >
-          <h1 className="font-bold text-2xl mb-4">Edit Moderator</h1>
-
+          <h1 className="font-bold text-2xl mb-4">Edit Moderator: {editUsername}</h1>
+          <div>role name: <input className={`px-2 border-2 border-gray-500 w-42 rounded-md`} onChange={(e) => editFilter(e.target.value)} type="text" value={editRoleName}/></div>
+          Permissions
+          <div className="flex justify-evenly">
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">All</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onClick={() => editPerms("7")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">Mute</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onClick={() => editPerms("1")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">Announce</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onClick={() => editPerms("2")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">Page Details</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onClick={() => editPerms("3")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">Delete Posts</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onClick={() => editPerms("4")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">setDelete Comments</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onClick={() => editPerms("5")}/></div>
+            </div>
+            <div>
+              <div className="border-1 border-gray-500 px-2 py-1">setRoles Management</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onClick={() => editPerms("6")}/></div>
+            </div>
+          </div>
+          <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
+            <div className="flex pt-10 w-full justify-end">
+              <button 
+                type="button" 
+                onClick={() => closeEditWindow()}
+                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+              >Cancel</button>
+              <button 
+                type="button"
+                onClick={() => submitEditMod(editID)} 
+                className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+            </div>
+          </div>
         </div>
       </div>
 
