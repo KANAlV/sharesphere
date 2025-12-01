@@ -72,7 +72,9 @@ export default function AdminControls({
   const [reports, setReports] = useState(false);
   const [muted, setMuted] = useState(false);
 
-  // page details
+  // --- page details --- //
+
+  // --- rules
   const [editRules, setEditRules] = useState(false)
   const [rulesEditWindow, SetRulesEditWindow] = useState(false)
   const [ruleChanged, setRuleChanged] = useState(false)
@@ -81,8 +83,9 @@ export default function AdminControls({
   const [newRuleName, setNewRuleName] = useState("")
   const [oldRuleDesc, setOldRuleDesc] = useState("")
   const [newRuleDesc, setNewRuleDesc] = useState("")
+  const [removeRuleWindow, setRemoveRuleWindow] = useState(false)
 
-  // moderator expand state
+  // --- moderator expand state --- //
   const [openMods, setOpenMods] = useState<Record<number, boolean>>({});
   const [addModOpen, setAddModOpen] = useState(false);
   const [addModTextBoxValue, setAddModTextBoxValue] = useState("");
@@ -235,8 +238,68 @@ export default function AdminControls({
   }
 
   async function submitEditRule() {
-    
+    try {
+      const pageType = pathname.startsWith("/o")? true:false;
+      const ruleNo = rules.length + 1;
+      const res = await fetch(`/api/moderator/updateRule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ oldRule: oldRuleName, newRule: newRuleName, newDesc: newRuleDesc, pageId: id, pageType: pageType, num: ruleNo }),
+      });
+
+      if (res.ok) {
+        // Successfully updated rule
+        alert("Rule updated successfully!"); 
+        setRemoveModWindow(false);
+        setOldRuleName("");
+        setOldRuleDesc("");
+        setNewRuleName("");
+        setNewRuleDesc("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to update rule: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to update rule:", err);
+      alert("An error occurred while update the rule.");
+    }
   }
+
+  // --- Delete Rule
+  const ShowRuleDel = (value:string) => {
+    setRemoveRuleWindow(true)
+    setOldRuleName(value)
+  }
+
+  async function submitRemoveRule() {
+    try {
+      const pageType = pathname.startsWith("/o");
+      const res = await fetch(`/api/moderator/removeRule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rule: oldRuleName, pageId: id, pageType }),
+      });
+
+      if (res.ok) {
+        alert("Rule removed successfully!"); 
+        setRemoveModWindow(false);
+        setOldRuleName("");
+        setOldRuleDesc("");
+        setNewRuleName("");
+        setNewRuleDesc("");
+        window.location.reload();
+      } else {
+        const errorData = await res.json();
+        alert(`Failed to remove rule: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to remove rule:", err);
+      alert("An error occurred while removing the rule.");
+    }
+  }
+
 
   // --- moderator tab functions ---
   async function addModTextBox(value: string) {
@@ -480,9 +543,10 @@ export default function AdminControls({
 
 
 
-      {/* Moderator Tabs */}
+      
 
-      {/* rules */}
+      {/* --- RULES  --- */}
+      {/* add/edit rules */}
       <div 
       onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
       className={`${rulesEditWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
@@ -528,6 +592,34 @@ export default function AdminControls({
         </div>
       </div>
 
+      {/* Delete Rule */}
+      <div 
+      onClick={() => {setRemoveRuleWindow(false), setOldRuleName("")}}
+        className={`${removeRuleWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+        >
+          <h1 className="font-bold text-2xl mb-4">Remove Rule</h1>
+          <div>
+             Are you sure you want to remove rule: "{oldRuleName}"?
+          </div>
+          <div className="flex pt-10 w-full justify-end">
+            <button 
+              type="button" 
+              onClick={() => setRemoveRuleWindow(false)}
+              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+            >Cancel</button>
+            <button 
+              type="button"
+              onClick={() => submitRemoveRule()} 
+              className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+          </div>
+        </div>
+      </div>
+
+      {/* --- Moderator Tabs --- */}
       {/* Add Moderators */}
       <div 
       onClick={() => setAddModOpen(false)}
@@ -636,7 +728,7 @@ export default function AdminControls({
         >
           <h1 className="font-bold text-2xl mb-4">Remove Moderator</h1>
           <div>
-             Are you ure you want to {removeUsername} as a moderator?
+             Are you sure you want to {removeUsername} as a moderator?
           </div>
           <div className="flex pt-10 w-full justify-end">
             <button 
@@ -804,10 +896,10 @@ export default function AdminControls({
                           className="flex mt-2 py-1 w-full hover:bg-gray-500/50 cursor-pointer"
                         >
                           <span className=" flex">
-                            <div className="text-center w-12">{post.num}</div> <div>{post.rule}</div>
+                            <div className="text-center w-12">{idx+1}</div> <div>{post.rule}</div>
                           </span>
                           {editRules && (
-                            <svg className="ml-auto" width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                            <svg onClick={(e) => {e.stopPropagation(), ShowRuleDel(post.rule)}} className="ml-auto" width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
                                 <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
                                     <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
                                         <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
