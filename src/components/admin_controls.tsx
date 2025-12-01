@@ -80,6 +80,12 @@ export default function AdminControls({
   const [addModShowResults, setAddModShowResults] = useState(false);
   const [addModResults, setAddModResults] = useState<{ username: string, id: string }[]>([]);
   const [addModLoading, setAddModLoading] = useState(false);
+  const [editModWindow, setEditModWindow] = useState(false);
+
+  // delete mod states
+  const [removeModWindow, setRemoveModWindow] = useState(false);
+  const [removeID, setRemoveID] = useState("");
+  const [removeUsername, setRemoveUsername] = useState("");
 
   
   const myModData = moderators.find(
@@ -175,9 +181,10 @@ export default function AdminControls({
 
   try {
     setAddModLoading(true);
+    const pageType = pathname.startsWith("/o")? "organization":"categories";
 
     const res = await fetch(
-      `/api/moderator/searchUser?user=${value}&pageId=${id}&pageType=organization`
+      `/api/moderator/searchUser?user=${value}&pageId=${id}&pageType=${pageType}`
     );
     const json = await res.json();
 
@@ -196,10 +203,12 @@ export default function AdminControls({
 
   async function addModerator(userId: string) {
     try {
+      const pageType = pathname.startsWith("/o")? "organization":"categories";
+
       const res = await fetch(`/api/moderator/addModerator`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, pageId: id, pageType: "organization" }),
+        body: JSON.stringify({ userId, pageId: id, pageType: pageType }),
       });
 
       if (res.ok) {
@@ -218,7 +227,47 @@ export default function AdminControls({
     }
   }
 
+  // remove mod functions
+  const showRemoveMod = (modId: string) => {
+    setRemoveModWindow(true);
+    const removeModData = moderators.find(
+      (m) => m.userId === modId
+    );
+    setRemoveID(removeModData? removeModData.userId:"");
+    setRemoveUsername(removeModData? removeModData.username:"");
+  }
+
+  async function submitRemoveMod(userId:string) {
+    try {
+      const pageType = pathname.startsWith("/o")? "organization":"categories";
+
+      const res = await fetch(`/api/moderator/removeModerator`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, pageId: id, pageType: pageType }),
+      });
+
+      if (res.ok) {
+        // Successfully removed moderator
+        alert("Moderator removed successfully!"); 
+        setRemoveModWindow(false);
+        setRemoveID("");
+        setRemoveUsername("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to remove moderator: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to remove moderator:", err);
+      alert("An error occurred while removing the moderator.");
+    }
+  }
+
+  // edit mod function
   const EditMod = (modId: string) => {
+    setEditModOpen(true);
 
   }
 
@@ -274,7 +323,35 @@ export default function AdminControls({
           onClick={(e) => e.stopPropagation()}
           className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
         >
+          <h1 className="font-bold text-2xl mb-4">Edit Moderator</h1>
 
+        </div>
+      </div>
+
+      {/* Delete Moderators */}
+      <div 
+      onClick={() => setRemoveModWindow(false)}
+        className={`${removeModWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+        >
+          <h1 className="font-bold text-2xl mb-4">Remove Moderator</h1>
+          <div>
+             Are you ure you want to {removeUsername} as a moderator?
+          </div>
+          <div className="flex pt-10 w-full justify-end">
+            <button 
+              type="button" 
+              onClick={() => setRemoveModWindow(false)}
+              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+            >Cancel</button>
+            <button 
+              type="button"
+              onClick={() => submitRemoveMod(removeID)} 
+              className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+          </div>
         </div>
       </div>
 
@@ -503,24 +580,45 @@ export default function AdminControls({
                     </div>
 
                     <div
+                      onClick={(e) => {
+                        if (editMods) {
+                          e.stopPropagation();
+                          showRemoveMod(mod.userId);
+                        } else {
+                          toggleMod(idx);
+                        }
+                      }}
                       className={`flex items-middle justify-center h-full cursor-pointer`}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className={`m-auto transform transition-transform duration-300 ${
-                          openMods[idx] ? "rotate-270" : "rotate-90"
-                        }`}
-                      >
-                        <path d="M8 4l8 8-8 8" />
-                      </svg>
+                      {editMods? (
+                        <svg width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                            <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
+                                    <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+
+                        </path>
+                                </g>
+                            </g>
+                        </svg>
+                      ):(
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className={`m-auto transform transition-transform duration-300 ${
+                            openMods[idx] ? "rotate-270" : "rotate-90"
+                          }`}
+                        >
+                          <path d="M8 4l8 8-8 8" />
+                        </svg>
+                      )}
+                      
                     </div>
                   </div>
 
