@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { fail } from "assert";
+import { Fascinate_Inline } from "next/font/google";
 
 type UserData = {
   id: string;
@@ -70,6 +71,16 @@ export default function AdminControls({
   const [mods, setMods] = useState(false);
   const [reports, setReports] = useState(false);
   const [muted, setMuted] = useState(false);
+
+  // page details
+  const [editRules, setEditRules] = useState(false)
+  const [rulesEditWindow, SetRulesEditWindow] = useState(false)
+  const [ruleChanged, setRuleChanged] = useState(false)
+  const [ruleAction, setRuleAction] = useState("")
+  const [oldRuleName, setOldRuleName] = useState("")
+  const [newRuleName, setNewRuleName] = useState("")
+  const [oldRuleDesc, setOldRuleDesc] = useState("")
+  const [newRuleDesc, setNewRuleDesc] = useState("")
 
   // moderator expand state
   const [openMods, setOpenMods] = useState<Record<number, boolean>>({});
@@ -175,11 +186,57 @@ export default function AdminControls({
   // --- rules ---
   const [openRules, setOpenRules] = useState<number[]>([]);
 
+  const ruleFilter = (value: string) => {
+    const filtered = value.replace(/[^a-zA-Z0-9 -]/g, "");
+    setNewRuleName(filtered);
+    setRuleChanged(true);
+  };
+
   const toggleRule = (idx: number) => {
     setOpenRules((prev) =>
       prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
     );
   };
+
+  const editSelectedRule = (rule:string, desc:string) => {
+    SetRulesEditWindow(true)
+    setOldRuleName(rule)
+    setOldRuleDesc(desc)
+    setNewRuleName(rule)
+    setNewRuleDesc(desc)
+  }
+
+  async function submitAddRule() {
+    try {
+      const pageType = pathname.startsWith("/o")? true:false;
+      const ruleNo = rules.length + 1;
+      const res = await fetch(`/api/moderator/addRule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rule: newRuleName, Desc: newRuleDesc, pageId: id, pageType: pageType, num: ruleNo }),
+      });
+
+      if (res.ok) {
+        // Successfully added rule
+        alert("Rule added successfully!"); 
+        setRemoveModWindow(false);
+        setNewRuleName("");
+        setNewRuleDesc("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to add rule: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to add rule:", err);
+      alert("An error occurred while adding the rule.");
+    }
+  }
+
+  async function submitEditRule() {
+    
+  }
 
   // --- moderator tab functions ---
   async function addModTextBox(value: string) {
@@ -421,6 +478,56 @@ export default function AdminControls({
     <>
       {/* MODAL BOXES */}
 
+
+
+      {/* Moderator Tabs */}
+
+      {/* rules */}
+      <div 
+      onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
+      className={`${rulesEditWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="fixed h-100 w-screen lg:w-2xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl"
+        >
+          <div className="flex justify-between">
+            <h1 className="font-bold text-2xl mb-4">
+            {ruleAction == "add"? "Add Rule" : "Edit Rule"}
+            </h1>
+            <div onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
+             className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">X</div>
+          </div>
+          <input
+          className="border-2 border-gray-500 px-2 rounded-lg"
+          onChange={(e) => ruleFilter(e.target.value)}
+          type="text" value={newRuleName} 
+          />
+          <textarea
+          className="mt-5 w-full min-h-40 border-2 border-gray-500 px-2 rounded-lg"
+          onChange={(e) => {setNewRuleDesc(e.target.value), setRuleChanged(true)}}
+          value={newRuleDesc}
+          />
+          <div className={`${ruleChanged? "":"hidden"} flex pt-10 w-full justify-end`}>
+            <button 
+              type="button" 
+              onClick={() => {
+                SetRulesEditWindow(false),
+                setOldRuleName(""),
+                setOldRuleDesc(""),
+                setNewRuleName(""),
+                setNewRuleDesc("")
+              }}
+              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+            >Cancel</button>
+            <button 
+              type="button"
+              onClick={() => {if(ruleAction == "add"){(submitAddRule())}else{(submitEditRule())}}} 
+              className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+          </div>
+        </div>
+      </div>
+
       {/* Add Moderators */}
       <div 
       onClick={() => setAddModOpen(false)}
@@ -475,31 +582,31 @@ export default function AdminControls({
           <div className="flex justify-evenly">
             <div>
               <div className="border-1 border-gray-500 px-2 py-1">All</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onClick={() => editPerms("7")}/></div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
             </div>
             <div>
               <div className="border-1 border-gray-500 px-2 py-1">Mute</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onClick={() => editPerms("1")}/></div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onChange={() => editPerms("1")}/></div>
             </div>
             <div>
               <div className="border-1 border-gray-500 px-2 py-1">Announce</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onClick={() => editPerms("2")}/></div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
             </div>
             <div>
               <div className="border-1 border-gray-500 px-2 py-1">Page Details</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onClick={() => editPerms("3")}/></div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
             </div>
             <div>
               <div className="border-1 border-gray-500 px-2 py-1">Delete Posts</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onClick={() => editPerms("4")}/></div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
             </div>
             <div>
-              <div className="border-1 border-gray-500 px-2 py-1">setDelete Comments</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onClick={() => editPerms("5")}/></div>
+              <div className="border-1 border-gray-500 px-2 py-1">Delete Comments</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
             </div>
             <div>
-              <div className="border-1 border-gray-500 px-2 py-1">setRoles Management</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onClick={() => editPerms("6")}/></div>
+              <div className="border-1 border-gray-500 px-2 py-1">Roles Management</div>
+              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
             </div>
           </div>
           <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
@@ -658,31 +765,72 @@ export default function AdminControls({
 
             {/* Rules */}
             <div className="mt-1 px-8 py-4 border-t-2 border-gray-500/50">
-              <p style={{ opacity: 0.9 }}>Rules</p>
+              <div className={`flex w-full justify-between`}>
+                <p style={{ opacity: 0.9 }}>Rules</p>
+                <div 
+                  onClick={() => setEditRules(!editRules)}
+                >
+                  <svg className={`${myModData?.perms.pagedetails? "":"hidden"} cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 21H21" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
+              <div className={`${editRules? "block":"hidden"} text-gray-500`}>click on a rule to edit</div>
+              <div
+                onClick={() => {setRuleAction("add"), editSelectedRule("", "")} }
+                className={`${editRules? "":"hidden"} flex mt-4 px-4 py-2 border-2 justify-center border-gray-500 rounded-lg cursor-pointer hover:bg-gray-500/50`}
+              >
+                Add Rule
+                <svg className="ml-2" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" strokeWidth="1.5" className="stroke-current"/>
+                <path d="M15 12L12 12M12 12L9 12M12 12L12 9M12 12L12 15" strokeWidth="1.5" strokeLinecap="round" className="stroke-current"/>
+                </svg>
+              </div>
                 {rules.length > 0 ? (
                   rules.map((post, idx) => {
                     const isOpen = openRules.includes(idx);
                     return (
                       <div key={idx}>
                         <div
-                          onClick={() => toggleRule(idx)}
+                          onClick={() => {
+                            if (editRules) {
+                              editSelectedRule(post.rule, post.description)
+                            } else {
+                              toggleRule(idx)
+                            }
+                          }}
                           className="flex mt-2 py-1 w-full hover:bg-gray-500/50 cursor-pointer"
                         >
                           <span className=" flex">
                             <div className="text-center w-12">{post.num}</div> <div>{post.rule}</div>
                           </span>
-                          <svg
-                            width="24px"
-                            height="24px"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            className={`ml-auto transition-transform duration-300 ${
-                              isOpen ? "rotate-180" : ""
-                            }`}
-                          >
-                            <path d="M7 10l5 5 5-5" />
-                          </svg>
+                          {editRules && (
+                            <svg className="ml-auto" width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                                <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                    <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
+                                        <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+
+                            </path>
+                                    </g>
+                                </g>
+                            </svg>
+                          )}
+                          {!editRules && (
+                            <svg
+                              width="24px"
+                              height="24px"
+                              fill="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className={`ml-auto transition-transform duration-300 ${
+                                isOpen ? "rotate-180" : ""
+                              }`}
+                            >
+                              <path d="M7 10l5 5 5-5" />
+                            </svg>
+                          )}
                         </div>
                         {isOpen && (
                           <div className={`block pl-10 pr-5 py-2 text-sm opacity-70 transition-all duration-500 ease-in-out ${
