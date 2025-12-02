@@ -3,9 +3,9 @@ import { sql } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const {  rule, Desc, pageId, pageType, num  } = await req.json();
+    const {  Desc, pageId, pageType  } = await req.json();
 
-    if (!rule || !Desc || !pageId || typeof pageType !== "boolean" || typeof num !== "number") {
+    if ( !Desc || !pageId || typeof pageType !== "boolean") {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
@@ -30,18 +30,30 @@ export async function POST(req: Request) {
       );
     }
 
-    // Upsert into roles table using page_id + page_type as unique identifier
-    const res = await sql`
-      INSERT INTO rules (page_id, page_type, rules, description, num)
-      VALUES (${page_id}, ${pageType}, ${rule}, ${Desc}, ${num})
-      RETURNING *;
-    `;
+    let res;
+
+    if (pageType) {
+      res = await sql`
+        UPDATE organization
+        SET description = ${Desc}
+        WHERE id = ${page_id}
+        RETURNING *;
+      `;
+    } else {
+      res = await sql`
+        UPDATE categories
+        SET description = ${Desc}
+        WHERE id = ${page_id}
+        RETURNING *;
+      `;
+    }
+    
 
     return NextResponse.json({ res });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to add rule" },
+      { error: "Failed to change description" },
       { status: 500 }
     );
   }

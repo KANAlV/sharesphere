@@ -73,6 +73,10 @@ export default function AdminControls({
   const [muted, setMuted] = useState(false);
 
   // --- page details --- //
+  // --- page description
+  const [descriptionEditWindow, SetDescriptionEditWindow] = useState(false)
+  const [descriptionChanged, setDescriptionChanged]  = useState(false)
+  const [pageDescription, setPageDescription] = useState("")
 
   // --- rules
   const [editRules, setEditRules] = useState(false)
@@ -184,6 +188,35 @@ export default function AdminControls({
     if (brightness < 128) fontcolor = "lightgray";
 
     return fontcolor;
+  }
+
+  // --- description
+  async function submitChangeDescription() {
+    try {
+      const pageType = pathname.startsWith("/o")? true:false;
+      const ruleNo = rules.length + 1;
+      const res = await fetch(`/api/moderator/changePageDescription`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ Desc: pageDescription, pageId: id, pageType: pageType}),
+      });
+
+      if (res.ok) {
+        // Successfully changed description
+        alert("Description changed successfully!"); 
+        setRemoveModWindow(false);
+        setNewRuleName("");
+        setNewRuleDesc("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to change description: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to add rule:", err);
+      alert("An error occurred while changing the description.");
+    }
   }
 
   // --- rules ---
@@ -331,6 +364,11 @@ export default function AdminControls({
       setAddModResults([]); // fallback to empty array
       setAddModShowResults(true);
     }
+  }
+
+  const closeAddMod = () => {
+    setAddModOpen(false)
+    addModTextBox("")
   }
 
   async function addModerator(userId: string) {
@@ -539,210 +577,260 @@ export default function AdminControls({
 
   return (
     <>
-      {/* MODAL BOXES */}
-
-
-
-      
-
-      {/* --- RULES  --- */}
-      {/* add/edit rules */}
-      <div 
-      onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
-      className={`${rulesEditWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed h-100 w-screen lg:w-2xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl"
+      {/* --- MODAL BOXES --- */}
+        {/* --- change description  --- */}
+        <div 
+        onClick={() => {SetDescriptionEditWindow(false), setDescriptionChanged(false)}}
+        className={`${descriptionEditWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
         >
-          <div className="flex justify-between">
-            <h1 className="font-bold text-2xl mb-4">
-            {ruleAction == "add"? "Add Rule" : "Edit Rule"}
-            </h1>
-            <div onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
-             className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">X</div>
-          </div>
-          <input
-          className="border-2 border-gray-500 px-2 rounded-lg"
-          onChange={(e) => ruleFilter(e.target.value)}
-          type="text" value={newRuleName} 
-          />
-          <textarea
-          className="mt-5 w-full min-h-40 border-2 border-gray-500 px-2 rounded-lg"
-          onChange={(e) => {setNewRuleDesc(e.target.value), setRuleChanged(true)}}
-          value={newRuleDesc}
-          />
-          <div className={`${ruleChanged? "":"hidden"} flex pt-10 w-full justify-end`}>
-            <button 
-              type="button" 
-              onClick={() => {
-                SetRulesEditWindow(false),
-                setOldRuleName(""),
-                setOldRuleDesc(""),
-                setNewRuleName(""),
-                setNewRuleDesc("")
-              }}
-              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
-            >Cancel</button>
-            <button 
-              type="button"
-              onClick={() => {if(ruleAction == "add"){(submitAddRule())}else{(submitEditRule())}}} 
-              className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
-          </div>
-        </div>
-      </div>
-
-      {/* Delete Rule */}
-      <div 
-      onClick={() => {setRemoveRuleWindow(false), setOldRuleName("")}}
-        className={`${removeRuleWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
-        >
-          <h1 className="font-bold text-2xl mb-4">Remove Rule</h1>
-          <div>
-             Are you sure you want to remove rule: "{oldRuleName}"?
-          </div>
-          <div className="flex pt-10 w-full justify-end">
-            <button 
-              type="button" 
-              onClick={() => setRemoveRuleWindow(false)}
-              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
-            >Cancel</button>
-            <button 
-              type="button"
-              onClick={() => submitRemoveRule()} 
-              className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
-          </div>
-        </div>
-      </div>
-
-      {/* --- Moderator Tabs --- */}
-      {/* Add Moderators */}
-      <div 
-      onClick={() => setAddModOpen(false)}
-        className={`${addModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
-        >
-          <h1 className="font-bold text-2xl mb-4">Add Moderator</h1>
-
-          <input
-            type="text"
-            value={addModTextBoxValue}
-            onChange={(e) => addModTextBox(e.target.value)}
-            placeholder="search username"
-            className="w-full p-2 mb-4 border-2 border-gray-500 rounded-lg bg-slate-100 dark:bg-slate-700"
-          />
-          <p className="text-gray-500 overflow-clip">
-          {addModLoading ? "Loading..." : 
-            (addModTextBoxValue.length > 2 ? `Showing results for "${addModTextBoxValue}"`:
-            addModTextBoxValue.length == 0? "":`Add ${3 - addModTextBoxValue.length} more characters.`)
-          }</p>
-          <div className={`${addModShowResults? "":"hidden"} max-h-60 overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}>
-            {addModShowResults && addModResults.length > 0 ? (
-              addModResults.map((user, idx) => (
-                <div key={idx}
-                  onClick={() => addModerator(user.id)}
-                  className="mt-2 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
-                  <h2 className="font-bold">{user.username}</h2>
-                </div>
-              ))
-            ) : (
-              <p style={{ opacity: 0.5 }}>No users found.</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Edit Moderators */}
-      <div 
-      onClick={() => setEditModOpen(false)}
-        className={`${editModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-fit "
-        >
-          <h1 className="font-bold text-2xl mb-4">Edit Moderator: {editUsername}</h1>
-          <div>role name: <input className={`px-2 border-2 border-gray-500 w-42 rounded-md`} onChange={(e) => editFilter(e.target.value)} type="text" value={editRoleName}/></div>
-          Permissions
-          <div className="flex justify-evenly">
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">All</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed h-100 w-screen lg:w-2xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl"
+          >
+            <div className="flex justify-between">
+              <h1 className="font-bold text-2xl mb-4">
+              {ruleAction == "add"? "Add Rule" : "Edit Rule"}
+              </h1>
+              <div onClick={() => {SetDescriptionEditWindow(false), setDescriptionChanged(false)}}
+              className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">X</div>
             </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Mute</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onChange={() => editPerms("1")}/></div>
-            </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Announce</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
-            </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Page Details</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
-            </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Delete Posts</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
-            </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Delete Comments</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
-            </div>
-            <div>
-              <div className="border-1 border-gray-500 px-2 py-1">Roles Management</div>
-              <div className="flex justify-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
-            </div>
-          </div>
-          <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
-            <div className="flex pt-10 w-full justify-end">
+            <textarea
+            className="mt-5 w-full min-h-40 border-2 border-gray-500 px-2 rounded-lg"
+            onChange={(e) => {setPageDescription(e.target.value), setDescriptionChanged(true)}}
+            value={pageDescription}
+            />
+            <div className={`${descriptionChanged? "":"hidden"} flex pt-10 w-full justify-end`}>
               <button 
                 type="button" 
-                onClick={() => closeEditWindow()}
+                onClick={() => {
+                  SetDescriptionEditWindow(false),
+                  setDescriptionChanged(false),
+                  setPageDescription("")
+                }}
                 className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
               >Cancel</button>
               <button 
                 type="button"
-                onClick={() => submitEditMod(editID)} 
+                onClick={() => submitChangeDescription()} 
                 className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Delete Moderators */}
-      <div 
-      onClick={() => setRemoveModWindow(false)}
-        className={`${removeModWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+        {/* --- rules  --- */}
+        {/* add/edit rules */}
+        <div 
+        onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
+        className={`${rulesEditWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
         >
-          <h1 className="font-bold text-2xl mb-4">Remove Moderator</h1>
-          <div>
-             Are you sure you want to {removeUsername} as a moderator?
-          </div>
-          <div className="flex pt-10 w-full justify-end">
-            <button 
-              type="button" 
-              onClick={() => setRemoveModWindow(false)}
-              className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
-            >Cancel</button>
-            <button 
-              type="button"
-              onClick={() => submitRemoveMod(removeID)} 
-              className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed h-100 w-screen lg:w-2xl top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl"
+          >
+            <div className="flex justify-between">
+              <h1 className="font-bold text-2xl mb-4">
+              {ruleAction == "add"? "Add Rule" : "Edit Rule"}
+              </h1>
+              <div onClick={() => {SetRulesEditWindow(false), setRuleChanged(false)}}
+              className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">
+              X
+              </div>
+            </div>
+            <input
+            className="border-2 border-gray-500 px-2 rounded-lg"
+            onChange={(e) => ruleFilter(e.target.value)}
+            type="text" value={newRuleName} 
+            />
+            <textarea
+            className="mt-5 w-full min-h-40 border-2 border-gray-500 px-2 rounded-lg"
+            onChange={(e) => {setNewRuleDesc(e.target.value), setRuleChanged(true)}}
+            value={newRuleDesc}
+            />
+            <div className={`${ruleChanged? "":"hidden"} flex pt-10 w-full justify-end`}>
+              <button 
+                type="button" 
+                onClick={() => {
+                  SetRulesEditWindow(false),
+                  setOldRuleName(""),
+                  setOldRuleDesc(""),
+                  setNewRuleName(""),
+                  setNewRuleDesc("")
+                }}
+                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+              >Cancel</button>
+              <button 
+                type="button"
+                onClick={() => {if(ruleAction == "add"){(submitAddRule())}else{(submitEditRule())}}} 
+                className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Delete Rule */}
+        <div 
+        onClick={() => {setRemoveRuleWindow(false), setOldRuleName("")}}
+          className={`${removeRuleWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+          >
+            <h1 className="font-bold text-2xl mb-4">Remove Rule</h1>
+            <div>
+              Are you sure you want to remove rule: "{oldRuleName}"?
+            </div>
+            <div className="flex pt-10 w-full justify-end">
+              <button 
+                type="button" 
+                onClick={() => setRemoveRuleWindow(false)}
+                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+              >Cancel</button>
+              <button 
+                type="button"
+                onClick={() => submitRemoveRule()} 
+                className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+            </div>
+          </div>
+        </div>
+
+      {/* --- Moderator Tabs --- */}
+        {/* Add Moderators */}
+        <div 
+        onClick={() => closeAddMod()}
+          className={`${addModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+          >
+            <div className="flex justify-between">
+              <h1 className="font-bold text-2xl mb-4">Add Moderator</h1>
+              <div onClick={() => closeAddMod()}
+              className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">
+              X
+              </div>
+            </div>
+            <input
+              type="text"
+              value={addModTextBoxValue}
+              onChange={(e) => addModTextBox(e.target.value)}
+              placeholder="search username"
+              className="w-full p-2 mb-4 border-2 border-gray-500 rounded-lg bg-slate-100 dark:bg-slate-700"
+            />
+            <p className="text-gray-500 overflow-clip">
+            {addModLoading ? "Loading..." : 
+              (addModTextBoxValue.length > 2 ? `Showing results for "${addModTextBoxValue}"`:
+              addModTextBoxValue.length == 0? "":`Add ${3 - addModTextBoxValue.length} more characters.`)
+            }</p>
+            <div className={`${addModShowResults? "":"hidden"} max-h-60 overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}>
+              {addModShowResults && addModResults.length > 0 ? (
+                addModResults.map((user, idx) => (
+                  <div key={idx}
+                    onClick={() => addModerator(user.id)}
+                    className="mt-2 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                    <h2 className="font-bold">{user.username}</h2>
+                  </div>
+                ))
+              ) : (
+                <p style={{ opacity: 0.5 }}>No users found.</p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Edit Moderators */}
+        <div 
+        onClick={() => closeEditWindow()}
+          className={`${editModOpen? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-sm lg:w-fit "
+          >
+            <div className="flex justify-between">
+              <h1 className="font-bold text-2xl mb-4">Edit Moderator: {editUsername}</h1>
+              <div onClick={() => {closeEditWindow()}}
+              className="flex justify-center items-center w-8 h-8 hover:bg-gray-500 rounded-full cursor-pointer">
+              X
+              </div>
+            </div>
+            <div className="pb-4">
+              Role name: <input className={`px-2 border-2 border-gray-500 w-42 rounded-md`} onChange={(e) => editFilter(e.target.value)} type="text" value={editRoleName}/>
+              <div className="text-gray-500">Note: Role name only helps identify a moderator, and does not have preset permissions</div>
+            </div>
+            Permissions
+            <div className="block lg:flex justify-evenly">
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">All</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Mute</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onChange={() => editPerms("1")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Announce</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Page Details</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Posts</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Comments</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Roles Management</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
+              </div>
+            </div>
+            <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
+              <div className="flex pt-10 w-full justify-end">
+                <button 
+                  type="button" 
+                  onClick={() => closeEditWindow()}
+                  className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                >Cancel</button>
+                <button 
+                  type="button"
+                  onClick={() => submitEditMod(editID)} 
+                  className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Moderators */}
+        <div 
+        onClick={() => setRemoveModWindow(false)}
+          className={`${removeModWindow? "block":"hidden"} fixed z-40 w-screen h-screen bg-black/50`}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-slate-200 dark:bg-slate-800 p-8 rounded-2xl w-11/12 max-w-md"
+          >
+            <h1 className="font-bold text-2xl mb-4">Remove Moderator</h1>
+            <div>
+              Are you sure you want to {removeUsername} as a moderator?
+            </div>
+            <div className="flex pt-10 w-full justify-end">
+              <button 
+                type="button" 
+                onClick={() => setRemoveModWindow(false)}
+                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+              >Cancel</button>
+              <button 
+                type="button"
+                onClick={() => submitRemoveMod(removeID)} 
+                className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+            </div>
+          </div>
+        </div>
 
       {/* SIDE BAR */}
       <div>
@@ -797,7 +885,19 @@ export default function AdminControls({
           <div className={`${page ? "block" : "hidden"} `}>
             {/* MAIN CONTENT */}
             <div className="px-8 pt-8 pb-4 lg:rounded-t-2xl border-t-2 border-gray-500/50">
-              <h1 className="font-bold">{categoryName}</h1>
+              <div className="flex justify-between">
+                <h1 className="font-bold">{categoryName}</h1>
+                <div 
+                  className={`${myModData?.perms.pagedetails? "":"hidden"}`}
+                  onClick={() => SetDescriptionEditWindow(!descriptionEditWindow)}
+                >
+                  <svg className={` cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M13 21H21" className={`${descriptionEditWindow? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${descriptionEditWindow? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15.3097 5.30981L18.7274 8.72755" className={`${descriptionEditWindow? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </div>
               <p style={{ opacity: 0.8 }}>{pageDetails.description}</p>
               <div style={{ opacity: 0.8 }} className="flex">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="false" role="img">
@@ -860,9 +960,10 @@ export default function AdminControls({
               <div className={`flex w-full justify-between`}>
                 <p style={{ opacity: 0.9 }}>Rules</p>
                 <div 
+                  className={`${myModData?.perms.pagedetails? "":"hidden"}`}
                   onClick={() => setEditRules(!editRules)}
                 >
-                  <svg className={`${myModData?.perms.pagedetails? "":"hidden"} cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg className={`cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13 21H21" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editRules? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
