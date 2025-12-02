@@ -24,7 +24,6 @@ export async function POST(req: Request) {
           delete_posts: false,
           delete_comments: false,
           roles_management: false,
-          adviser: false,
         },
       },
     };
@@ -47,20 +46,11 @@ export async function POST(req: Request) {
       );
     }
 
-    // check if row exists
-    const check = await sql`
-      SELECT 1 FROM roles
-      WHERE page_id = ${page_id} AND
-            page_type = ${pageType}
-    `;
-
-    // Upsert into roles table using page_id + page_type as unique identifier
+    // Remove userId key from jsonb using "-"
     const res = await sql`
-      INSERT INTO roles (page_id, page_type, data)
-      VALUES (${page_id}, ${pageType}, ${JSON.stringify(newData)}::jsonb)
-      ON CONFLICT (page_id, page_type)
-      DO UPDATE
-      SET data = roles.data || EXCLUDED.data
+      UPDATE roles
+      SET data = data - ${userId}
+      WHERE page_id = ${page_id} AND page_type = ${pageType}
       RETURNING *;
     `;
 

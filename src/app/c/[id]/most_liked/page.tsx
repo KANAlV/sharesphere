@@ -4,6 +4,7 @@ import Sidebar from "@/components/sidebar";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import AdminControls from "@/components/admin_controls";
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
@@ -118,10 +119,57 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     num: string;
   }[];
 
+  // Fetch moderator data
+  type Mod = {
+    userId: string;
+    username: string;
+    role: string;
+    perms: {
+      all: boolean;
+      mute: boolean;
+      announce: boolean;
+      pagedetails: boolean;
+      delete_posts: boolean;
+      delete_comments: boolean;
+      roles_management: boolean;
+      adviser: boolean;
+    };
+  };
+
+  // Fetch moderators as an array
+  const moderators = (await sql`
+    SELECT 
+      mod.user_id AS "userId",
+      u.username,
+      (mod.info->>'role')::TEXT AS role,
+      (mod.info->'perms')::JSONB AS perms
+    FROM roles roles_table
+    CROSS JOIN LATERAL jsonb_each(roles_table.data) AS mod(user_id, info)
+    JOIN users u ON u.id = mod.user_id::uuid
+    WHERE roles_table.page_id = (
+      SELECT id FROM categories WHERE category_name = ${id}
+    )
+      AND roles_table.page_type = 'categories';
+  `) as Mod[];
+
+  // Check if current user is a moderator
+  const isModerator = user && moderators.some(mod => mod.userId === user.id);
+
+  const isAdmin = user? user.udata:"0";
+  // ------------------------------------
+
   return (
     <>
       <CoursePageClient id={id} userdata={userdata} posts={posts} details={details} announcements={announcements} />
-      <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
+      {user?.udata == "1" ? (
+        <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
+      ):((
+        isModerator? (
+        <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
+        ):(
+        <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
+        ))
+      )}
     </>
   );
 }
