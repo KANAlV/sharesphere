@@ -677,7 +677,7 @@ export default function AdminControls({
           >
             <h1 className="font-bold text-2xl mb-4">Remove Rule</h1>
             <div>
-              Are you sure you want to remove rule: "{oldRuleName}"?
+              Are you sure you want <br/> to remove rule: &quot;{oldRuleName}&quot;?
             </div>
             <div className="flex pt-10 w-full justify-end">
               <button 
