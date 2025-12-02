@@ -127,6 +127,10 @@ export default function Navigation({ user }: { user: User | null }) {
             {user?.udata === "1" && (
               <NavItem label="Page Creation" icon={PageIcon} onClick={() => waitRedir("/page_creation")} isOpen={isOpen} />
             )}
+             {/* Admin Account creation */}
+            {user?.udata === "1" && (
+             <NavItem label="Admin Creation" icon={AdminIcon} onClick={() => waitRedir("/create-admin")} isOpen={isOpen} />
+            )}
 
             {/* Logout */}
             {user && (
@@ -203,6 +207,14 @@ const LogoutIcon = () => (
     stroke="#E02424" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+const AdminIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6l7-4z" />
+    <path d="M12 11v3" />
+    <circle cx="12" cy="9" r="1.5" fill="currentColor" />
+  </svg>
+);
+
 
 const LoginIcon = UserIcon;
 const PageIcon = CoursesIcon;
