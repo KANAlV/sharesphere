@@ -147,9 +147,9 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     CROSS JOIN LATERAL jsonb_each(roles_table.data) AS mod(user_id, info)
     JOIN users u ON u.id = mod.user_id::uuid
     WHERE roles_table.page_id = (
-      SELECT id FROM organization WHERE name = ${id}
+      SELECT id FROM categories WHERE category_name = ${id}
     )
-      AND roles_table.page_type = 'organization';
+      AND roles_table.page_type = 'categories';
   `) as Mod[];
 
   // Check if current user is a moderator

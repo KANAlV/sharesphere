@@ -47,6 +47,13 @@ export async function POST(req: Request) {
       );
     }
 
+    // check if row exists
+    const check = await sql`
+      SELECT 1 FROM roles
+      WHERE page_id = ${page_id} AND
+            page_type = ${pageType}
+    `;
+
     // Upsert into roles table using page_id + page_type as unique identifier
     const res = await sql`
       INSERT INTO roles (page_id, page_type, data)
