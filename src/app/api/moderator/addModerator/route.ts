@@ -24,6 +24,7 @@ export async function POST(req: Request) {
           delete_posts: false,
           delete_comments: false,
           roles_management: false,
+          adviser: false,
         },
       },
     };

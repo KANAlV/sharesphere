@@ -29,6 +29,7 @@ type Mod = {
     delete_posts: boolean;
     delete_comments: boolean;
     roles_management: boolean;
+    adviser: boolean;
   };
 };
 
@@ -52,6 +53,7 @@ type Rule = {
 
 export default function AdminControls({
   id,
+  isAdmin,
   userdata,
   moderators,
   details,
@@ -60,6 +62,7 @@ export default function AdminControls({
   rules
 }: {
   id: string;
+  isAdmin: string;
   userdata: UserData[] | null;
   moderators: Mod[];
   details: Details[];
@@ -98,6 +101,7 @@ export default function AdminControls({
   const [addModLoading, setAddModLoading] = useState(false);
 
   //edit mod states
+  const [editAdviser, setEditAdviser] = useState(false);
   const [editMods, setEditMods] = useState(false);
   const [editModOpen, setEditModOpen] = useState(false);
   const [editID, setEditID] = useState("");
@@ -109,6 +113,7 @@ export default function AdminControls({
   const [delete_posts, setDelete_posts] = useState(false);
   const [delete_comments, setDelete_comments]= useState(false);
   const [roles_management, setRoles_management]= useState(false);
+  const [isAdviser, setIsAdviser] = useState(false);
   const [editChanged, setEditChanged] = useState(false);
   const [editRoleName, setEditRoleName] = useState("");
 
@@ -444,6 +449,7 @@ export default function AdminControls({
     setEditID(editModData? editModData.userId :"")
     setEditUsername(editModData? editModData.username :"")
     setEditRoleName(editModData? editModData.role:"")
+    setIsAdviser(editModData? editModData.perms.adviser : false)
     setAll(editModData? editModData.perms.all : false)
     setMute(editModData? editModData.perms.mute : false)
     setAnnounce(editModData? editModData.perms.announce : false)
@@ -476,6 +482,24 @@ export default function AdminControls({
     };
     setEditChanged(true)
     switch (perm) {
+      case "8": {
+        const newVal = !isAdviser;
+        if (newVal){
+          setEditRoleName("Adviser")
+        } else {
+          setEditRoleName("")
+        }
+        setIsAdviser(newVal);
+        setAll(newVal);
+        setMute(newVal);
+        setAnnounce(newVal);
+        setPagedetails(newVal);
+        setDelete_posts(newVal);
+        setDelete_comments(newVal);
+        setRoles_management(newVal);
+        return; // done
+      }
+
       case "7": {
         const newVal = !all;
         setAll(newVal);
@@ -546,6 +570,7 @@ export default function AdminControls({
             delete_posts: delete_posts,
             delete_comments: delete_comments,
             roles_management: roles_management,
+            adviser: isAdviser,
           }
         }
       }
@@ -760,6 +785,10 @@ export default function AdminControls({
             </div>
             Permissions
             <div className="block lg:flex justify-evenly">
+              <div className={`${isAdmin == "1"?"":"hidden"} flex lg:block`}>
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Adviser</div>
+                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={isAdviser} onChange={() => editPerms("8")}/></div>
+              </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">All</div>
                 <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
@@ -888,7 +917,7 @@ export default function AdminControls({
               <div className="flex justify-between">
                 <h1 className="font-bold">{categoryName}</h1>
                 <div 
-                  className={`${myModData?.perms.pagedetails? "":"hidden"}`}
+                  className={`${isAdmin == "1" || myModData?.perms.pagedetails? "":"hidden"}`}
                   onClick={() => SetDescriptionEditWindow(!descriptionEditWindow)}
                 >
                   <svg className={` cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -960,7 +989,7 @@ export default function AdminControls({
               <div className={`flex w-full justify-between`}>
                 <p style={{ opacity: 0.9 }}>Rules</p>
                 <div 
-                  className={`${myModData?.perms.pagedetails? "":"hidden"}`}
+                  className={`${isAdmin == "1" || myModData?.perms.pagedetails? "":"hidden"}`}
                   onClick={() => setEditRules(!editRules)}
                 >
                   <svg className={`cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1065,15 +1094,123 @@ export default function AdminControls({
           <div className={`${mods ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl border-t-2 border-gray-500/50
                             overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
           `}>
+            {/* advisers */}
             <div className="flex justify-between w-full">
+              <h1 className="font-bold">Advisers</h1>
+              {isAdmin == "1" ? (
+                <svg onClick={() => setEditAdviser(!editAdviser)} className="cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 21H21" className={`${editAdviser? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editAdviser? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editAdviser? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ):""}
+            </div>
+            {/* mapped mods */}
+            {moderators.length > 0 ? (
+              moderators.map((mod, idx) => (
+                mod.perms.adviser? (
+                  <div key={idx} className="mt-4 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                    {/* ROW HEADER */}
+                    <div
+                      
+                      onClick={() => (editAdviser? EditMod(mod.userId):toggleMod(idx))}
+                      className="flex cursor-pointer"
+                    >
+                      <div className="w-9/10">
+                        <h2 className="font-bold">{mod.username}</h2>
+                        <p className="text-gray-500 select-none">{mod.role}</p>
+                      </div>
+
+                      <div
+                        onClick={(e) => {
+                          if (editAdviser) {
+                            e.stopPropagation();
+                            showRemoveMod(mod.userId);
+                          } else {
+                            toggleMod(idx);
+                          }
+                        }}
+                        className={`flex items-middle justify-center h-full cursor-pointer`}
+                      >
+                        {editAdviser? (
+                          <svg width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                              <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                  <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
+                                      <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+
+                          </path>
+                                  </g>
+                              </g>
+                          </svg>
+                        ):(
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`m-auto transform transition-transform duration-300 ${
+                              openMods[idx] ? "rotate-270" : "rotate-90"
+                            }`}
+                          >
+                            <path d="M8 4l8 8-8 8" />
+                          </svg>
+                        )}
+                        
+                      </div>
+                    </div>
+
+                    {/* SHOW WHEN EXPANDED */}
+                    {openMods[idx] && (
+                      <div className="mt-2 select-none">
+                        <p className="font-semibold">Permissions:</p>
+                        <ul className="list-disc list-inside">
+                          {mod.perms.all && <li>All Permissions</li>}
+
+                          {!mod.perms.all && (
+                            <>
+                              {mod.perms.mute && <li>Mute Users</li>}
+                              {mod.perms.announce && <li>Make Announcements</li>}
+                              {mod.perms.pagedetails && <li>Edit Page Details</li>}
+                              {mod.perms.delete_posts && <li>Delete Posts</li>}
+                              {mod.perms.delete_comments && <li>Delete Comments</li>}
+                              {mod.perms.roles_management && <li>Manage Roles</li>}
+
+                              {/* If no perms */}
+                              {!mod.perms.mute &&
+                              !mod.perms.announce &&
+                              !mod.perms.pagedetails &&
+                              !mod.perms.delete_posts && 
+                              !mod.perms.delete_comments && 
+                              !mod.perms.roles_management && <li>No Perms</li>}
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                  </div>
+                ):""
+              ))
+            ) : (
+              <p style={{ opacity: 0.5 }}>No moderators found.</p>
+            )}
+
+
+            {/* mods */}
+            <div className="flex mt-4 justify-between w-full">
               <h1 className="font-bold">Moderators</h1>
-              {myModData?.perms.all ? (
+              {isAdmin == "1" || myModData?.perms.all ? (
                 <svg onClick={() => setEditMods(!editMods)} className="cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 21H21" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M15.3097 5.30981L18.7274 8.72755" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              ):(myModData?.perms.roles_management ? (
+              ):(isAdmin == "1" || myModData?.perms.roles_management ? (
                 <svg onClick={() => setEditMods(!editMods)} className="cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 21H21" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <path d="M20.0651 7.39423L7.09967 20.4114C6.72438 20.7882 6.21446 21 5.68265 21H4.00383C3.44943 21 3 20.5466 3 19.9922V18.2987C3 17.7696 3.20962 17.2621 3.58297 16.8873L16.5517 3.86681C19.5632 1.34721 22.5747 4.87462 20.0651 7.39423Z" className={`${editMods? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -1098,91 +1235,93 @@ export default function AdminControls({
             {/* mapped mods */}
             {moderators.length > 0 ? (
               moderators.map((mod, idx) => (
-                <div key={idx} className="mt-4 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
-                  {/* ROW HEADER */}
-                  <div
-                    
-                    onClick={() => (editMods? EditMod(mod.userId):toggleMod(idx))}
-                    className="flex cursor-pointer"
-                  >
-                    <div className="w-9/10">
-                      <h2 className="font-bold">{mod.username}</h2>
-                      <p className="text-gray-500 select-none">{mod.role}</p>
-                    </div>
-
+                !mod.perms.adviser? (
+                  <div key={idx} className="mt-4 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                    {/* ROW HEADER */}
                     <div
-                      onClick={(e) => {
-                        if (editMods) {
-                          e.stopPropagation();
-                          showRemoveMod(mod.userId);
-                        } else {
-                          toggleMod(idx);
-                        }
-                      }}
-                      className={`flex items-middle justify-center h-full cursor-pointer`}
-                    >
-                      {editMods? (
-                        <svg width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                            <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
-                                <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
-                                    <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
-
-                        </path>
-                                </g>
-                            </g>
-                        </svg>
-                      ):(
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className={`m-auto transform transition-transform duration-300 ${
-                            openMods[idx] ? "rotate-270" : "rotate-90"
-                          }`}
-                        >
-                          <path d="M8 4l8 8-8 8" />
-                        </svg>
-                      )}
                       
-                    </div>
-                  </div>
+                      onClick={() => (editMods? EditMod(mod.userId):toggleMod(idx))}
+                      className="flex cursor-pointer"
+                    >
+                      <div className="w-9/10">
+                        <h2 className="font-bold">{mod.username}</h2>
+                        <p className="text-gray-500 select-none">{mod.role}</p>
+                      </div>
 
-                  {/* SHOW WHEN EXPANDED */}
-                  {openMods[idx] && (
-                    <div className="mt-2 select-none">
-                      <p className="font-semibold">Permissions:</p>
-                      <ul className="list-disc list-inside">
-                        {mod.perms.all && <li>All Permissions</li>}
+                      <div
+                        onClick={(e) => {
+                          if (editMods) {
+                            e.stopPropagation();
+                            showRemoveMod(mod.userId);
+                          } else {
+                            toggleMod(idx);
+                          }
+                        }}
+                        className={`flex items-middle justify-center h-full cursor-pointer`}
+                      >
+                        {editMods? (
+                          <svg width="24" height="24" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                              <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+                                  <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" fill="red">
+                                      <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
 
-                        {!mod.perms.all && (
-                          <>
-                            {mod.perms.mute && <li>Mute Users</li>}
-                            {mod.perms.announce && <li>Make Announcements</li>}
-                            {mod.perms.pagedetails && <li>Edit Page Details</li>}
-                            {mod.perms.delete_posts && <li>Delete Posts</li>}
-                            {mod.perms.delete_comments && <li>Delete Comments</li>}
-                            {mod.perms.roles_management && <li>Manage Roles</li>}
-
-                            {/* If no perms */}
-                            {!mod.perms.mute &&
-                            !mod.perms.announce &&
-                            !mod.perms.pagedetails &&
-                            !mod.perms.delete_posts && 
-                            !mod.perms.delete_comments && 
-                            !mod.perms.roles_management && <li>No Perms</li>}
-                          </>
+                          </path>
+                                  </g>
+                              </g>
+                          </svg>
+                        ):(
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={`m-auto transform transition-transform duration-300 ${
+                              openMods[idx] ? "rotate-270" : "rotate-90"
+                            }`}
+                          >
+                            <path d="M8 4l8 8-8 8" />
+                          </svg>
                         )}
-                      </ul>
+                        
+                      </div>
                     </div>
-                  )}
 
-                </div>
+                    {/* SHOW WHEN EXPANDED */}
+                    {openMods[idx] && (
+                      <div className="mt-2 select-none">
+                        <p className="font-semibold">Permissions:</p>
+                        <ul className="list-disc list-inside">
+                          {mod.perms.all && <li>All Permissions</li>}
+
+                          {!mod.perms.all && (
+                            <>
+                              {mod.perms.mute && <li>Mute Users</li>}
+                              {mod.perms.announce && <li>Make Announcements</li>}
+                              {mod.perms.pagedetails && <li>Edit Page Details</li>}
+                              {mod.perms.delete_posts && <li>Delete Posts</li>}
+                              {mod.perms.delete_comments && <li>Delete Comments</li>}
+                              {mod.perms.roles_management && <li>Manage Roles</li>}
+
+                              {/* If no perms */}
+                              {!mod.perms.mute &&
+                              !mod.perms.announce &&
+                              !mod.perms.pagedetails &&
+                              !mod.perms.delete_posts && 
+                              !mod.perms.delete_comments && 
+                              !mod.perms.roles_management && <li>No Perms</li>}
+                            </>
+                          )}
+                        </ul>
+                      </div>
+                    )}
+
+                  </div>
+                ):""
               ))
             ) : (
               <p style={{ opacity: 0.5 }}>No moderators found.</p>

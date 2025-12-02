@@ -60,6 +60,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       delete_posts: boolean;
       delete_comments: boolean;
       roles_management: boolean;
+      adviser: boolean;
     };
   };
 
@@ -82,7 +83,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   // Check if current user is a moderator
   const isModerator = user && moderators.some(mod => mod.userId === user.id);
 
-
+  const isAdmin = user? user.udata:"0";
   // ------------------------------------
 
   const exists = (await sql`
@@ -158,10 +159,14 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <CoursePageClient id={id} userdata={userdata} posts={posts} details={details} announcements={announcements} />
-      {isModerator ? (
-        <AdminControls id={id} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
-      ):(
+      {user?.udata == "1" ? (
+        <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
+      ):((
+        isModerator? (
+        <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
+        ):(
         <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
+        ))
       )}
     </>
   );
