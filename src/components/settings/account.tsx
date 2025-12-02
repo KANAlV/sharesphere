@@ -313,26 +313,37 @@ export default function Account({ account }: { account: Account[] }) {
   return (
     <>
       {/* EMAIL SECTION */}
-      <div
-        onMouseEnter={() => emlHover(true)}
-        onMouseLeave={() => emlHover(false)}
-        onClick={() => showEmailWindow(true)}
-        className="flex mt-4 px-6 hover:cursor-pointer"
-      >
-        <div className="flex w-full justify-between pr-5 items-center">
-          <div>Email address</div>
-          <div>{email}</div>
-        </div>
+<div
+  onMouseEnter={() => emlHover(true)}
+  onMouseLeave={() => emlHover(false)}
+  onClick={() => showEmailWindow(true)}
+  className="flex mt-4 px-6 hover:cursor-pointer"
+>
+  <div className="flex w-full justify-between pr-5 items-center">
+    <div className="text-sm text-gray-300">Email address</div>
 
-        <div
-          className={`box-border size-9 rounded-full flex items-center justify-center
-        ${eml ? "bg-gray-500/50" : ""}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">
-            <path d="M9 18l6-6-6-6" stroke="currentColor" fill="none" />
-          </svg>
-        </div>
-      </div>
+    {/* Long email will now truncate properly */}
+    <div className="max-w-[55%] text-right truncate text-sm text-gray-200">
+      {email}
+    </div>
+  </div>
+
+  <div
+    className={`box-border size-9 rounded-full flex items-center justify-center ${
+      eml ? "bg-gray-500/50" : ""
+    }`}
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      className="text-gray-300"
+    >
+      <path d="M9 18l6-6-6-6" stroke="currentColor" fill="none" />
+    </svg>
+  </div>
+</div>
+
 
       {/* PASSWORD SECTION */}
       <div

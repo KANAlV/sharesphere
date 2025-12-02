@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { initFlowbite } from "flowbite";
 
 type User = {
@@ -10,83 +9,87 @@ type User = {
   email: string;
 };
 
-async function handleLogout() {
-  await fetch("/api/logout");
-  window.location.href = "/"; // redirect manually
-}
-
 export default function UserDropdown({ user }: { user: User | null }) {
-  useEffect(() => {
-    // Initialize Flowbite dropdowns, tooltips, etc.
-    initFlowbite();
-  }, []);
-  const [isDroppedDown, setIsDroppedDown] = useState(false);
+  useEffect(() => initFlowbite(), []);
+
+  const [openMenu, setOpenMenu] = useState(false);
   const [cWait, setCWait] = useState(false);
-  const loggedIn = user !== null;
-
-  useEffect(() => {
-    const dropdown = document.getElementById("dropdown");
-
-    // Function to check dropdown visibility
-    const checkDropdown = () => {
-      if (dropdown) {
-        const visible = !dropdown.classList.contains("hidden");
-        setIsDroppedDown(visible);
-      }
-    };
-
-    // Watch for attribute changes (Flowbite toggles "hidden")
-    const observer = new MutationObserver(checkDropdown);
-    if (dropdown) {
-      observer.observe(dropdown, { attributes: true });
-    }
-
-    // Initial check
-    checkDropdown();
-
-    // Cleanup observer
-    return () => observer.disconnect();
-  }, []);
-
-  const [label, toggleLabel] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const waitRedir = (loc: string) => {
     setCWait(true);
     document.body.style.cursor = "wait";
-    if (user) {window.location.href = loc;}
-    else {window.location.href = "/login";}
-    
+    window.location.href = user ? loc : "/login";
   };
 
-  return (<>
-    {/* Loading overlay */}
-    {cWait && (
-      <div className="fixed top-0 flex z-50 w-screen h-screen justify-center items-center" />
-    )}
+  // CLICK OUTSIDE TO CLOSE
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-    <div className="flex relative">
-      <div onClick={() => waitRedir("/create-post")}>
-        <button onMouseEnter={()=>toggleLabel(true)} onMouseLeave={()=>toggleLabel(false)} className="block hs-dark-mode p-2 pr-5 rounded-full">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-              viewBox="0 0 24 24" fill="none" stroke="#fff"
-              strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="4" y="4" width="16" height="16" rx="4"></rect>
-            <path d="M12 8v8M8 12h8"></path>
-          </svg>
-        </button>
-        
-        <div className={`${label ? "block":"hidden"} absolute top-full left-2/9 -translate-x-1/2 
-                      w-0 h-0 border-x-8 border-x-transparent 
-                      border-b-8 border-b-gray-100 dark:border-b-gray-700`}></div>
-        <div
-          id="label"
-          className={`${label ? "block":"hidden"} z-50 bg-white divide-y divide-gray-100 
-            rounded-lg shadow-sm w-33 dark:bg-gray-700 absolute right-0 mt-2 p-2 text-center`}
+  return (
+    <>
+      {cWait && (
+        <div className="fixed top-0 left-0 w-screen h-screen z-50 bg-black/10" />
+      )}
+
+      <div className="relative" ref={menuRef}>
+
+        {/* =========================
+            MAIN BUTTON (Opens dropdown)
+        ========================== */}
+        <button
+          onClick={() => setOpenMenu((prev) => !(prev))}
+          className="p-2 md:p-3 rounded-full bg-blue-500/10 active:scale-95 transition-all"
         >
-          Create Post
+       <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="4" y="4" width="16" height="16" rx="4"></rect>
+              <path d="M12 8v8M8 12h8"></path>
+            </svg>
+        </button>
+
+        {/*DROPDOWN MENU*/}
+        <div
+          className={`${
+            openMenu ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
+          } absolute right-0 mt-2 w-52 
+            bg-white dark:bg-gray-800 rounded-xl shadow-lg 
+            transition-all duration-150 origin-top-right p-2 z-50`}
+        >
+          {/* CREATE POST */}
+          <button
+            onClick={() => waitRedir("/create-post")}
+            className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          >
+            <span>Create Post</span>
+          </button>
+
+          {/* CREATE ANNOUNCEMENT */}
+         <button
+  onClick={() => waitRedir("/create_announcement")}
+  className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap"
+>
+  <span>Create Announcement</span>
+</button>
+
         </div>
       </div>
-    </div>
-  
-  </>);
+    </>
+  );
 }
