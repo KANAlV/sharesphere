@@ -129,7 +129,7 @@ export default function Navigation({ user }: { user: User | null }) {
             )}
              {/* Admin Account creation */}
             {user?.udata === "1" && (
-             <NavItem label="Admin Creation" icon={AdminIcon} onClick={() => waitRedir("/create-admin")} isOpen={isOpen} />
+             <NavItem label="Administrators" icon={AdminIcon} onClick={() => waitRedir("/administrator")} isOpen={isOpen} />
             )}
 
             {/* Logout */}
