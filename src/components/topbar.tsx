@@ -9,6 +9,7 @@ type User = {
   id: string;
   username: string;
   email: string;
+  udata: string;
 };
 
 export default function Topbar({ user }: { user: User | null }) {

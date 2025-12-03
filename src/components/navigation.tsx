@@ -122,11 +122,6 @@ export default function Navigation({ user }: { user: User | null }) {
              <NavItem label="Administrators" icon={AdminIcon} onClick={() => waitRedir("/administrator")} isOpen={isOpen} />
             )}
 
-            {/* Admin Account creation */}
-            {user?.udata === "1" && (
-             <NavItem label="Administrators" icon={AdminIcon} onClick={() => waitRedir("/administrator")} isOpen={isOpen} />
-            )}
-
             {/* Settings */}
             {user?.udata === "1" && (
              <NavItem label="Settings" icon={SettingsIcon} onClick={() => waitRedir("/settings/account")} isOpen={isOpen} />

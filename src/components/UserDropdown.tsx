@@ -7,6 +7,7 @@ type User = {
   id: string;
   username: string;
   email: string;
+  udata: string;
 };
 
 export default function UserDropdown({ user }: { user: User | null }) {
@@ -74,6 +75,7 @@ export default function UserDropdown({ user }: { user: User | null }) {
         >
           {/* CREATE POST */}
           <button
+            type="button"
             onClick={() => waitRedir("/create-post")}
             className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
           >
@@ -82,11 +84,12 @@ export default function UserDropdown({ user }: { user: User | null }) {
 
           {/* CREATE ANNOUNCEMENT */}
          <button
-  onClick={() => waitRedir("/create_announcement")}
-  className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap"
->
-  <span>Create Announcement</span>
-</button>
+            type="button"
+            onClick={() => waitRedir("/create_announcement")}
+            className={`${user?.udata == "1"? "":"hidden"} flex items-center gap-3 w-full p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition whitespace-nowrap`}
+          >
+            <span>Create Announcement</span>
+          </button>
 
         </div>
       </div>
