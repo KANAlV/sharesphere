@@ -64,6 +64,15 @@ type Report = {
   created_at: string;
 };
 
+type Logs = {
+  id: string;
+  page_id: string;
+  action: string;
+  reciever: string;
+  action_by: string;
+  created_at: string;
+};
+
 export default function AdminControls({
   id,
   isAdmin,
@@ -86,7 +95,7 @@ export default function AdminControls({
   const [page, setPage] = useState(true);
   const [mods, setMods] = useState(false);
   const [reports, setReports] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [logs, setLogs] = useState(false);
 
   // --- page details --- //
   // --- page description
@@ -138,6 +147,9 @@ export default function AdminControls({
   // reports
   const [reportList, setReportList] = useState<Report[]>([]);
 
+  // logs
+  const [logsList, setLogsList] = useState<Logs[]>([]);
+
   // get current session permissions
   const myModData = moderators.find(
     (m) => m.userId === userdata?.[0]?.id
@@ -149,7 +161,7 @@ export default function AdminControls({
     tab == "page"? setPage(true):setPage(false);
     tab == "mods"? setMods(true):setMods(false);
     tab == "reports"? setReports(true):setReports(false);
-    tab == "muted"? setMuted(true):setMuted(false);
+    tab == "logs"? setLogs(true):setLogs(false);
   }
 
   const toggleMod = (idx: number) => {
@@ -627,7 +639,7 @@ export default function AdminControls({
         }
 
         const data = await res.json();
-        setReportList(data.reports); // expects { reports: [...] }
+        setReportList(data.reports);
       } catch (err) {
         console.error("Error fetching reports:", err);
       }
@@ -635,6 +647,29 @@ export default function AdminControls({
 
     fetchReports();
   }, []);
+
+  // --- LOGS FUNCTIONS --- //
+  useEffect(() => {
+    const fetchLogs = async () => {
+      const pageType = pathname.startsWith("/o") ? "o" : "c";
+
+      try {
+        const res = await fetch(`/api/moderator/loadLogs?id=${encodeURIComponent(id)}&type=${pageType}`);
+        if (!res.ok) {
+          console.error("Failed to fetch logs");
+          return;
+        }
+
+        const data = await res.json();
+        setLogsList(Array.isArray(data.logs) ? data.logs : []);
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      }
+    };
+
+    fetchLogs();
+  }, []);
+
 
   const reportsRedir = (pt:string, cDir:string, oDir:string|null, pid:string, cid:string|null) => {
     const page_type = pt == "organization"? "/o/"+oDir:"/c/"+cDir;
@@ -644,6 +679,30 @@ export default function AdminControls({
     } else {
       const redirLoc = page_type+"/posts/"+pid+"/comment/"+cid;
       window.location.href = redirLoc;
+    }
+  }
+
+  //removeReport
+  async function removeReport(reportId:string) {
+    try {
+      const res = await fetch(`/api/moderator/removeReport`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId: reportId }),
+      });
+
+      if (res.ok) {
+        // Successfully removed report
+        alert("report removed successfully!"); 
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to remove report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to remove report:", err);
+      alert("An error occurred while removing the report.");
     }
   }
 
@@ -951,9 +1010,9 @@ export default function AdminControls({
                             cursor-pointer border-b-3 ${reports? "border-blue-600":"border-blue-600/0"} `}>
               Reports
             </div>
-            <div onClick={() => toggleTab("muted")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
-                            cursor-pointer border-b-3 ${muted? "border-blue-600":"border-blue-600/0"} `}>
-              Muted
+            <div onClick={() => toggleTab("logs")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${logs? "border-blue-600":"border-blue-600/0"} `}>
+              Logs
             </div>
           </div>
 
@@ -1387,20 +1446,56 @@ export default function AdminControls({
 
             {/* display reports.map here */}
             <div className="mt-4 space-y-3">
-
               {reportList.length === 0 && (
                 <div className="text-gray-400 italic">No reports found.</div>
               )}
 
               {reportList.map((r) => (
-                <div 
-                  key={r.id}
-                  onClick={() => reportsRedir(r.page_type, r.category_name, r.org_name, r.post_id,r.comment_id)}
+                <div key={r.id}>
+                  <div
+                  onClick={() => removeReport(r.id)}
+                  className="flex justify-self-end justify-center items-center absolute w-8 h-8 rounded-full hover:bg-gray-500/50 cursor-pointer">
+                  X
+                  </div>
+                  <div
+                    onClick={() => reportsRedir(r.page_type, r.category_name, r.org_name, r.post_id,r.comment_id)}
+                    className="p-4 border border-gray-600 rounded-lg bg-gray-800/30"
+                  > 
+                    {!r.comment_id ? (<div><b>Post by:</b> {r.posted_by}</div>):(<div><b>Comment by:</b> {r.posted_by}</div>)}
+                    <div><b>Report By:</b> {r.reported_by}</div>
+                    <div><b>Reason:</b> {r.reason}</div>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+          {/* Logs */}
+          <div
+            className={`${logs ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl 
+                        border-t-2 border-gray-500/50 overflow-x-auto 
+                        scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}
+          >
+            <div className="text-xl pb-2 border-b-2 border-gray-500">
+              Reports
+            </div>
+
+            {/* display logs.map here */}
+            <div className="mt-4 space-y-3">
+              {logsList.length === 0 && (
+                <div className="text-gray-400 italic">No reports found.</div>
+              )}
+
+              {logsList.map((l) => (
+                <div
+                  key={l.id}
                   className="p-4 border border-gray-600 rounded-lg bg-gray-800/30"
-                >
-                  {!r.comment_id ? (<div><b>Post by:</b> {r.posted_by}</div>):(<div><b>Comment by:</b> {r.posted_by}</div>)}
-                  <div><b>Report By:</b> {r.reported_by}</div>
-                  <div><b>Reason:</b> {r.reason}</div>
+                > 
+                  <div>{new Date(l.created_at).toLocaleString()}</div>
+                  <div><b>{l.action}:</b></div>
+                  <div>{l.reciever}</div>
+                  <div><b>Moderator:</b> {l.action_by}</div>
                 </div>
               ))}
 

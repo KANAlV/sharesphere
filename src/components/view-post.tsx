@@ -319,7 +319,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       {/* Title */}
       <div className="flex border-b-2 border-[#6C6C6C] justify-between w-full p-5 mb-3">
         <div>
-          <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.title}</p>
+          <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.user_deleted || post.mod_deleted? "-- Removed --":post.title}</p>
           <p style={{ color: fontcolor }} className="text-sm">
             {post.user_deleted || post.mod_deleted? "Anonymous":post.username} — {new Date(post.created_at).toLocaleDateString()}
           </p>
@@ -455,7 +455,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       </div>
 
       {/* Comment input */}
-      <div style={{ color: fontcolor}} className="flex mt-5 mb-8 items-center w-full">
+      <div style={{ color: fontcolor}} className={`${post.user_deleted || post.mod_deleted? "hidden":""} flex mt-5 mb-8 items-center w-full`}>
         {userdata? (<>
           <div className="w-12 h-12 self-start overflow-clip rounded-full">
             <img
