@@ -479,7 +479,7 @@ export default function AdminControls({
     setEditRoleName(editModData? editModData.role:"")
     setIsAdviser(editModData? editModData.perms.adviser : false)
     setAll(editModData? editModData.perms.all : false)
-    setMute(editModData? editModData.perms.mute : false)
+    setMute(true)
     setAnnounce(editModData? editModData.perms.announce : false)
     setPagedetails(editModData? editModData.perms.pagedetails : false)
     setDelete_posts(editModData? editModData.perms.delete_posts : false)
@@ -519,7 +519,7 @@ export default function AdminControls({
         }
         setIsAdviser(newVal);
         setAll(newVal);
-        setMute(newVal);
+        setMute(true);
         setAnnounce(newVal);
         setPagedetails(newVal);
         setDelete_posts(newVal);
@@ -531,7 +531,7 @@ export default function AdminControls({
       case "7": {
         const newVal = !all;
         setAll(newVal);
-        setMute(newVal);
+        setMute(true);
         setAnnounce(newVal);
         setPagedetails(newVal);
         setDelete_posts(newVal);
@@ -900,10 +900,6 @@ export default function AdminControls({
                 <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
               </div>
               <div className="flex lg:block">
-                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Mute</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={mute} onChange={() => editPerms("1")}/></div>
-              </div>
-              <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Announce</div>
                 <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
               </div>
@@ -1236,7 +1232,6 @@ export default function AdminControls({
 
                           {!mod.perms.all && (
                             <>
-                              {mod.perms.mute && <li>Mute Users</li>}
                               {mod.perms.announce && <li>Make Announcements</li>}
                               {mod.perms.pagedetails && <li>Edit Page Details</li>}
                               {mod.perms.delete_posts && <li>Delete Posts</li>}
@@ -1244,7 +1239,7 @@ export default function AdminControls({
                               {mod.perms.roles_management && <li>Manage Roles</li>}
 
                               {/* If no perms */}
-                              {!mod.perms.mute &&
+                              {
                               !mod.perms.announce &&
                               !mod.perms.pagedetails &&
                               !mod.perms.delete_posts && 
@@ -1363,7 +1358,6 @@ export default function AdminControls({
 
                           {!mod.perms.all && (
                             <>
-                              {mod.perms.mute && <li>Mute Users</li>}
                               {mod.perms.announce && <li>Make Announcements</li>}
                               {mod.perms.pagedetails && <li>Edit Page Details</li>}
                               {mod.perms.delete_posts && <li>Delete Posts</li>}
@@ -1371,7 +1365,7 @@ export default function AdminControls({
                               {mod.perms.roles_management && <li>Manage Roles</li>}
 
                               {/* If no perms */}
-                              {!mod.perms.mute &&
+                              {
                               !mod.perms.announce &&
                               !mod.perms.pagedetails &&
                               !mod.perms.delete_posts && 

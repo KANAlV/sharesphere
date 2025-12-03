@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AdminVerification } from "@/components/adminVerification";
 
 type admn = {
   username:string;
@@ -8,7 +9,8 @@ type admn = {
   fullname:string;
 }
 
-export default function AdminList() {
+export default async function AdminList() {
+  await AdminVerification();
   const [admins, setAdmins] = useState<admn[]>([]);
   const [loading, setLoading] = useState(true);
 

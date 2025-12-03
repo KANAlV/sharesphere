@@ -1,8 +1,10 @@
 import CreateAnnouncementPage from "@/components/create_announcement";
 import TokenChecker from "@/components/TokenCheker";
+import { AdminVerification } from "@/components/adminVerification";
 import { sql } from "@/lib/db";
 
 export default async function Page() {
+  await AdminVerification();
   const courses = (await sql`
       SELECT * FROM fetchAllCourses(20,0)
       `) as {
