@@ -51,6 +51,28 @@ type Rule = {
   num: string;
 };
 
+type Report = {
+  id: string;
+  posted_by: string;
+  post_id: string;
+  comment_id: string | null;
+  page_type: string;
+  category_name: string;
+  org_name:string | null;
+  reported_by: string;
+  reason: string;
+  created_at: string;
+};
+
+type Logs = {
+  id: string;
+  page_id: string;
+  action: string;
+  reciever: string;
+  action_by: string;
+  created_at: string;
+};
+
 export default function AdminControls({
   id,
   isAdmin,
@@ -73,7 +95,7 @@ export default function AdminControls({
   const [page, setPage] = useState(true);
   const [mods, setMods] = useState(false);
   const [reports, setReports] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [logs, setLogs] = useState(false);
 
   // --- page details --- //
   // --- page description
@@ -122,7 +144,13 @@ export default function AdminControls({
   const [removeID, setRemoveID] = useState("");
   const [removeUsername, setRemoveUsername] = useState("");
 
-  
+  // reports
+  const [reportList, setReportList] = useState<Report[]>([]);
+
+  // logs
+  const [logsList, setLogsList] = useState<Logs[]>([]);
+
+  // get current session permissions
   const myModData = moderators.find(
     (m) => m.userId === userdata?.[0]?.id
   );
@@ -133,7 +161,7 @@ export default function AdminControls({
     tab == "page"? setPage(true):setPage(false);
     tab == "mods"? setMods(true):setMods(false);
     tab == "reports"? setReports(true):setReports(false);
-    tab == "muted"? setMuted(true):setMuted(false);
+    tab == "logs"? setLogs(true):setLogs(false);
   }
 
   const toggleMod = (idx: number) => {
@@ -600,6 +628,84 @@ export default function AdminControls({
     }
   }
 
+  // --- REPORTS FUNCTIONS --- //
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const res = await fetch(`/api/moderator/loadReports?id=${encodeURIComponent(id)}`);
+        if (!res.ok) {
+          console.error("Failed to fetch reports");
+          return;
+        }
+
+        const data = await res.json();
+        setReportList(data.reports);
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  // --- LOGS FUNCTIONS --- //
+  useEffect(() => {
+    const fetchLogs = async () => {
+      const pageType = pathname.startsWith("/o") ? "o" : "c";
+
+      try {
+        const res = await fetch(`/api/moderator/loadLogs?id=${encodeURIComponent(id)}&type=${pageType}`);
+        if (!res.ok) {
+          console.error("Failed to fetch logs");
+          return;
+        }
+
+        const data = await res.json();
+        setLogsList(Array.isArray(data.logs) ? data.logs : []);
+      } catch (err) {
+        console.error("Error fetching reports:", err);
+      }
+    };
+
+    fetchLogs();
+  }, []);
+
+
+  const reportsRedir = (pt:string, cDir:string, oDir:string|null, pid:string, cid:string|null) => {
+    const page_type = pt == "organization"? "/o/"+oDir:"/c/"+cDir;
+    if(cid == null){
+      const redirLoc = page_type+"/posts/"+pid;
+      window.location.href = redirLoc;
+    } else {
+      const redirLoc = page_type+"/posts/"+pid+"/comment/"+cid;
+      window.location.href = redirLoc;
+    }
+  }
+
+  //removeReport
+  async function removeReport(reportId:string) {
+    try {
+      const res = await fetch(`/api/moderator/removeReport`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportId: reportId }),
+      });
+
+      if (res.ok) {
+        // Successfully removed report
+        alert("report removed successfully!"); 
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to remove report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to remove report:", err);
+      alert("An error occurred while removing the report.");
+    }
+  }
+
   return (
     <>
       {/* --- MODAL BOXES --- */}
@@ -632,12 +738,12 @@ export default function AdminControls({
                   setDescriptionChanged(false),
                   setPageDescription("")
                 }}
-                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-400"
               >Cancel</button>
               <button 
                 type="button"
                 onClick={() => submitChangeDescription()} 
-                className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
         </div>
@@ -681,12 +787,12 @@ export default function AdminControls({
                   setNewRuleName(""),
                   setNewRuleDesc("")
                 }}
-                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer text-white hover:bg-gray-400"
               >Cancel</button>
               <button 
                 type="button"
                 onClick={() => {if(ruleAction == "add"){(submitAddRule())}else{(submitEditRule())}}} 
-                className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
         </div>
@@ -708,12 +814,12 @@ export default function AdminControls({
               <button 
                 type="button" 
                 onClick={() => setRemoveRuleWindow(false)}
-                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-400"
               >Cancel</button>
               <button 
                 type="button"
                 onClick={() => submitRemoveRule()} 
-                className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                className="ml-4 px-4 py-2 bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
         </div>
@@ -823,12 +929,12 @@ export default function AdminControls({
                 <button 
                   type="button" 
                   onClick={() => closeEditWindow()}
-                  className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                  className="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-400"
                 >Cancel</button>
                 <button 
                   type="button"
                   onClick={() => submitEditMod(editID)} 
-                  className="ml-4 px-4 py-2 bg-blue-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                  className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
               </div>
             </div>
           </div>
@@ -851,12 +957,12 @@ export default function AdminControls({
               <button 
                 type="button" 
                 onClick={() => setRemoveModWindow(false)}
-                className="px-4 py-2 bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-400"
               >Cancel</button>
               <button 
                 type="button"
                 onClick={() => submitRemoveMod(removeID)} 
-                className="ml-4 px-4 py-2 bg-red-700 rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                className="ml-4 px-4 py-2 bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
         </div>
@@ -904,9 +1010,9 @@ export default function AdminControls({
                             cursor-pointer border-b-3 ${reports? "border-blue-600":"border-blue-600/0"} `}>
               Reports
             </div>
-            <div onClick={() => toggleTab("muted")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
-                            cursor-pointer border-b-3 ${muted? "border-blue-600":"border-blue-600/0"} `}>
-              Muted
+            <div onClick={() => toggleTab("logs")} className={`flex justify-center items-center px-4 text-lg font-bold whitespace-nowrap
+                            cursor-pointer border-b-3 ${logs? "border-blue-600":"border-blue-600/0"} `}>
+              Logs
             </div>
           </div>
 
@@ -918,7 +1024,7 @@ export default function AdminControls({
                 <h1 className="font-bold">{categoryName}</h1>
                 <div 
                   className={`${isAdmin == "1" || myModData?.perms.pagedetails? "":"hidden"}`}
-                  onClick={() => SetDescriptionEditWindow(!descriptionEditWindow)}
+                  onClick={() => {SetDescriptionEditWindow(!descriptionEditWindow), setPageDescription(pageDetails.description)}}
                 >
                   <svg className={` cursor-pointer p-1 rounded-full overflow-visible hover:bg-gray-500/50`} width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M13 21H21" className={`${descriptionEditWindow? "stroke-red-700":"stroke-current"}`} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -938,49 +1044,6 @@ export default function AdminControls({
                 </svg>
                 <span className="w-2" />
                 Created {dateCreated}
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div className=" mt-1 pl-8 py-4 border-t-2 border-gray-500/50">
-              <p style={{ opacity: 0.9 }}>
-                {/^\/[co]\/[^/]+\/posts/.test(pathname) ? "Post Tags":(pathname.startsWith(`/c/`)||pathname.startsWith(`/o/`) ? "Most Popular Tags":"Currently showing posts for:")}
-              </p>
-              <div className="block max-h-120 overflow-y-clip">
-                {tags.length > 0 ? (
-                  tags.map((post, idx) => (
-                    <a href={pathname.startsWith("/c")? (pathname !== `/c/${id}` ? `/c/${id}`:`/c/${id}/tags/${redirectTo(post.tag)}`):(pathname !== `/o/${id}` ? `/o/${id}`:`/o/${id}/tags/${redirectTo(post.tag)}`)} key={idx} className="block w-min">
-                      <div className={`flex px-5 py-2 w-min whitespace-nowrap rounded-full mt-2`}
-                      style={{ backgroundColor: post.color, color: textColor(post.color) }}
-                      >
-                        {post.tag}
-                        {pathname.includes("tags") ? (
-                        <svg
-                          width="24"
-                          height="24"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          aria-hidden="true"
-                          focusable="false"
-                          className="pl-2"
-                        >
-                          <path
-                            d="M6 6L18 18M6 18L18 6"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      ) : null}
-                      </div>
-                    </a>
-                  ))
-                  ) : (
-                    <p style={{ opacity: 0.9 }}>No Tags found.</p>
-                  )
-                }
               </div>
             </div>
 
@@ -1070,7 +1133,7 @@ export default function AdminControls({
             </div>
 
             {/* Related Orgs/Clubs */}
-            <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4 lg:bg-gray-500/50`}>
+            <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4`}>
               <p style={{ opacity: 0.9 }}>Related Orgs / Clubs</p>
               {rel.length > 0 ? (
                 rel.map((post, idx) => (
@@ -1326,6 +1389,74 @@ export default function AdminControls({
             ) : (
               <p style={{ opacity: 0.5 }}>No moderators found.</p>
             )}
+          </div>
+
+          {/* Reports */}
+          <div
+            className={`${reports ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl 
+                        border-t-2 border-gray-500/50 overflow-x-auto 
+                        scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}
+          >
+            <div className="text-xl pb-2 border-b-2 border-gray-500">
+              Reports
+            </div>
+
+            {/* display reports.map here */}
+            <div className="mt-4 space-y-3">
+              {reportList.length === 0 && (
+                <div className="text-gray-400 italic">No reports found.</div>
+              )}
+
+              {reportList.map((r) => (
+                <div key={r.id}>
+                  <div
+                  onClick={() => removeReport(r.id)}
+                  className="flex justify-self-end justify-center items-center absolute w-8 h-8 rounded-full hover:bg-gray-500/50 cursor-pointer">
+                  X
+                  </div>
+                  <div
+                    onClick={() => reportsRedir(r.page_type, r.category_name, r.org_name, r.post_id,r.comment_id)}
+                    className="p-4 border border-gray-600 rounded-lg bg-gray-800/30"
+                  > 
+                    {!r.comment_id ? (<div><b>Post by:</b> {r.posted_by}</div>):(<div><b>Comment by:</b> {r.posted_by}</div>)}
+                    <div><b>Report By:</b> {r.reported_by}</div>
+                    <div><b>Reason:</b> {r.reason}</div>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+          {/* Logs */}
+          <div
+            className={`${logs ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl 
+                        border-t-2 border-gray-500/50 overflow-x-auto 
+                        scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}
+          >
+            <div className="text-xl pb-2 border-b-2 border-gray-500">
+              Reports
+            </div>
+
+            {/* display logs.map here */}
+            <div className="mt-4 space-y-3">
+              {logsList.length === 0 && (
+                <div className="text-gray-400 italic">No reports found.</div>
+              )}
+
+              {logsList.map((l) => (
+                <div
+                  key={l.id}
+                  className="p-4 border border-gray-600 rounded-lg bg-gray-800/30"
+                > 
+                  <div>{new Date(l.created_at).toLocaleString()}</div>
+                  <div><b>{l.action}:</b></div>
+                  <div>{l.reciever}</div>
+                  <div><b>Moderator:</b> {l.action_by}</div>
+                </div>
+              ))}
+
+            </div>
           </div>
 
           <div className="p-2 mt-50 lg:m-0 w-inherit rounded-b-2xl" />
