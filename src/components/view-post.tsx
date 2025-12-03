@@ -321,10 +321,10 @@ export default function PostView({ post, myModData, details, userdata }: { post:
         <div>
           <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.title}</p>
           <p style={{ color: fontcolor }} className="text-sm">
-            {post.username} — {new Date(post.created_at).toLocaleDateString()}
+            {post.user_deleted || post.mod_deleted? "Anonymous":post.username} — {new Date(post.created_at).toLocaleDateString()}
           </p>
         </div>
-        <div className={`${userdata? "":"hidden"} right-0 h-10 justify-end items-end rounded-full`}>
+        <div className={`${userdata || !post.user_deleted || !post.mod_deleted? "":"hidden"} right-0 h-10 justify-end items-end rounded-full`}>
           <div onClick={() => setOptionsDropdown(optionsDropdown === post.id ? null : post.id)} className={`justify-self-end w-10 h-10 overflow-clip rounded-full`}>
             <div className={`${userdata? "":"hidden"} flex hover:bg-gray-500/50 w-10 h-10 justify-center items-center rounded-full`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -376,7 +376,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       </div>
 
       {/* Images */}
-      {length > 0 && (
+      {length > 0 || !post.user_deleted || !post.mod_deleted && (
         <div className="relative w-full overflow-hidden rounded-xl">
           <div className="flex bg-gray-500/30 transition-transform duration-500" style={{ transform: `translateX(-${current * 100}%)` }}>
             {images.map((img, idx) => (
@@ -394,11 +394,11 @@ export default function PostView({ post, myModData, details, userdata }: { post:
 
       {/* Content */}
       <div className="border-b-2 border-[#6C6C6C] flex-2 px-5 pt-2 pb-4">
-        <p style={{ color: fontcolor }} className="text-lg">{post.content}</p>
+        <p style={{ color: fontcolor }} className="text-lg">{post.mod_deleted? "Comment was deleted by a moderator.":(post.user_deleted? "User has deleted this comment":(post.content))}</p>
       </div>
 
       {/* Likes / Dislikes */}
-      <div className="flex gap-6 ml-4 pt-5 items-center">
+      <div className={`${post.user_deleted || post.mod_deleted? "hidden":""} flex gap-6 ml-4 pt-5 items-center`}>
         <div className="flex items-center gap-2 cursor-pointer" onClick={() => reactPost("like")}>
           {userReacted.liked ? (
             <svg width="22" height="22" viewBox="0 -0.5 21 21" version="1.1" xmlns="http://www.w3.org/2000/svg">

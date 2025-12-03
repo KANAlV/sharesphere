@@ -1117,7 +1117,7 @@ export default function AdminControls({
             </div>
 
             {/* Related Orgs/Clubs */}
-            <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4 lg:bg-gray-500/50`}>
+            <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4`}>
               <p style={{ opacity: 0.9 }}>Related Orgs / Clubs</p>
               {rel.length > 0 ? (
                 rel.map((post, idx) => (
