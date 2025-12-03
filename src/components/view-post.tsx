@@ -376,41 +376,40 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       </div>
 
       {/* Images */}
-      {(length > 0 || post.user_deleted || post.mod_deleted) && (
-      <div className="relative w-full overflow-hidden rounded-xl">
-        <div
-          className="flex bg-gray-500/30 transition-transform duration-500"
-          style={{ transform: `translateX(-${current * 100}%)` }}
-        >
-          {images.map((img, idx) => (
-            <img
-              key={idx}
-              src={img}
-              alt={`Slide ${idx}`}
-              className="w-full h-64 object-contain flex-shrink-0"
-            />
-          ))}
+      {length > 0 && !post.user_deleted && !post.mod_deleted && (
+        <div className="relative w-full overflow-hidden rounded-xl">
+          <div
+            className="flex bg-gray-500/30 transition-transform duration-500"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {images.map((img, idx) => (
+              <img
+                key={idx}
+                src={img}
+                alt={`Slide ${idx}`}
+                className="w-full h-64 object-contain flex-shrink-0"
+              />
+            ))}
+          </div>
+
+          {length > 1 && (
+            <>
+              <button
+                onClick={prevSlide}
+                className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              >
+                ‹
+              </button>
+              <button
+                onClick={nextSlide}
+                className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
+              >
+                ›
+              </button>
+            </>
+          )}
         </div>
-
-        {length > 1 && (
-          <>
-            <button
-              onClick={prevSlide}
-              className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-            >
-              ‹
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition"
-            >
-              ›
-            </button>
-          </>
-        )}
-      </div>
-    )}
-
+      )}
 
       {/* Content */}
       <div className="border-b-2 border-[#6C6C6C] flex-2 px-5 pt-2 pb-4">
