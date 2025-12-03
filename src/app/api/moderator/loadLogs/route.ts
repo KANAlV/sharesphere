@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     const filterId = url.searchParams.get("id");
     const type = url.searchParams.get("type");
 
-    let logs = await sql`
+    const logs = await sql`
     SELECT 
       ml.id::TEXT,
       ml.page_id::TEXT,
