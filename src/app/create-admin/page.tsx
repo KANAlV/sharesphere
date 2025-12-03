@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type admn = {
+  id: string;
+  username: string;
+  email: string;
+  fullname: string;
+};
+
 export default function CreateAdminOnly() {
   const router = useRouter();
 
@@ -16,7 +23,7 @@ export default function CreateAdminOnly() {
 
   // Promote states
   const [searchUser, setSearchUser] = useState("");
-  const [foundUser, setFoundUser] = useState<any>(null);
+  const [foundUser, setFoundUser] = useState<admn | null>(null);
   const [promoteMsg, setPromoteMsg] = useState("");
 
   // ---------------- CREATE ACCOUNT ----------------

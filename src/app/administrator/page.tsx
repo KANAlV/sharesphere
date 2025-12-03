@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+type admn = {
+  username:string;
+  email:string;
+  fullname:string;
+}
+
 export default function AdminList() {
-  const [admins, setAdmins] = useState<any[]>([]);
+  const [admins, setAdmins] = useState<admn[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
