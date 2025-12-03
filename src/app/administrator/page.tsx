@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 type admn = {
@@ -12,8 +12,24 @@ type admn = {
 export default function AdminList() {
   const [admins, setAdmins] = useState<admn[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
   useEffect(() => {
+    async function checkAdmins() {
+      try {
+        const res = await fetch("/api/adminChecker");
+        const data = await res.json();
+
+        if (!data.isAdmin) {
+          router.push("/"); // redirect if not admin
+        }
+      } catch (err) {
+        console.error("Failed to check admin:", err);
+        router.push("/"); // fallback redirect
+      }
+    }
+
+    checkAdmins();
+
     async function fetchAdmins() {
       try {
         const res = await fetch("/api/administrator");
