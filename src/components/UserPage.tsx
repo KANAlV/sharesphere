@@ -144,12 +144,11 @@ export default function UserPage({ user, posts: initialPosts, }: { user: User[],
 
                     {/* Profile - overlapping banner */}
                     <div className="relative flex items-center pl-4 -mt-16"> {/* Half overlap using negative margin */}
-                    <div className="relative w-32 h-32 border-4 border-black dark:border-white rounded-full overflow-hidden">
-                        <Image
-                        src={profile}
-                        alt="user profile"
-                        fill
-                        style={{ objectFit: "cover" }}
+                    <div className="relative w-32 h-32 border-4 bg-black dark:bg-white border-black dark:border-white rounded-full overflow-hidden">
+                        <img
+                          src={profile}
+                          alt="user profile"
+                          className="w-full h-full rounded-full object-cover"
                         />
                     </div>
                     <div className="flex h-32 justify-end items-end p-4">

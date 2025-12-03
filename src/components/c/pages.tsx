@@ -18,7 +18,9 @@ type Post = {
   title: string;
   username: string;
   content: string;
-  created_at: string;
+  posted: string;
+  user_deleted: boolean;
+  mod_deleted: boolean;
   likes: number;
   dislikes: number;
   lnd: LikesDislikesDetails;
@@ -245,10 +247,10 @@ export default function CoursePage({
                 <div className="items-center">
                   <h2 className="text-xl font-bold">{post.title}</h2>
                   <p className="inline-block opacity-80">
-                    {post.username} — {displayPostedDate(post.created_at)}
+                    {post.user_deleted || post.mod_deleted? "Anon":post.username} — {displayPostedDate(post.posted)}
                   </p>
                 </div>
-                <p className="line-clamp-3">{post.content}</p>
+                <p className="line-clamp-3">{post.mod_deleted? "[deleted] by mod":(post.user_deleted? "[deleted] by user":(post.content))}</p>
                 <br />
                 {/* Likes and Dislikes */}
                 <div className="flex">

@@ -85,7 +85,7 @@ export default function Navigation({ user }: { user: User | null }) {
             {user && (
               <div
                 onClick={() => {
-                  waitRedir("/settings/account");
+                  waitRedir("/u/"+user.username);
                   setIsOpen(false);
                 }}
                 className={`hidden lg:flex flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none lg:flex-row lg:justify-start lg:my-4`}
@@ -93,17 +93,7 @@ export default function Navigation({ user }: { user: User | null }) {
                 <div className="lg:pl-2 mt-1">
                   <div className="text-gray-500">Logged in As:</div>
                   <div className="text-lg">{user.username}</div>
-                </div>
-                <span className="w-2/4" />
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.65-.07.98s.03.66.07.98L2.46 14.6a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65a7.03 7.03 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z" />
-                </svg>
+                </div>                
               </div>
             )}
 
@@ -126,6 +116,16 @@ export default function Navigation({ user }: { user: User | null }) {
             {/* Page creation */}
             {user?.udata === "1" && (
               <NavItem label="Page Creation" icon={PageIcon} onClick={() => waitRedir("/page_creation")} isOpen={isOpen} />
+            )}
+
+            {/* Admin Account creation */}
+            {user?.udata === "1" && (
+             <NavItem label="Administrators" icon={AdminIcon} onClick={() => waitRedir("/administrator")} isOpen={isOpen} />
+            )}
+
+            {/* Settings */}
+            {user?.udata === "1" && (
+             <NavItem label="Settings" icon={SettingsIcon} onClick={() => waitRedir("/settings/account")} isOpen={isOpen} />
             )}
 
             {/* Logout */}
@@ -203,6 +203,26 @@ const LogoutIcon = () => (
     stroke="#E02424" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+
+const AdminIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 2l7 4v6c0 5-3.5 9-7 10-3.5-1-7-5-7-10V6l7-4z" />
+    <path d="M12 11v3" />
+    <circle cx="12" cy="9" r="1.5" fill="currentColor" />
+  </svg>
+);
+
+const SettingsIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.03-.66-.07-.98l2.11-1.65a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.03 7.03 0 0 0-1.69-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.49.42l-.38 2.65a7.03 7.03 0 0 0-1.69.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65L4.57 11c-.04.32-.07.65-.07.98s.03.66.07.98L2.46 14.6a.5.5 0 0 0-.12.65l2 3.46a.5.5 0 0 0 .6.22l2.49-1c.52.39 1.09.72 1.69.98l.38 2.65A.5.5 0 0 0 10 22h4a.5.5 0 0 0 .49-.42l.38-2.65a7.03 7.03 0 0 0 1.69-.98l2.49 1a.5.5 0 0 0 .6-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.65ZM12 15.5A3.5 3.5 0 1 1 15.5 12 3.5 3.5 0 0 1 12 15.5Z" />
+  </svg>
+)
 
 const LoginIcon = UserIcon;
 const PageIcon = CoursesIcon;

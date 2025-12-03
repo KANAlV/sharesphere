@@ -69,7 +69,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     username: string;
     title: string;
     content: string;
-    created_at: string;
+    posted: string;
+    user_deleted: boolean;
+    mod_deleted: boolean;
     likes: number;
     dislikes: number;
     lnd:LikesDislikesDetails;
