@@ -186,7 +186,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         </div>
 
         {isOpen && (
-          <div className="absolute p-4 z-40 h-2/4 w-4/9 bg-background border-2 border-gray-500 rounded-2xl">
+          <div className="absolute p-4 z-40 h-2/4 w-5/6 lg:w-4/9 bg-background border-2 border-gray-500 rounded-2xl">
             <p className="font-semibold">Page Type:</p>
             <div className="flex">
               <label className="px-4">

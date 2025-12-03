@@ -8,7 +8,7 @@ export async function GET() {
     const announcements = await sql`
       SELECT announceid, author_id, title, content
       FROM annnouncemetns
-      ORDER BY announceid DESC;
+      ORDER BY created_at DESC;
     `;
 
     console.log("✅ Announcements fetched:", announcements);

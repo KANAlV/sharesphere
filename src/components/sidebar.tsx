@@ -269,26 +269,6 @@ export default function Sidebar({
             )}
         </div>
 
-        {/* Related Orgs/Clubs */}
-        <div className={`${inOrgs ? "hidden" : null} mt-1 px-8 py-4 lg:bg-gray-500/50`}>
-          <p style={{ opacity: 0.9 }}>Related Orgs / Clubs</p>
-          {rel.length > 0 ? (
-            rel.map((post, idx) => (
-              <div key={idx} className={`mt-2 px-5 py-1 w-min whitespace-nowrap`}>
-                <a
-                  href={`/o/${redirectTo(post.title)}`}
-                  className="hover:underline"
-                >
-                  {OrgName(post.title)}
-                </a>
-              </div>
-            ))
-            ) : (
-              <p style={{ opacity: 0.5 }}>No related orgs/clubs found.</p>
-            )
-          }
-        </div>
-
         <div className="p-2 mt-50 lg:m-0 w-inherit lg:bg-gray-500/50 rounded-b-2xl" />
       </div>
     </div>
