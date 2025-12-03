@@ -17,6 +17,8 @@ type Post = {
   dislikes: number;
   lnd: LikesDislikesDetails;
   images: string[];
+  user_deleted: boolean;
+  mod_deleted: boolean;
 };
 
 type Details = {
@@ -30,6 +32,22 @@ type UserData = {
   id: string;
   username: string;
   profile: string;
+};
+
+type Mod = {
+  userId: string;
+  username: string;
+  role: string;
+  perms: {
+    all: boolean;
+    mute: boolean;
+    announce: boolean;
+    pagedetails: boolean;
+    delete_posts: boolean;
+    delete_comments: boolean;
+    roles_management: boolean;
+    adviser: boolean;
+  };
 };
 
 type Comments = {
@@ -50,7 +68,7 @@ type Comments = {
 let theme: string;
 let userid: string;
 
-export default function PostView({ post, details, userdata }: { post: Post, details: Details[], userdata: UserData[] | null }) {
+export default function PostView({ post, myModData, details, userdata }: { post: Post, myModData: Mod|null, details: Details[], userdata: UserData[]|null }) {
   theme = details[0].theme;
   userid = userdata ? userdata[0].id : "";
 
@@ -77,6 +95,25 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
   const [replyTo, setReplyTo] = useState<string | null>(null); // comment id being replied to
   const [replyComment, setReplyComment] = useState("");
   const replyTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // --- DROPDOWN OPTIONS --- //
+  const [optionsDropdown, setOptionsDropdown] = useState<string | null>(null);
+
+  // --- reporting consts --- //
+  const [reportWindow ,openReportWindow] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportCommentId, setReportCommentId] = useState("");
+  const [reportUsername, setReportUsername] = useState("");
+  const pageType = usePathname().startsWith("/o")? "organization":"categories"
+
+  // --- deleting post --- ///
+  const [deleteWindow, openDeleteWindow] = useState(false);
+
+  const [userReactState, setUserReactState] = useState<{
+    [commentId: string]: { liked: boolean; disliked: boolean }
+  }>({});
+
+  
 
   // --- Set background color ---
   useEffect(() => {
@@ -166,14 +203,176 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
     }
   };
 
-  return (
+  // --- reporting
+  async function sendReport() {
+    if(reportReason == "") {
+      alert("Please enter the reason for the report");
+      return;
+    } 
+
+    const commentId = "";
+    try {
+      const res = await fetch(`/api/reporting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: post.id, commentId: commentId, reason: reportReason, pageType: pageType}),
+      });
+
+      if (res.ok) {
+        // Successfully report
+        alert("Successfully Reported"); 
+        openReportWindow(false);
+        setReportReason("");
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to report:", err);
+      alert("An error occurred while reporting.");
+    }
+  }
+
+  // --- deleting
+  async function DeletePost() {    
+    try {
+      const res = await fetch(`/api/deletePost`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId:post.id, Mod: myModData?.userId ?? null }),
+      });
+
+      if (res.ok) {
+        // Successfully Delete
+        alert("Successfully Deleted Post"); 
+        openDeleteWindow(false);
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to delete post: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      alert("An error occurred while deleting post.");
+    }
+  }
+
+  return (<>
+    {/* Report Modal */}
+    <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Report {reportUsername}</h1>
+        <p className="text-gray-500">Please tell us the reason why you are reporting.</p>
+        <textarea
+        onChange={(e) => setReportReason(e.target.value)}
+        value={reportReason}
+        className="mt-4 w-full p-1 min-h-24 border-2 border-gray-500"
+        />
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openReportWindow(false)
+              setReportCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => sendReport()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Report</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Delete Modal */}
+    <div onClick={() => {openDeleteWindow(false)}} className={`${deleteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Delete Comment</h1>
+        <p className="text-gray-500">Are sure you to delete {userdata? (userdata[0].username == post.username? "this":post.username+"'s"):""} post?</p>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openDeleteWindow(false)
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => DeletePost()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Main Content */}
     <div id="title" className="p-4 b-6 rounded-lg w-full h-screen lg:max-w-7/9 lg:ml-12 mt-16 lg:p-16 lg:mt-6">
       {/* Title */}
-      <div className="border-b-2 border-[#6C6C6C] flex-2 p-5 mb-3">
-        <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.title}</p>
-        <p style={{ color: fontcolor }} className="text-sm">
-          {post.username} — {new Date(post.created_at).toLocaleDateString()}
-        </p>
+      <div className="flex border-b-2 border-[#6C6C6C] justify-between w-full p-5 mb-3">
+        <div>
+          <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.title}</p>
+          <p style={{ color: fontcolor }} className="text-sm">
+            {post.username} — {new Date(post.created_at).toLocaleDateString()}
+          </p>
+        </div>
+        <div className={`${userdata? "":"hidden"} right-0 h-10 justify-end items-end rounded-full`}>
+          <div onClick={() => setOptionsDropdown(optionsDropdown === post.id ? null : post.id)} className={`justify-self-end w-10 h-10 overflow-clip rounded-full`}>
+            <div className={`${userdata? "":"hidden"} flex hover:bg-gray-500/50 w-10 h-10 justify-center items-center rounded-full`}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div className={`${optionsDropdown === post.id? "":"hidden"} w-fit z-50 justify-items-end relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+            <div
+            onClick={() => {openReportWindow(true)}}
+            className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
+            >
+              <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path style={{ stroke: "transparent", fill: fontcolor }} d="M7 12.5538H6.25C6.25 12.5713 6.25061 12.5888 6.25183 12.6062L7 12.5538ZM7.782 13.2398V12.4898C7.76683 12.4898 7.75167 12.4903 7.73653 12.4912L7.782 13.2398ZM17.217 13.2398L17.3055 12.4951C17.2761 12.4916 17.2466 12.4898 17.217 12.4898V13.2398ZM17.8805 12.9231L18.5153 13.3225V13.3225L17.8805 12.9231ZM17.879 12.1878L18.5121 11.7858C18.5046 11.7739 18.4967 11.7622 18.4885 11.7508L17.879 12.1878ZM15.943 9.48782L16.5526 9.05075L16.5467 9.04282L15.943 9.48782ZM15.943 8.75682L16.5468 9.20187L16.5525 9.19386L15.943 8.75682ZM17.879 6.05682L18.4885 6.49386C18.4967 6.48242 18.5046 6.47075 18.5121 6.45887L17.879 6.05682ZM17.8805 5.32159L18.5153 4.92214L18.5153 4.92214L17.8805 5.32159ZM17.217 5.00482V5.75482C17.2466 5.75482 17.2761 5.75307 17.3055 5.74958L17.217 5.00482ZM7.782 5.00482L7.73653 5.75344C7.75167 5.75436 7.76683 5.75482 7.782 5.75482V5.00482ZM7 5.69082L6.25183 5.63841C6.25061 5.65586 6.25 5.67334 6.25 5.69082H7ZM7.75 12.5538C7.75 12.1396 7.41421 11.8038 7 11.8038C6.58579 11.8038 6.25 12.1396 6.25 12.5538H7.75ZM6.25 19.0048C6.25 19.419 6.58579 19.7548 7 19.7548C7.41421 19.7548 7.75 19.419 7.75 19.0048H6.25ZM6.25183 12.6062C6.30892 13.4212 7.01201 14.038 7.82747 13.9884L7.73653 12.4912C7.73632 12.4912 7.73688 12.4912 7.73797 12.4913C7.73901 12.4915 7.74008 12.4917 7.74107 12.4921C7.74295 12.4927 7.74396 12.4935 7.74445 12.4939C7.74494 12.4943 7.74581 12.4952 7.7467 12.497C7.74718 12.498 7.74758 12.499 7.74786 12.5C7.74815 12.5011 7.74818 12.5016 7.74817 12.5014L6.25183 12.6062ZM7.782 13.9898H17.217V12.4898H7.782V13.9898ZM17.1285 13.9846C17.6798 14.0501 18.2196 13.7924 18.5153 13.3225L17.2457 12.5236C17.2585 12.5034 17.2818 12.4922 17.3055 12.4951L17.1285 13.9846ZM18.5153 13.3225C18.811 12.8526 18.8098 12.2545 18.5121 11.7858L17.2459 12.5899C17.233 12.5697 17.233 12.5439 17.2457 12.5236L18.5153 13.3225ZM18.4885 11.7508L16.5525 9.05079L15.3335 9.92486L17.2695 12.6249L18.4885 11.7508ZM16.5467 9.04282C16.5816 9.09009 16.5816 9.15455 16.5467 9.20183L15.3393 8.31182C14.984 8.79376 14.984 9.45088 15.3393 9.93283L16.5467 9.04282ZM16.5525 9.19386L18.4885 6.49386L17.2695 5.61979L15.3335 8.31979L16.5525 9.19386ZM18.5121 6.45887C18.8098 5.99018 18.811 5.39204 18.5153 4.92214L17.2457 5.72104C17.233 5.70078 17.233 5.67499 17.2459 5.65478L18.5121 6.45887ZM18.5153 4.92214C18.2196 4.45224 17.6798 4.19454 17.1285 4.26007L17.3055 5.74958C17.2818 5.75241 17.2585 5.7413 17.2457 5.72104L18.5153 4.92214ZM17.217 4.25482H7.782V5.75482H17.217V4.25482ZM7.82747 4.2562C7.01201 4.20667 6.30892 4.82344 6.25183 5.63841L7.74817 5.74323C7.74818 5.74303 7.74815 5.74359 7.74786 5.74465C7.74758 5.74566 7.74718 5.74669 7.7467 5.74762C7.74581 5.7494 7.74494 5.7503 7.74445 5.75073C7.74396 5.75116 7.74295 5.75191 7.74107 5.75257C7.74008 5.75291 7.73901 5.75317 7.73797 5.75332C7.73688 5.75347 7.73632 5.75343 7.73653 5.75344L7.82747 4.2562ZM6.25 5.69082V12.5538H7.75V5.69082H6.25ZM6.25 12.5538V16.2987H7.75V12.5538H6.25ZM6.25 16.2987V19.0048H7.75V16.2987H6.25Z" fill="#000000"/>
+              </svg>
+              <p>Report</p>
+            </div>
+            <div
+            onClick={() => {openDeleteWindow(true)}}
+            className={`
+              ${userdata
+                ? (
+                    userdata[0]?.username === post.username
+                      ? ""
+                      : (
+                          myModData?.perms?.delete_posts
+                            ? ""
+                            : "hidden"
+                        )
+                  )
+                : "hidden"
+              }
+              flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+            >
+              <svg width="22" height="22" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <g id="Page-1" stroke="none" strokeWidth="1.5" fill="none" fillRule="evenodd">
+                  <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" className="stroke-current">
+                    <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+                    </path>
+                  </g>
+                </g>
+              </svg>
+              <p className="pl-2.5">Delete</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Images */}
@@ -328,6 +527,7 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
 
       {/* Comments Section */}
       <MainComments
+        myModData={myModData}
         parentId={post.id}
         fontcolor={fontcolor}
         userdata={userdata}
@@ -342,10 +542,11 @@ export default function PostView({ post, details, userdata }: { post: Post, deta
         postComment={postComment}
       />
     </div>
-  );
+  </>);
 }
 
 type NestedRepliesProps = {
+  myModData: Mod|null;
   parentId: string;
   fontcolor: string;
   userdata: UserData[] | null;
@@ -367,6 +568,7 @@ type NestedRepliesProps = {
 
 function MainComments(props: NestedRepliesProps) {
   const {
+    myModData,
     parentId,
     fontcolor,
     userdata,
@@ -396,6 +598,21 @@ function MainComments(props: NestedRepliesProps) {
 
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+
+  // --- DROPDOWN OPTIONS --- //
+  const [optionsDropdown, setOptionsDropdown] = useState<string | null>(null);
+
+  // --- reporting consts --- //
+  const [reportWindow ,openReportWindow] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportCommentId, setReportCommentId] = useState("");
+  const [reportUsername, setReportUsername] = useState("");
+  const pageType = usePathname().startsWith("/o")? "organization":"categories"
+
+  // --- deliting comment --- ///
+  const [deleteWindow, openDeleteWindow] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState("");
+  const [deleteUsername, setDeleteUsername] = useState("");
 
   const [userReactState, setUserReactState] = useState<{
     [commentId: string]: { liked: boolean; disliked: boolean }
@@ -511,7 +728,123 @@ function MainComments(props: NestedRepliesProps) {
     }));
   };
 
-  return (
+  // --- reporting
+  async function sendReport() {
+    if(reportReason == "") {
+      alert("Please enter the reason for the report");
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/reporting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: postId, commentId: reportCommentId, reason: reportReason, pageType: pageType}),
+      });
+
+      if (res.ok) {
+        // Successfully report
+        alert("Successfully Reported"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to report:", err);
+      alert("An error occurred while reporting.");
+    }
+  }
+
+  // --- deleting
+  async function DeleteComment() {    
+    try {
+      const res = await fetch(`/api/deleteComment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId: deleteCommentId, postId:postId, Mod: myModData?.userId ?? null }),
+      });
+
+      if (res.ok) {
+        // Successfully Delete
+        alert("Successfully Deleted Comment"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to delete comment: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      alert("An error occurred while deleting comment.");
+    }
+  }
+
+  return (<>
+    {/* Report Modal */}
+    <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Report {reportUsername}</h1>
+        <p className="text-gray-500">Please tell us the reason why you are reporting.</p>
+        <textarea
+        onChange={(e) => setReportReason(e.target.value)}
+        value={reportReason}
+        className="mt-4 w-full p-1 min-h-24 border-2 border-gray-500"
+        />
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openReportWindow(false)
+              setReportCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => sendReport()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Report</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Delete Modal */}
+    <div onClick={() => {openDeleteWindow(false), setDeleteCommentId("")}} className={`${deleteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Delete Comment</h1>
+        <p className="text-gray-500">Are sure you to delete {userdata? (userdata[0].username == deleteUsername? "this":deleteUsername+"'s"):""} comment?</p>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openDeleteWindow(false)
+              setDeleteCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => DeleteComment()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Main Content */}
     <div>
       <div className="h-1"/>
       {nestedComments.map((comment, idx) => (
@@ -519,30 +852,81 @@ function MainComments(props: NestedRepliesProps) {
           {/* Avatar */}
           <div className="absolute bg-black w-10 h-10 self-start overflow-clip rounded-full">
             <img
-              src={comment.anonymous ? "/anon.png" : comment.profile}
-              alt={comment.username}
+              src={comment.anonymous || comment.user_deleted || comment.mod_deleted? "/anon.png" : comment.profile}
+              alt={comment.anonymous || comment.user_deleted || comment.mod_deleted? "anon":comment.username}
               className="object-cover rounded-lg"
               sizes="80px"
             />
           </div>
 
+          {/* Reporting */}
+          <div className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex-1 justify-items-end absolute top-4 right-0 self-end`}>
+            <div onClick={() => setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)} className={`w-10 h-10 overflow-clip rounded-full`}>
+              <div className={`${userdata? "":"hidden"} flex hover:bg-gray-500/50 w-10 h-10 justify-center items-center rounded-full`}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+              <div
+              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+              className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
+              >
+                <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path style={{ stroke: "transparent", fill: fontcolor }} d="M7 12.5538H6.25C6.25 12.5713 6.25061 12.5888 6.25183 12.6062L7 12.5538ZM7.782 13.2398V12.4898C7.76683 12.4898 7.75167 12.4903 7.73653 12.4912L7.782 13.2398ZM17.217 13.2398L17.3055 12.4951C17.2761 12.4916 17.2466 12.4898 17.217 12.4898V13.2398ZM17.8805 12.9231L18.5153 13.3225V13.3225L17.8805 12.9231ZM17.879 12.1878L18.5121 11.7858C18.5046 11.7739 18.4967 11.7622 18.4885 11.7508L17.879 12.1878ZM15.943 9.48782L16.5526 9.05075L16.5467 9.04282L15.943 9.48782ZM15.943 8.75682L16.5468 9.20187L16.5525 9.19386L15.943 8.75682ZM17.879 6.05682L18.4885 6.49386C18.4967 6.48242 18.5046 6.47075 18.5121 6.45887L17.879 6.05682ZM17.8805 5.32159L18.5153 4.92214L18.5153 4.92214L17.8805 5.32159ZM17.217 5.00482V5.75482C17.2466 5.75482 17.2761 5.75307 17.3055 5.74958L17.217 5.00482ZM7.782 5.00482L7.73653 5.75344C7.75167 5.75436 7.76683 5.75482 7.782 5.75482V5.00482ZM7 5.69082L6.25183 5.63841C6.25061 5.65586 6.25 5.67334 6.25 5.69082H7ZM7.75 12.5538C7.75 12.1396 7.41421 11.8038 7 11.8038C6.58579 11.8038 6.25 12.1396 6.25 12.5538H7.75ZM6.25 19.0048C6.25 19.419 6.58579 19.7548 7 19.7548C7.41421 19.7548 7.75 19.419 7.75 19.0048H6.25ZM6.25183 12.6062C6.30892 13.4212 7.01201 14.038 7.82747 13.9884L7.73653 12.4912C7.73632 12.4912 7.73688 12.4912 7.73797 12.4913C7.73901 12.4915 7.74008 12.4917 7.74107 12.4921C7.74295 12.4927 7.74396 12.4935 7.74445 12.4939C7.74494 12.4943 7.74581 12.4952 7.7467 12.497C7.74718 12.498 7.74758 12.499 7.74786 12.5C7.74815 12.5011 7.74818 12.5016 7.74817 12.5014L6.25183 12.6062ZM7.782 13.9898H17.217V12.4898H7.782V13.9898ZM17.1285 13.9846C17.6798 14.0501 18.2196 13.7924 18.5153 13.3225L17.2457 12.5236C17.2585 12.5034 17.2818 12.4922 17.3055 12.4951L17.1285 13.9846ZM18.5153 13.3225C18.811 12.8526 18.8098 12.2545 18.5121 11.7858L17.2459 12.5899C17.233 12.5697 17.233 12.5439 17.2457 12.5236L18.5153 13.3225ZM18.4885 11.7508L16.5525 9.05079L15.3335 9.92486L17.2695 12.6249L18.4885 11.7508ZM16.5467 9.04282C16.5816 9.09009 16.5816 9.15455 16.5467 9.20183L15.3393 8.31182C14.984 8.79376 14.984 9.45088 15.3393 9.93283L16.5467 9.04282ZM16.5525 9.19386L18.4885 6.49386L17.2695 5.61979L15.3335 8.31979L16.5525 9.19386ZM18.5121 6.45887C18.8098 5.99018 18.811 5.39204 18.5153 4.92214L17.2457 5.72104C17.233 5.70078 17.233 5.67499 17.2459 5.65478L18.5121 6.45887ZM18.5153 4.92214C18.2196 4.45224 17.6798 4.19454 17.1285 4.26007L17.3055 5.74958C17.2818 5.75241 17.2585 5.7413 17.2457 5.72104L18.5153 4.92214ZM17.217 4.25482H7.782V5.75482H17.217V4.25482ZM7.82747 4.2562C7.01201 4.20667 6.30892 4.82344 6.25183 5.63841L7.74817 5.74323C7.74818 5.74303 7.74815 5.74359 7.74786 5.74465C7.74758 5.74566 7.74718 5.74669 7.7467 5.74762C7.74581 5.7494 7.74494 5.7503 7.74445 5.75073C7.74396 5.75116 7.74295 5.75191 7.74107 5.75257C7.74008 5.75291 7.73901 5.75317 7.73797 5.75332C7.73688 5.75347 7.73632 5.75343 7.73653 5.75344L7.82747 4.2562ZM6.25 5.69082V12.5538H7.75V5.69082H6.25ZM6.25 12.5538V16.2987H7.75V12.5538H6.25ZM6.25 16.2987V19.0048H7.75V16.2987H6.25Z" fill="#000000"/>
+                </svg>
+                <p>Report</p>
+              </div>
+              <div
+              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+              className={`
+                ${userdata
+                  ? (
+                      userdata[0]?.username === comment.username
+                        ? ""
+                        : (
+                            myModData?.perms?.delete_comments
+                              ? ""
+                              : "hidden"
+                          )
+                    )
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg width="22" height="22" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                  <g id="Page-1" stroke="none" strokeWidth="1.5" fill="none" fillRule="evenodd">
+                    <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" className="stroke-current">
+                      <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+                      </path>
+                    </g>
+                  </g>
+                </svg>
+                <p className="pl-2.5">Delete</p>
+              </div>
+            </div>
+          </div>
+
           {/* Comment content */}
           <div style={{ borderLeft: `${comment.has_comments? `2px solid ${fontcolor}`:"0 none black"}` }} className="flex-grow ml-4.75 pt-4 pl-8">
             <p 
-              onClick={() => gotoUser(comment.username, comment.anonymous)}
+              onClick={() => (comment.user_deleted || comment.mod_deleted? "":(gotoUser(comment.username, comment.anonymous)))}
               style={{ color: fontcolor }}
-              className={`text-sm w-fit ${comment.anonymous? "":"cursor-pointer"}`}>
-              {comment.anonymous ? "anonymous" : comment.username} •{" "}
+              className={`text-sm w-fit ${comment.anonymous || comment.user_deleted || comment.mod_deleted? "":"cursor-pointer"}`}>
+              {comment.anonymous || comment.user_deleted || comment.mod_deleted ? "anonymous" : comment.username} •{" "}
               {new Date(comment.created_at).toLocaleString()}
             </p>
             <div className="pt-2 pl-4">
               <p style={{ color: fontcolor }} className="text-sm">
-                {comment.content}
+                {comment.mod_deleted? "Comment was deleted by a moderator.":(comment.user_deleted? "User has deleted this comment":(comment.content))}
               </p>
             </div>
 
             {/* Likes / Dislikes / Reply */}
-            <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
+            <div style={{ color: fontcolor }} className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex gap-4 mt-2 items-center`}>
               <div className="flex items-center gap-1 cursor-pointer"
                 onClick={() => handleLike(comment.id)}>
                 {userReactState[comment.id]?.liked ? (
@@ -698,6 +1082,7 @@ function MainComments(props: NestedRepliesProps) {
           <div className="ml-4.75">
             <div className={`${openReplies1[comment.id] ? "block" : "hidden"} pt-2`}>
               <NestedReplies
+                myModData={myModData}
                 parentId={comment.id}
                 fontcolor={fontcolor}
                 userdata={userdata}
@@ -734,11 +1119,12 @@ function MainComments(props: NestedRepliesProps) {
         )}
       </div>
     </div>
-  );
+  </>);
 }
 
 function NestedReplies(props: NestedRepliesProps) {
   const {
+    myModData,
     parentId,
     fontcolor,
     userdata,
@@ -772,6 +1158,21 @@ function NestedReplies(props: NestedRepliesProps) {
   const [userReactState, setUserReactState] = useState<{
     [commentId: string]: { liked: boolean; disliked: boolean }
   }>({});
+
+  // --- DROPDOWN OPTIONS --- //
+  const [optionsDropdown, setOptionsDropdown] = useState<string | null>(null);
+
+  // --- reporting consts --- //
+  const [reportWindow ,openReportWindow] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportCommentId, setReportCommentId] = useState("");
+  const [reportUsername, setReportUsername] = useState("");
+  const pageType = usePathname().startsWith("/o")? "organization":"categories"
+
+  // --- deliting comment --- ///
+  const [deleteWindow, openDeleteWindow] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState("");
+  const [deleteUsername, setDeleteUsername] = useState("");
 
   async function fetchNested() {
     try {
@@ -883,39 +1284,205 @@ function NestedReplies(props: NestedRepliesProps) {
     }));
   };
 
-  return (
+  // --- reporting
+  async function sendReport() {
+    if(reportReason == "") {
+      alert("Please enter the reason for the report");
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/reporting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: postId, commentId: reportCommentId, reason: reportReason, pageType: pageType}),
+      });
+
+      if (res.ok) {
+        // Successfully report
+        alert("Successfully Reported"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to report:", err);
+      alert("An error occurred while reporting.");
+    }
+  }
+
+  // --- deleting
+  async function DeleteComment() {    
+    try {
+      const res = await fetch(`/api/deleteComment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId: deleteCommentId, postId:postId, Mod: myModData?.userId ?? null }),
+      });
+
+      if (res.ok) {
+        // Successfully Delete
+        alert("Successfully Deleted Comment"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to delete comment: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      alert("An error occurred while deleting comment.");
+    }
+  }
+
+  return (<>
+    {/* Report Modal */}
+    <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Report {reportUsername}</h1>
+        <p className="text-gray-500">Please tell us the reason why you are reporting.</p>
+        <textarea
+        onChange={(e) => setReportReason(e.target.value)}
+        value={reportReason}
+        className="mt-4 w-full p-1 min-h-24 border-2 border-gray-500"
+        />
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openReportWindow(false)
+              setReportCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => sendReport()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Report</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Delete Modal */}
+    <div onClick={() => {openDeleteWindow(false), setDeleteCommentId("")}} className={`${deleteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Delete Comment</h1>
+        <p className="text-gray-500">Are sure you to delete {userdata? (userdata[0].username == deleteUsername? "this":deleteUsername+"'s"):""} comment?</p>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openDeleteWindow(false)
+              setDeleteCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => DeleteComment()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Main Content */}
     <div>
-      <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
-      <div className="h-1"/>
+      <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
       {nestedComments.map((comment, idx) => (
-        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="pl-4 w-full justify-between relative select-none">
+        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="ml-4 w-full justify-between relative select-none">
           {/* Avatar */}
           <div className="absolute bg-black w-10 h-10 self-start overflow-clip rounded-full">
             <img
-              src={comment.anonymous ? "/anon.png" : comment.profile}
-              alt={comment.username}
+              src={comment.anonymous || comment.user_deleted || comment.mod_deleted? "/anon.png" : comment.profile}
+              alt={comment.anonymous || comment.user_deleted || comment.mod_deleted? "anon":comment.username}
               className="object-cover rounded-lg"
               sizes="80px"
             />
           </div>
 
+          {/* Reporting */}
+          <div className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex-1 justify-items-end absolute top-4 right-0 self-end`}>
+            <div onClick={() => setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)} className={`w-10 h-10 overflow-clip rounded-full`}>
+              <div className={`${userdata? "":"hidden"} flex hover:bg-gray-500/50 w-10 h-10 justify-center items-center rounded-full`}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+              <div
+              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+              className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
+              >
+                <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path style={{ stroke: "transparent", fill: fontcolor }} d="M7 12.5538H6.25C6.25 12.5713 6.25061 12.5888 6.25183 12.6062L7 12.5538ZM7.782 13.2398V12.4898C7.76683 12.4898 7.75167 12.4903 7.73653 12.4912L7.782 13.2398ZM17.217 13.2398L17.3055 12.4951C17.2761 12.4916 17.2466 12.4898 17.217 12.4898V13.2398ZM17.8805 12.9231L18.5153 13.3225V13.3225L17.8805 12.9231ZM17.879 12.1878L18.5121 11.7858C18.5046 11.7739 18.4967 11.7622 18.4885 11.7508L17.879 12.1878ZM15.943 9.48782L16.5526 9.05075L16.5467 9.04282L15.943 9.48782ZM15.943 8.75682L16.5468 9.20187L16.5525 9.19386L15.943 8.75682ZM17.879 6.05682L18.4885 6.49386C18.4967 6.48242 18.5046 6.47075 18.5121 6.45887L17.879 6.05682ZM17.8805 5.32159L18.5153 4.92214L18.5153 4.92214L17.8805 5.32159ZM17.217 5.00482V5.75482C17.2466 5.75482 17.2761 5.75307 17.3055 5.74958L17.217 5.00482ZM7.782 5.00482L7.73653 5.75344C7.75167 5.75436 7.76683 5.75482 7.782 5.75482V5.00482ZM7 5.69082L6.25183 5.63841C6.25061 5.65586 6.25 5.67334 6.25 5.69082H7ZM7.75 12.5538C7.75 12.1396 7.41421 11.8038 7 11.8038C6.58579 11.8038 6.25 12.1396 6.25 12.5538H7.75ZM6.25 19.0048C6.25 19.419 6.58579 19.7548 7 19.7548C7.41421 19.7548 7.75 19.419 7.75 19.0048H6.25ZM6.25183 12.6062C6.30892 13.4212 7.01201 14.038 7.82747 13.9884L7.73653 12.4912C7.73632 12.4912 7.73688 12.4912 7.73797 12.4913C7.73901 12.4915 7.74008 12.4917 7.74107 12.4921C7.74295 12.4927 7.74396 12.4935 7.74445 12.4939C7.74494 12.4943 7.74581 12.4952 7.7467 12.497C7.74718 12.498 7.74758 12.499 7.74786 12.5C7.74815 12.5011 7.74818 12.5016 7.74817 12.5014L6.25183 12.6062ZM7.782 13.9898H17.217V12.4898H7.782V13.9898ZM17.1285 13.9846C17.6798 14.0501 18.2196 13.7924 18.5153 13.3225L17.2457 12.5236C17.2585 12.5034 17.2818 12.4922 17.3055 12.4951L17.1285 13.9846ZM18.5153 13.3225C18.811 12.8526 18.8098 12.2545 18.5121 11.7858L17.2459 12.5899C17.233 12.5697 17.233 12.5439 17.2457 12.5236L18.5153 13.3225ZM18.4885 11.7508L16.5525 9.05079L15.3335 9.92486L17.2695 12.6249L18.4885 11.7508ZM16.5467 9.04282C16.5816 9.09009 16.5816 9.15455 16.5467 9.20183L15.3393 8.31182C14.984 8.79376 14.984 9.45088 15.3393 9.93283L16.5467 9.04282ZM16.5525 9.19386L18.4885 6.49386L17.2695 5.61979L15.3335 8.31979L16.5525 9.19386ZM18.5121 6.45887C18.8098 5.99018 18.811 5.39204 18.5153 4.92214L17.2457 5.72104C17.233 5.70078 17.233 5.67499 17.2459 5.65478L18.5121 6.45887ZM18.5153 4.92214C18.2196 4.45224 17.6798 4.19454 17.1285 4.26007L17.3055 5.74958C17.2818 5.75241 17.2585 5.7413 17.2457 5.72104L18.5153 4.92214ZM17.217 4.25482H7.782V5.75482H17.217V4.25482ZM7.82747 4.2562C7.01201 4.20667 6.30892 4.82344 6.25183 5.63841L7.74817 5.74323C7.74818 5.74303 7.74815 5.74359 7.74786 5.74465C7.74758 5.74566 7.74718 5.74669 7.7467 5.74762C7.74581 5.7494 7.74494 5.7503 7.74445 5.75073C7.74396 5.75116 7.74295 5.75191 7.74107 5.75257C7.74008 5.75291 7.73901 5.75317 7.73797 5.75332C7.73688 5.75347 7.73632 5.75343 7.73653 5.75344L7.82747 4.2562ZM6.25 5.69082V12.5538H7.75V5.69082H6.25ZM6.25 12.5538V16.2987H7.75V12.5538H6.25ZM6.25 16.2987V19.0048H7.75V16.2987H6.25Z" fill="#000000"/>
+                </svg>
+                <p>Report</p>
+              </div>
+              <div
+              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+              className={`
+                ${userdata
+                  ? (
+                      userdata[0]?.username === comment.username
+                        ? ""
+                        : (
+                            myModData?.perms?.delete_comments
+                              ? ""
+                              : "hidden"
+                          )
+                    )
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg width="22" height="22" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                  <g id="Page-1" stroke="none" strokeWidth="1.5" fill="none" fillRule="evenodd">
+                    <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" className="stroke-current">
+                      <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+                      </path>
+                    </g>
+                  </g>
+                </svg>
+                <p className="pl-2.5">Delete</p>
+              </div>
+            </div>
+          </div>
+
           {/* Comment content */}
-          <div style={{ borderLeft: `2px solid ${fontcolor}` }} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
+          <div style={{borderLeft: `2px solid ${fontcolor}`}} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
             <p 
-              onClick={() => gotoUser(comment.username, comment.anonymous)}
+              onClick={() => (comment.user_deleted || comment.mod_deleted? "":(gotoUser(comment.username, comment.anonymous)))}
               style={{ color: fontcolor }}
-              className={`text-sm w-fit ${comment.anonymous? "":"cursor-pointer"}`}>
-              {comment.anonymous ? "anonymous" : comment.username} •{" "}
+              className={`text-sm w-fit ${comment.anonymous || comment.user_deleted || comment.mod_deleted? "":"cursor-pointer"}`}>
+              {comment.anonymous || comment.user_deleted || comment.mod_deleted ? "anonymous" : comment.username} •{" "}
               {new Date(comment.created_at).toLocaleString()}
             </p>
             <div className="pt-2 pl-4">
               <p style={{ color: fontcolor }} className="text-sm">
-                {comment.content}
+                {comment.mod_deleted? "Comment was deleted by a moderator.":(comment.user_deleted? "User has deleted this comment":(comment.content))}
               </p>
             </div>
 
             {/* Likes / Dislikes / Reply */}
-            <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
+            <div style={{ color: fontcolor }} className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex gap-4 mt-2 items-center`}>
               <div className="flex items-center gap-1 cursor-pointer"
                 onClick={() => handleLike(comment.id)}>
                 {userReactState[comment.id]?.liked ? (
@@ -1071,6 +1638,7 @@ function NestedReplies(props: NestedRepliesProps) {
           <div className="ml-4.75">
             <div className={`${openReplies1[comment.id] ? "block" : "hidden"} pt-2`}>
               <NestedReplies2
+                myModData={myModData}
                 parentId={comment.id}
                 fontcolor={fontcolor}
                 userdata={userdata}
@@ -1110,11 +1678,12 @@ function NestedReplies(props: NestedRepliesProps) {
         </div>
       </div>
     </div>
-  );
+  </>);
 }
 
 function NestedReplies2(props: NestedRepliesProps) {
   const {
+    myModData,
     parentId,
     fontcolor,
     userdata,
@@ -1146,6 +1715,21 @@ function NestedReplies2(props: NestedRepliesProps) {
   const [userReactState, setUserReactState] = useState<{
     [commentId: string]: { liked: boolean; disliked: boolean }
   }>({});
+
+  // --- DROPDOWN OPTIONS --- //
+  const [optionsDropdown, setOptionsDropdown] = useState<string | null>(null);
+
+  // --- reporting consts --- //
+  const [reportWindow ,openReportWindow] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportCommentId, setReportCommentId] = useState("");
+  const [reportUsername, setReportUsername] = useState("");
+  const pageType = usePathname().startsWith("/o")? "organization":"categories"
+
+  // --- deliting comment --- ///
+  const [deleteWindow, openDeleteWindow] = useState(false);
+  const [deleteCommentId, setDeleteCommentId] = useState("");
+  const [deleteUsername, setDeleteUsername] = useState("");
 
   async function fetchNested() {
     try {
@@ -1256,7 +1840,123 @@ function NestedReplies2(props: NestedRepliesProps) {
     }));
   };
 
-  return (
+  // --- reporting
+  async function sendReport() {
+    if(reportReason == "") {
+      alert("Please enter the reason for the report");
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/api/reporting`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: postId, commentId: reportCommentId, reason: reportReason, pageType: pageType}),
+      });
+
+      if (res.ok) {
+        // Successfully report
+        alert("Successfully Reported"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to report: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to report:", err);
+      alert("An error occurred while reporting.");
+    }
+  }
+
+  // --- deleting
+  async function DeleteComment() {    
+    try {
+      const res = await fetch(`/api/deleteComment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ commentId: deleteCommentId, postId:postId, Mod: myModData?.userId ?? null }),
+      });
+
+      if (res.ok) {
+        // Successfully Delete
+        alert("Successfully Deleted Comment"); 
+        openReportWindow(false);
+        setReportCommentId("");
+        setReportUsername("");
+        setReportReason("");
+        window.location.reload();
+      } else {
+        // Handle error response
+        const errorData = await res.json();
+        alert(`Failed to delete comment: ${errorData.error}`);
+      }
+    } catch (err) {
+      console.error("Failed to delete:", err);
+      alert("An error occurred while deleting comment.");
+    }
+  }
+
+  return (<>
+    {/* Report Modal */}
+    <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Report {reportUsername}</h1>
+        <p className="text-gray-500">Please tell us the reason why you are reporting.</p>
+        <textarea
+        onChange={(e) => setReportReason(e.target.value)}
+        value={reportReason}
+        className="mt-4 w-full p-1 min-h-24 border-2 border-gray-500"
+        />
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openReportWindow(false)
+              setReportCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => sendReport()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Report</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Delete Modal */}
+    <div onClick={() => {openDeleteWindow(false), setDeleteCommentId("")}} className={`${deleteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Delete Comment</h1>
+        <p className="text-gray-500">Are sure you to delete {userdata? (userdata[0].username == deleteUsername? "this":deleteUsername+"'s"):""} comment?</p>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openDeleteWindow(false)
+              setDeleteCommentId("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => DeleteComment()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Yes</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Main Content */}
     <div>
       <div style={{borderLeft: `2px solid ${fontcolor}`}} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
       <div className="h-1"/>
@@ -1273,23 +1973,74 @@ function NestedReplies2(props: NestedRepliesProps) {
                 />
               </div>
 
+              {/* Reporting */}
+              <div className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex-1 justify-items-end absolute top-4 right-0 self-end`}>
+                <div onClick={() => setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)} className={`w-10 h-10 overflow-clip rounded-full`}>
+                  <div className={`${userdata? "":"hidden"} flex hover:bg-gray-500/50 w-10 h-10 justify-center items-center rounded-full`}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13 5C13 4.44772 12.5523 4 12 4C11.4477 4 11 4.44772 11 5C11 5.55228 11.4477 6 12 6C12.5523 6 13 5.55228 13 5Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13 12C13 11.4477 12.5523 11 12 11C11.4477 11 11 11.4477 11 12C11 12.5523 11.4477 13 12 13C12.5523 13 13 12.5523 13 12Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M13 19C13 18.4477 12.5523 18 12 18C11.4477 18 11 18.4477 11 19C11 19.5523 11.4477 20 12 20C12.5523 20 13 19.5523 13 19Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                </div>
+                <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+                  <div
+                  onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+                  className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
+                  >
+                    <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path style={{ stroke: "transparent", fill: fontcolor }} d="M7 12.5538H6.25C6.25 12.5713 6.25061 12.5888 6.25183 12.6062L7 12.5538ZM7.782 13.2398V12.4898C7.76683 12.4898 7.75167 12.4903 7.73653 12.4912L7.782 13.2398ZM17.217 13.2398L17.3055 12.4951C17.2761 12.4916 17.2466 12.4898 17.217 12.4898V13.2398ZM17.8805 12.9231L18.5153 13.3225V13.3225L17.8805 12.9231ZM17.879 12.1878L18.5121 11.7858C18.5046 11.7739 18.4967 11.7622 18.4885 11.7508L17.879 12.1878ZM15.943 9.48782L16.5526 9.05075L16.5467 9.04282L15.943 9.48782ZM15.943 8.75682L16.5468 9.20187L16.5525 9.19386L15.943 8.75682ZM17.879 6.05682L18.4885 6.49386C18.4967 6.48242 18.5046 6.47075 18.5121 6.45887L17.879 6.05682ZM17.8805 5.32159L18.5153 4.92214L18.5153 4.92214L17.8805 5.32159ZM17.217 5.00482V5.75482C17.2466 5.75482 17.2761 5.75307 17.3055 5.74958L17.217 5.00482ZM7.782 5.00482L7.73653 5.75344C7.75167 5.75436 7.76683 5.75482 7.782 5.75482V5.00482ZM7 5.69082L6.25183 5.63841C6.25061 5.65586 6.25 5.67334 6.25 5.69082H7ZM7.75 12.5538C7.75 12.1396 7.41421 11.8038 7 11.8038C6.58579 11.8038 6.25 12.1396 6.25 12.5538H7.75ZM6.25 19.0048C6.25 19.419 6.58579 19.7548 7 19.7548C7.41421 19.7548 7.75 19.419 7.75 19.0048H6.25ZM6.25183 12.6062C6.30892 13.4212 7.01201 14.038 7.82747 13.9884L7.73653 12.4912C7.73632 12.4912 7.73688 12.4912 7.73797 12.4913C7.73901 12.4915 7.74008 12.4917 7.74107 12.4921C7.74295 12.4927 7.74396 12.4935 7.74445 12.4939C7.74494 12.4943 7.74581 12.4952 7.7467 12.497C7.74718 12.498 7.74758 12.499 7.74786 12.5C7.74815 12.5011 7.74818 12.5016 7.74817 12.5014L6.25183 12.6062ZM7.782 13.9898H17.217V12.4898H7.782V13.9898ZM17.1285 13.9846C17.6798 14.0501 18.2196 13.7924 18.5153 13.3225L17.2457 12.5236C17.2585 12.5034 17.2818 12.4922 17.3055 12.4951L17.1285 13.9846ZM18.5153 13.3225C18.811 12.8526 18.8098 12.2545 18.5121 11.7858L17.2459 12.5899C17.233 12.5697 17.233 12.5439 17.2457 12.5236L18.5153 13.3225ZM18.4885 11.7508L16.5525 9.05079L15.3335 9.92486L17.2695 12.6249L18.4885 11.7508ZM16.5467 9.04282C16.5816 9.09009 16.5816 9.15455 16.5467 9.20183L15.3393 8.31182C14.984 8.79376 14.984 9.45088 15.3393 9.93283L16.5467 9.04282ZM16.5525 9.19386L18.4885 6.49386L17.2695 5.61979L15.3335 8.31979L16.5525 9.19386ZM18.5121 6.45887C18.8098 5.99018 18.811 5.39204 18.5153 4.92214L17.2457 5.72104C17.233 5.70078 17.233 5.67499 17.2459 5.65478L18.5121 6.45887ZM18.5153 4.92214C18.2196 4.45224 17.6798 4.19454 17.1285 4.26007L17.3055 5.74958C17.2818 5.75241 17.2585 5.7413 17.2457 5.72104L18.5153 4.92214ZM17.217 4.25482H7.782V5.75482H17.217V4.25482ZM7.82747 4.2562C7.01201 4.20667 6.30892 4.82344 6.25183 5.63841L7.74817 5.74323C7.74818 5.74303 7.74815 5.74359 7.74786 5.74465C7.74758 5.74566 7.74718 5.74669 7.7467 5.74762C7.74581 5.7494 7.74494 5.7503 7.74445 5.75073C7.74396 5.75116 7.74295 5.75191 7.74107 5.75257C7.74008 5.75291 7.73901 5.75317 7.73797 5.75332C7.73688 5.75347 7.73632 5.75343 7.73653 5.75344L7.82747 4.2562ZM6.25 5.69082V12.5538H7.75V5.69082H6.25ZM6.25 12.5538V16.2987H7.75V12.5538H6.25ZM6.25 16.2987V19.0048H7.75V16.2987H6.25Z" fill="#000000"/>
+                    </svg>
+                    <p>Report</p>
+                  </div>
+                  <div
+                  onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+                  className={`
+                    ${userdata
+                      ? (
+                          userdata[0]?.username === comment.username
+                            ? ""
+                            : (
+                                myModData?.perms?.delete_comments
+                                  ? ""
+                                  : "hidden"
+                              )
+                        )
+                      : "hidden"
+                    }
+                    flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+                  >
+                    <svg width="22" height="22" viewBox="-3 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                      <g id="Page-1" stroke="none" strokeWidth="1.5" fill="none" fillRule="evenodd">
+                        <g id="Icon-Set-Filled" transform="translate(-261.000000, -205.000000)" className="stroke-current">
+                          <path d="M268,220 C268,219.448 268.448,219 269,219 C269.552,219 270,219.448 270,220 L270,232 C270,232.553 269.552,233 269,233 C268.448,233 268,232.553 268,232 L268,220 L268,220 Z M273,220 C273,219.448 273.448,219 274,219 C274.552,219 275,219.448 275,220 L275,232 C275,232.553 274.552,233 274,233 C273.448,233 273,232.553 273,232 L273,220 L273,220 Z M278,220 C278,219.448 278.448,219 279,219 C279.552,219 280,219.448 280,220 L280,232 C280,232.553 279.552,233 279,233 C278.448,233 278,232.553 278,232 L278,220 L278,220 Z M263,233 C263,235.209 264.791,237 267,237 L281,237 C283.209,237 285,235.209 285,233 L285,217 L263,217 L263,233 L263,233 Z M277,209 L271,209 L271,208 C271,207.447 271.448,207 272,207 L276,207 C276.552,207 277,207.447 277,208 L277,209 L277,209 Z M285,209 L279,209 L279,207 C279,205.896 278.104,205 277,205 L271,205 C269.896,205 269,205.896 269,207 L269,209 L263,209 C261.896,209 261,209.896 261,211 L261,213 C261,214.104 261.895,214.999 262.999,215 L285.002,215 C286.105,214.999 287,214.104 287,213 L287,211 C287,209.896 286.104,209 285,209 L285,209 Z" id="trash">
+                          </path>
+                        </g>
+                      </g>
+                    </svg>
+                    <p className="pl-2.5">Delete</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Comment content */}
               <div style={{borderLeft: `2px solid ${fontcolor}`}} className="flex-grow ml-4.75 pt-4 pl-8 border-l-2">
                 <p 
-                  onClick={() => gotoUser(comment.username, comment.anonymous)}
+                  onClick={() => (comment.user_deleted || comment.mod_deleted? "":gotoUser(comment.username, comment.anonymous))}
                   style={{ color: fontcolor }}
-                  className={`text-sm w-fit ${comment.anonymous? "":"cursor-pointer"}`}>
-                  {comment.anonymous ? "anonymous" : comment.username} •{" "}
+                  className={`text-sm w-fit ${comment.anonymous || comment.user_deleted || comment.mod_deleted? "":"cursor-pointer"}`}>
+                  {comment.anonymous || comment.user_deleted || comment.mod_deleted ? "anonymous" : comment.username} •{" "}
                   {new Date(comment.created_at).toLocaleString()}
                 </p>
                 <div className="pt-2 pl-4">
                   <p style={{ color: fontcolor }} className="text-sm">
-                    {comment.content}
+                    {comment.mod_deleted? "Comment was deleted by a moderator.":(comment.user_deleted? "User has deleted this comment":(comment.content))}
                   </p>
                 </div>
 
                 {/* Likes / Dislikes / Reply */}
-                <div style={{ color: fontcolor }} className="flex gap-4 mt-2 items-center">
+                <div style={{ color: fontcolor }} className={`${comment.user_deleted || comment.mod_deleted? "hidden":""} flex gap-4 mt-2 items-center`}>
                   <div className="flex items-center gap-1 cursor-pointer"
                     onClick={() => handleLike(comment.id)}>
                     {userReactState[comment.id]?.liked ? (
@@ -1463,5 +2214,5 @@ function NestedReplies2(props: NestedRepliesProps) {
         </div>
       </div>
     </div>
-  );
+  </>);
 }

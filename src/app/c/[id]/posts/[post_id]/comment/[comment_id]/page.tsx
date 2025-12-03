@@ -157,10 +157,14 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
 
   const isAdmin = user? user.udata:"0";
   // ------------------------------------
+ 
+  const myModData = moderators.find(
+    (m) => m.userId === userdata?.[0]?.id
+  )??null;
 
   return (
     <div style={{ backgroundColor: details[0].theme}}>
-      <PostView comment_id={comment_id} post={post} details={details} userdata={userdata} />
+      <PostView comment_id={comment_id} myModData={myModData} post={post} details={details} userdata={userdata} />
       {user?.udata == "1" ? (
         <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
       ):((
