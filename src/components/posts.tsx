@@ -23,7 +23,9 @@ type Post = {
   id: string;
   title: string;
   content: string;
-  created_at: string;
+  posted: string;
+  user_deleted: boolean;
+  mod_deleted: boolean;
   likes: number;
   dislikes: number;
   category: string;
@@ -122,9 +124,9 @@ export default function Posts({
             No posts found.
           </p>
         ) : (
-          posts.map((post) => (
+          posts.map((post, idx) => (
             <Link
-              key={post.id}
+              key={idx}
               href={`/${post.organization ? "o/" + post.organization:"c/" + post.category}/posts/${post.id}`}
               className="bg-transparent p-5 hover:bg-gray-100/10 dark:hover:bg-gray-900/10 block border-t-2"
             >
@@ -133,12 +135,12 @@ export default function Posts({
               </h2>
               {/* 👇 Username + date */}
               <p className="text-sm text-gray-400 mb-2">
-                {post.username ? post.username : "Loading..."} —{" "}
-                {new Date(post.created_at).toLocaleString()}
+                {post.user_deleted || post.mod_deleted? "Anon":post.username} —{" "}
+                {new Date(post.posted).toLocaleString()}
               </p>
 
               <p className="text-gray-700 dark:text-gray-300 line-clamp-3">
-                {post.content}
+                {post.mod_deleted? "[deleted] by mod":(post.user_deleted? "[deleted] by user":(post.content))}
               </p>
 
               {/* Likes/Dislikes */}
