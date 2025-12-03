@@ -236,17 +236,6 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
           ))}
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap items-center gap-3 border border-gray-500 rounded-full p-2">
-          <input type="text" placeholder="Add a tag" value={searchTag} onChange={(e) => getTags(e.target.value)} className="flex-grow mx-4 min-w-[30px] max-w-[200px] focus:outline-none focus:ring-0" />
-          {postTags.map((post, idx) => (
-            <div key={idx} className="flex items-center m-1 px-4 py-2 rounded-full bg-gray-500/50">
-              {Display(post.name)}
-              <button type="button" className="pl-2 cursor-pointer hover:text-red-700" onClick={() => removeTag(post.dir)}>x</button>
-            </div>
-          ))}
-        </div>
-
         {/* Autocomplete Dropdown */}
         <div className={`${tagsOpen ? "flex" : "hidden"} flex-col relative z-30 border-2 border-gray-500 rounded-r-2xl rounded-b-2xl`}>
           {newTags.filter((t) => !postTags.some((p) => p.dir === t.dir)).map((post, idx) => (
