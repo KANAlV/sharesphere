@@ -123,9 +123,9 @@ export default function Navigation({ user }: { user: User | null }) {
             )}
 
             {/* Settings */}
-            {user?.udata === "1" && (
+            {user ? (
              <NavItem label="Settings" icon={SettingsIcon} onClick={() => waitRedir("/settings/account")} isOpen={isOpen} />
-            )}
+            ) : ""}
 
             {/* Logout */}
             {user && (
