@@ -156,17 +156,6 @@ export default function Login() {
 
       {/* RIGHT PANEL */}
       <div className="md:w-1/2 w-full flex items-center justify-center p-6 relative">
-        {/* DARK MODE BUTTON */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className={`absolute top-4 right-4 p-2 rounded-full border ${
-            darkMode
-              ? "border-gray-600 hover:bg-gray-800 text-yellow-400"
-              : "border-gray-300 hover:bg-gray-200 text-gray-700"
-          }`}
-        >
-          {darkMode ? <SunIcon /> : <MoonIcon />}
-        </button>
 
         {/* FORM */}
         <form
