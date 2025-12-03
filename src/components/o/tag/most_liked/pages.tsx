@@ -22,6 +22,8 @@ type Post = {
   likes: number;
   dislikes: number;
   lnd: LikesDislikesDetails;
+  user_deleted: boolean;
+  mod_deleted: boolean;
 };
 
 type Details = {
@@ -252,7 +254,7 @@ export default function CoursePage({
                     {displayPostedDate(post.created_at)}
                   </p>
                 </div>
-                <p className="line-clamp-3">{post.content}</p>
+                <p className="line-clamp-3">{post.user_deleted? "[deleted] by user":(post.mod_deleted? "[deleted] by mod":post.content)}</p>
                 <br />
                 {/* Likes and Dislikes */}
                 <div className="flex">

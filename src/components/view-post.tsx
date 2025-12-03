@@ -321,7 +321,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
         <div>
           <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.user_deleted || post.mod_deleted? "-- Removed --":post.title}</p>
           <p style={{ color: fontcolor }} className="text-sm">
-            {post.user_deleted || post.mod_deleted? "Anonymous":post.username} — {new Date(post.created_at).toLocaleDateString()}
+            {post.user_deleted || post.mod_deleted? "Anon":post.username} — {new Date(post.created_at).toLocaleDateString()}
           </p>
         </div>
         <div className={`${userdata || !post.user_deleted || !post.mod_deleted? "":"hidden"} right-0 h-10 justify-end items-end rounded-full`}>
@@ -394,7 +394,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
 
       {/* Content */}
       <div className="border-b-2 border-[#6C6C6C] flex-2 px-5 pt-2 pb-4">
-        <p style={{ color: fontcolor }} className="text-lg">{post.mod_deleted? "Comment was deleted by a moderator.":(post.user_deleted? "User has deleted this comment":(post.content))}</p>
+        <p style={{ color: fontcolor }} className="text-lg">{post.mod_deleted? "[deleted] by mod":(post.user_deleted? "[deleted] by user":(post.content))}</p>
       </div>
 
       {/* Likes / Dislikes */}
