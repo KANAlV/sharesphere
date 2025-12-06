@@ -315,6 +315,16 @@ export default function CoursePage({
           )}
 
           {loading && <p className="text-center opacity-80">Loading more posts...</p>}
+          {hasMore && !loading && (
+            <div className="text-center mt-4">
+              <button
+                className="px-4 py-2 rounded-full hover:bg-gray-500/50 border-2 border-gray-500 transition"
+                onClick={loadMorePosts}
+              >
+                Load More
+              </button>
+            </div>
+          )}
           {!hasMore && (
             <p className="text-center opacity-60 mt-2">No more posts to show.</p>
           )}
