@@ -165,9 +165,10 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     (m) => m.userId === userdata?.[0]?.id
   )??null;
 
-  return (
-    <>
+  return (<div className="flex w-full lg:min-w-0 overflow-hidden" style={{backgroundColor: details[0].theme,}}>
+    <div className="flex justify-evenly lg:min-w-0 w-full h-screen">
       <PostView post={post} myModData={myModData} details={details} userdata={userdata} />
+    </div>
       {user?.udata == "1" ? (
         <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
       ):((
@@ -177,6 +178,6 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
         <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
         ))
       )}
-    </>
+    </div>
   );
 }

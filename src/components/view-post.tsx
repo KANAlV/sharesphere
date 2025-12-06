@@ -315,7 +315,11 @@ export default function PostView({ post, myModData, details, userdata }: { post:
     </div>
 
     {/* Main Content */}
-    <div id="title" className="p-4 b-6 rounded-lg w-full h-screen lg:max-w-7/9 lg:ml-12 mt-16 lg:p-16 lg:mt-6">
+    <div
+    id="title"
+    className="p-4 b-6 rounded-lg w-full h-screen mt-16 pb-50
+              lg:flex-1 lg:min-w-0 lg:max-w-full lg:mt-20 lg:max-h-18/20 lg:p-16
+              overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
       {/* Title */}
       <div className="flex border-b-2 border-[#6C6C6C] justify-between w-full p-5 mb-3">
         <div>
@@ -867,7 +871,7 @@ function MainComments(props: NestedRepliesProps) {
     <div>
       <div className="h-1"/>
       {nestedComments.map((comment, idx) => (
-        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="ml-4 w-full justify-between relative select-none">
+        <div key={`lvl2-${parentId}-${comment.id}-${idx}`} className="w-full justify-between relative select-none">
           {/* Avatar */}
           <div className="absolute bg-black w-10 h-10 self-start overflow-clip rounded-full">
             <img
@@ -1125,13 +1129,13 @@ function MainComments(props: NestedRepliesProps) {
           <div
             onClick={() => loadMore()}
             style={{color: fontcolor, border: `2px solid ${fontcolor}`}}
-            className="absolute ml-12 mt-1.5 justify-self-start border-2 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-500/50 select-none"
+            className="relative mt-1.5 justify-self-start border-2 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-500/50 select-none"
           >
             load more comments
           </div>
         ):(
           <div
-            className="absolute ml-12 mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
+            className="relative mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
           >
             no more comments
           </div>

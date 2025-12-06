@@ -41,45 +41,18 @@ export default function Navigation({ user }: { user: User | null }) {
       )}
 
       <div
-        className={`z-40 fixed w-screen h-16 lg:h-full bottom-0 lg:top-18 ${
-          isOpen ? "lg:w-1/5" : "lg:w-1/50"
+        className={`z-40 fixed lg:z-0 lg:static w-screen h-16 lg:h-full bottom-0 lg:top-18 ${
+          isOpen ? "lg:w-1/5" : "lg:w-0"
         }`}
       >
-        {/* Toggle button */}
-        <div
-          onClick={() => setIsOpen(!isOpen)}
-          className={`hidden lg:flex absolute right-0 align-middle ${
-            isOpen ? "" : "w-2/3"
-          } h-full bg-slate-300 dark:bg-slate-800 border-gray-500 border-2 cursor-pointer`}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={`m-auto transform transition-transform duration-300 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
-          >
-            <path d="M8 4l8 8-8 8" />
-          </svg>
-        </div>
-
         {/* Navigation panel */}
         <div
-          className={`bg-slate-300 dark:bg-slate-800 ${
-            isOpen ? "lg:w-13/14" : "lg:w-8/12"
-          } h-screen lg:border-r border-gray-500`}
+          className={`lg:pt-18 bg-slate-300 dark:bg-slate-800 h-screen lg:border-r border-gray-500`}
         >
           <div
             className={`flex lg:block w-full lg:pt-2 ${
               isOpen ? "lg:px-8" : "lg:hidden"
-            } items-center overflow-x-auto lg:overflow-x-clip scrollbar-track-black/0 whitespace-nowrap gap-4 px-4`}
+            } items-center overflow-x-scroll lg:overflow-x-clip scrollbar-track-black/0 whitespace-nowrap gap-4 px-4`}
           >
             {/* User PC view */}
             {user && (
@@ -133,6 +106,29 @@ export default function Navigation({ user }: { user: User | null }) {
             )}
           </div>
         </div>
+      </div>
+      {/* Toggle button */}
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className={`hidden lg:flex align-middle
+        h-screen bg-slate-300 dark:bg-slate-800 border-gray-500 border-2 cursor-pointer`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className={`m-auto transform transition-transform duration-300 ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
+        >
+          <path d="M8 4l8 8-8 8" />
+        </svg>
       </div>
     </>
   );

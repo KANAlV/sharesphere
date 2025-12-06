@@ -160,9 +160,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const isAdmin = user? user.udata:"0";
   // ------------------------------------
 
-  return (
-    <>
+  return (<div className="flex w-full lg:min-w-0 overflow-hidden" style={{backgroundColor: details[0].theme,}}>
+    <div className="flex justify-evenly lg:min-w-0 w-full h-screen">
       <CoursePageClient id={id} userdata={userdata} posts={posts} details={details} announcements={announcements} />
+    </div>
       {user?.udata == "1" ? (
         <AdminControls id={id} isAdmin={isAdmin} userdata={userdata} moderators={moderators} details={details} rel={rel} tags={tags} rules={rules}/>
       ):((
@@ -172,6 +173,6 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <Sidebar id={id} details={details} rel={rel} tags={tags} rules={rules}/>
         ))
       )}
-    </>
+    </div>
   );
 }

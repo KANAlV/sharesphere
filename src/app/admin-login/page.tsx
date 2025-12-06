@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
   return (
     <>
       {/* MAIN LAYOUT */}
-      <div className="min-h-screen flex flex-col md:flex-row bg-gray-100 text-black">
+      <div className="min-h-screen flex w-full flex-col md:flex-row bg-gray-100 text-black">
 
         {/* LEFT SIDE */}
         <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">

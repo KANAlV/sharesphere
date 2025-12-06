@@ -143,7 +143,7 @@ export default function Login() {
     <div
       className={`${
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      } min-h-screen flex flex-col md:flex-row transition-all duration-300`}
+      } min-h-screen w-full flex flex-col md:flex-row transition-all duration-300`}
     >
       {/* LEFT PANEL */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">

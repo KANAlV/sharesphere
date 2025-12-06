@@ -78,9 +78,9 @@ export default async function CourseCarouselWrapper() {
   console.log("Fetched courses:", courses);
 
   return (
-    <>
+    <div className="block w-full h-screen overflow-y-scroll scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
       <TextCarousel/>
       <Posts userdata={userdata} courses={courses} posts={posts}/>
-    </>
+    </div>
   );
 }

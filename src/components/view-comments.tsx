@@ -288,7 +288,7 @@ function MainComments(props: NestedRepliesProps) {
   async function fetchNested() {
     try {
       const res = await fetch(
-        `/api/posts/main_comments?parentId=${parentId}&postId=${postId}&offset=${offset}`
+        `/api/posts/comments?parentId=${parentId}&postId=${postId}&offset=${offset}`
       );
       const json = await res.json();
 
@@ -773,13 +773,13 @@ function MainComments(props: NestedRepliesProps) {
           <div
             onClick={() => loadMore()}
             style={{color: fontcolor, border: `2px solid ${fontcolor}`}}
-            className="absolute ml-12 mt-1.5 justify-self-start border-2 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-500/50 select-none"
+            className="relative ml-12 mt-1.5 justify-self-start border-2 px-3 py-1 rounded-full cursor-pointer hover:bg-gray-500/50 select-none"
           >
             load more comments
           </div>
         ):(
           <div
-            className="absolute ml-12 mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
+            className="relative ml-12 mt-1.5 justify-self-start border-2 text-gray-500 border-gray-500 px-3 py-1 rounded-full select-none"
           >
             no more comments
           </div>
@@ -1850,7 +1850,7 @@ function NestedReplies2(props: NestedRepliesProps) {
               {/* expand comments */}
               <div 
                 onClick={() =>
-                  window.location.href = `${pathname}/comment/${comment.id}`
+                  window.location.href = `${pathname.split("/comment")[0]}/comment/${comment.id}`
                 }
                 style={{color: fontcolor, background: theme,  border: `2px solid ${fontcolor}`}} className={`${comment.has_comments? "":"hidden"} ml-2 absolute w-6 h-6 self-end border-2 overflow-clip rounded-full cursor-pointer`}>
                 <div className="flex items-center h-full justify-self-center">

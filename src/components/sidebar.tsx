@@ -85,69 +85,6 @@ export default function Sidebar({
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-
-  // Dynamically calculate sidebar position (only on large screens)
-  useEffect(() => {
-    if (!isClient) return;
-
-    const updatePosition = () => {
-      if (window.innerWidth < 1024) {
-        setSidebarLeft(null);
-        return;
-      }
-
-      const banner = document.getElementById("banner");
-      const title = document.getElementById("title");
-
-      if (title) {setSidebarMode(false)};
-
-      // Prefer banner, fallback to title
-      const refElement = banner ?? title;
-      if (refElement) {
-        const rect = refElement.getBoundingClientRect();
-        setSidebarLeft(rect.right + 20);
-      }
-    };
-
-    updatePosition();
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition);
-
-    return () => {
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition);
-    };
-  }, [isClient]);
-
-  useEffect(() => {
-    if(/^\/[co]\/[^/]+\/posts/.test(pathname)) {
-      if (isSticky) return;
-      setIsSticky(true)
-    };
-  })
-
-  // Sticky behavior
-  useEffect(() => {
-    if(/^\/[co]\/[^/]+\/posts/.test(pathname)) return;
-    if (!isClient) return;
-
-    const handleScroll = () => {
-      const banner = document.getElementById("banner");
-      const title = document.getElementById("title");      
-
-      // Prefer banner, fallback to title
-      const refElement = banner ?? title;
-      if (!refElement) return;
-
-      const bottom = refElement.getBoundingClientRect().bottom;
-      setIsSticky(bottom <= 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [isClient]);
-
   
   // --- Font color logic ---
   const textColor = (theme: string) => {
@@ -178,37 +115,23 @@ export default function Sidebar({
       {/* MOBILE TOGGLE */}
       <div
         className="z-30 lg:hidden fixed top-42 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
-        onClick={() => setIsOpen(true)}
+        onClick={() => setIsOpen(!isOpen)}
       >
         ≡
       </div>
 
       {/* SIDEBAR CONTAINER */}
       <div
-        className={`transition-opacity duration-500 ease-in-out lg:opacity-100
+      className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
-          ${sidebarMode ?
-            `${isSticky ? "lg:fixed lg:top-20" : "lg:absolute lg:top-70"}`:
-            `${isSticky ? (/^\/[co]\/[^/]+\/posts/.test(pathname)? "lg:fixed lg:top-32":"lg:fixed lg:top-20") : "lg:absolute lg:top-22"}`
-          }
-          fixed top-18 h-screen lg:max-h-8/9 w-screen bg-[#111]
-          lg:block lg:max-w-1/6
+          fixed pt-5 inset-0 top-12 h-screen w-screen bg-[#111]
+          lg:block lg:relative lg:w-80 lg:top-20 lg:mr-10 lg:max-h-screen lg:bg-black/0
           overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
-          lg:bg-black/0 text-white`}
+          text-white`}
         style={{
-          zIndex: 30,
-          left: isClient && window.innerWidth >= 1024 ? sidebarLeft ?? "auto" : "auto",
-          right: !isClient || window.innerWidth < 1024 ? 0 : "auto",
           color: textColor(pageDetails.theme),
         }}
       >
-        {/* MOBILE CLOSE BUTTON */}
-        <div className="lg:hidden h-5 w-screen">
-          <div className="fixed right-7 w-5 h-5 text-3xl" onClick={() => setIsOpen(false)}>
-            ≡
-          </div>
-        </div>
-
         {/* MAIN CONTENT */}
         <div className="px-8 pt-8 pb-4 lg:bg-gray-500/50 lg:rounded-t-2xl">
           <h1 className="font-bold">{categoryName}</h1>

@@ -141,10 +141,13 @@ export default function CoursePage({
 
   return (
     <div
-      className="flex z-10 absolute w-full min-h-screen h-auto"
-      style={{ backgroundColor: pageDetails.theme, color: fontcolor }}
+      className="flex w-full min-w-0
+      lg:relative lg:top-24 lg:min-h-0 lg:max-h-15/20 xl:max-h-17/20 lg:min-w-0 justify-self-center
+      overflow-y-scroll scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600"
+      style={{ color: fontcolor }}
     >
-      <div className="relative w-full lg:max-w-2xl xl:max-w-4xl 2xl:max-w-5xl 3xl:max-w-6xl mx-auto sm:mt-20">
+
+      <div className="block w-full lg:shrink lg:max-w-300 lg:scroll-x-hidden mx-auto">
         <div className="space-y-4 mt-6">
           {/* Page Name / Banner */}
           <div
