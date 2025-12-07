@@ -32,6 +32,7 @@ type Post = {
   lnd: LikesDislikesDetails;
   organization: string;
   username?: string;
+  anonymous: boolean;
 };
 
 export default function Posts({
@@ -135,7 +136,7 @@ export default function Posts({
               </h2>
               {/* 👇 Username + date */}
               <p className="text-sm text-gray-400 mb-2">
-                {post.user_deleted || post.mod_deleted? "Anon":post.username} —{" "}
+                {post.user_deleted || post.mod_deleted || post.anonymous? "[Anonymous]":post.username} —{" "}
                 {new Date(post.posted).toLocaleString()}
               </p>
 

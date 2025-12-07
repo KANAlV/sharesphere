@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { title, content, course_id, org_id, tags, images } = body;
+    const { title, content, course_id, org_id, tags, images, anonymous } = body;
 
     if (!title || !content) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -29,13 +29,14 @@ export async function POST(req: Request) {
 
     // Insert post
     const result = await sql`
-    INSERT INTO posts (title, content, categories_id, organization_id, author_id, images)
+    INSERT INTO posts (title, content, categories_id, organization_id, author_id, anonymous, images)
     VALUES (
         ${title},
         ${content},
         ${course_id ?? null},
         ${org_id ?? null},
         ${userId},
+        ${anonymous},
         ${images ? JSON.stringify(images) : JSON.stringify([])}
     )
     RETURNING id;

@@ -75,6 +75,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     likes: number;
     dislikes: number;
     lnd:LikesDislikesDetails;
+    anonymous: boolean;
   }[];
 
   const announcements = (await sql`

@@ -54,26 +54,28 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     SELECT 
       p.id::TEXT, 
       p.title, 
-      p.content, 
       p.created_at, 
       u.username, 
       p.likes, 
       p.dislikes,
       p.lnd,
-      p.images
+      p.user_deleted,
+      p.mod_deleted,
+      p.anonymous
     FROM posts p
     JOIN users u ON p.author_id = u.id
     WHERE p.id = ${post_id}
   `) as {
     id: string;
     title: string;
-    content: string;
     created_at: string;
     username: string;
     likes: number;
     dislikes: number;
     lnd: LikesDislikesDetails;
-    images: string[]; // just an array of URLs
+    user_deleted: boolean;
+    mod_deleted: boolean;
+    anonymous: boolean;
   }[];
 
   const post = posts[0];
@@ -163,8 +165,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
   )??null;
 
   return (<div className="flex w-full lg:min-w-0 overflow-hidden" style={{backgroundColor: details[0].theme,}}>
-    <div className="flex justify-evenly lg:min-w-0 w-full h-screen
-      overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
+    <div className="flex justify-evenly lg:min-w-0 w-full h-screen">
       <PostView comment_id={comment_id} myModData={myModData} post={post} details={details} userdata={userdata} />
     </div>
       {user?.udata == "1" ? (

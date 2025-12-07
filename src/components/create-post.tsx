@@ -14,6 +14,8 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
   const [content, setContent] = useState("");
   const [tagsOpen, setTagsOpen] = useState(false);
   const [searchTag, setSearchTag] = useState("");
+  const [anonymous, setAnonymous] = useState(false);
+  const [disclamer, showDisclamer] = useState(false);
   const [postTags, setPostTags] = useState<tags[]>([]);
   const [newTags, setNewTags] = useState<tags[]>([]);
   const [images, setImages] = useState<ImagePreview[]>([]);
@@ -120,6 +122,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
       images: string[];
       course_id: string | null;
       org_id: string | null;
+      anonymous: boolean;
     } = {
       title,
       content,
@@ -127,6 +130,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
       images: imageUrls,
       course_id: null,
       org_id: null,
+      anonymous: anonymous,
     };
 
     if (pagetype === "courses") {
@@ -170,7 +174,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-[#1a1a1a] dark:to-[#0e0e0e] flex justify-center py-10">
+    <div className="lg:w-full min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-[#1a1a1a] dark:to-[#0e0e0e] flex justify-center py-10">
       <div className="mt-15 w-full max-w-4xl bg-white dark:bg-[#222] rounded-2xl shadow-lg p-8">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">Create a Post</h1>
 
@@ -214,6 +218,35 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         <input type="text" value={title} onChange={(e) => titleField(e.target.value)} placeholder="Enter a title..." className="w-full mt-4 border border-gray-500 bg-transparent text-lg rounded-xl p-3 mb-6 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
         <textarea placeholder="Write your thoughts..." value={content} onChange={(e) => contentField(e.target.value)} className="w-full min-h-[300px] border border-gray-500 bg-transparent rounded-xl p-4 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
 
+        <div className="flex mt-4 mx-4 w-full mb-2 justify-between">
+          <div className="flex">
+            Post anonymously
+            <div
+              onClick={() => setAnonymous(!anonymous)}
+              onMouseEnter={()=>showDisclamer(true)}
+              onMouseLeave={()=>showDisclamer(false)}
+              className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+                ${anonymous ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+                  ${anonymous ? "translate-x-6" : "translate-x-0"}`}
+              />
+            </div>
+
+            <div
+              id="label"
+              className={`${disclamer ? "block":"hidden"}
+                          z-50 divide-y dark:bg-gray-700 bg-gray-300
+                          rounded-lg shadow-sm w-86 text-justify  absolute mt-6 p-4`}
+            >
+              Disclaimer: Posting anyting inappropriate will allow moderators
+              to see your details even if using this feature. It is to allow
+              diciplinary action for students on this site.
+            </div>
+          </div>
+        </div>
+
         {/* Image Upload */}
         <div className="mt-4 mb-4 flex flex-wrap gap-4 items-end">
           <div className="w-full text-gray-500 mb-2">{images.length} / 5 images</div>
@@ -244,7 +277,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-3 mt-6">
+          <div className="flex justify-end gap-3 mt-6">
           <button className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">Discard</button>
           <button 
             onClick={submitPost}

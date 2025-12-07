@@ -10,13 +10,14 @@ type LikesDislikesDetails = {
 type Post = {
   id: string;
   title: string;
-  content: string;
   created_at: string;
   username: string;
   likes: number;
   dislikes: number;
   lnd: LikesDislikesDetails;
-  images: string[];
+  user_deleted: boolean;
+  mod_deleted: boolean;
+  anonymous: boolean;
 };
 
 type Details = {
@@ -70,12 +71,7 @@ export default function PostView({ comment_id, myModData, post, details, userdat
   theme = details[0].theme;
   userid = userdata ? userdata[0].id : "";
 
-  const images = post.images || [];
   const [current, setCurrent] = useState(0);
-  const length = images.length;
-
-  const nextSlide = () => setCurrent(current === length - 1 ? 0 : current + 1);
-  const prevSlide = () => setCurrent(current === 0 ? length - 1 : current - 1);
 
   // --- Post reactions from lnd ---
   const [postLikes, setPostLikes] = useState(Object.keys(post.lnd?.likes || {}).length);
@@ -183,12 +179,16 @@ export default function PostView({ comment_id, myModData, post, details, userdat
   };
 
   return (
-    <div id="title" className="p-4 b-6 rounded-lg w-full h-screen lg:max-w-7/9 lg:ml-12 mt-16 lg:p-16 lg:mt-6">
+    <div
+    id="title"
+    className="p-4 b-6 rounded-lg w-full h-screen mt-16 pb-50
+              lg:flex-1 lg:min-w-0 lg:max-w-full lg:mt-20 lg:max-h-18/20 lg:p-16
+              overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
       {/* Title */}
       <div className="border-b-2 border-[#6C6C6C] flex-2 p-5 mb-3">
         <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.title}</p>
         <p style={{ color: fontcolor }} className="text-sm">
-          {post.username} — {new Date(post.created_at).toLocaleDateString()}
+          {post.user_deleted || post.mod_deleted || post.anonymous? "[Anonymous]":post.username} — {new Date(post.created_at).toLocaleDateString()}
         </p>
       </div>
 

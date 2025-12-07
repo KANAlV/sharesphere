@@ -978,12 +978,9 @@ export default function AdminControls({
           className={`transition-opacity duration-500 ease-in-out lg:opacity-100
           ${isOpen ? "opacity-100" : "opacity-0 pointer-events-none lg:pointer-events-auto"}
           fixed pt-5 inset-0 top-12 h-screen w-screen bg-slate-300 dark:bg-slate-800
-          lg:block lg:relative lg:w-80 lg:top-20 lg:max-h-screen
+          lg:block lg:relative lg:z-0 lg:w-80 lg:top-20 lg:max-h-screen
           overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
           text-white`}
-          style={{
-            zIndex: 30,
-          }}
         >
           {/* MOBILE CLOSE BUTTON */}
           <div className="lg:hidden h-5 w-screen">

@@ -71,6 +71,7 @@ export default async function CourseCarouselWrapper() {
   category: string,
   organization: string,
   username?: string;
+  anonymous: boolean;
 }[];
 
   const posts = JSON.parse(JSON.stringify(postsRaw));

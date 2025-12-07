@@ -19,6 +19,7 @@ type Post = {
   images: string[];
   user_deleted: boolean;
   mod_deleted: boolean;
+  anonymous: boolean;
 };
 
 type Details = {
@@ -325,7 +326,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
         <div>
           <p style={{ color: fontcolor }} className="text-3xl font-bold">{post.user_deleted || post.mod_deleted? "-- Removed --":post.title}</p>
           <p style={{ color: fontcolor }} className="text-sm">
-            {post.user_deleted || post.mod_deleted? "Anon":post.username} — {new Date(post.created_at).toLocaleDateString()}
+            {post.user_deleted || post.mod_deleted || post.anonymous? "[Anonymous]":post.username} — {new Date(post.created_at).toLocaleDateString()}
           </p>
         </div>
         <div className={`${userdata || !post.user_deleted || !post.mod_deleted? "":"hidden"} right-0 h-10 justify-end items-end rounded-full`}>
@@ -340,7 +341,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
           </div>
           <div className={`${optionsDropdown === post.id? "":"hidden"} w-fit z-50 justify-items-end relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
             <div
-            onClick={() => {openReportWindow(true)}}
+            onClick={() => {openReportWindow(true), setOptionsDropdown(optionsDropdown === post.id ? null : post.id)}}
             className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
             >
               <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -349,7 +350,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
               <p>Report</p>
             </div>
             <div
-            onClick={() => {openDeleteWindow(true)}}
+            onClick={() => {openDeleteWindow(true), setOptionsDropdown(optionsDropdown === post.id ? null : post.id)}}
             className={`
               ${userdata
                 ? (
@@ -895,7 +896,7 @@ function MainComments(props: NestedRepliesProps) {
             </div>
             <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
               <div
-              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
               className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
               >
                 <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -904,7 +905,7 @@ function MainComments(props: NestedRepliesProps) {
                 <p>Report</p>
               </div>
               <div
-              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
               className={`
                 ${userdata
                   ? (
@@ -1451,7 +1452,7 @@ function NestedReplies(props: NestedRepliesProps) {
             </div>
             <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
               <div
-              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+              onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
               className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
               >
                 <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1460,7 +1461,7 @@ function NestedReplies(props: NestedRepliesProps) {
                 <p>Report</p>
               </div>
               <div
-              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+              onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
               className={`
                 ${userdata
                   ? (
@@ -2009,7 +2010,7 @@ function NestedReplies2(props: NestedRepliesProps) {
                 </div>
                 <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
                   <div
-                  onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
+                  onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
                   className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
                   >
                     <svg width="32" height="32" viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2018,7 +2019,7 @@ function NestedReplies2(props: NestedRepliesProps) {
                     <p>Report</p>
                   </div>
                   <div
-                  onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username)}}
+                  onClick={() => {openDeleteWindow(true), setDeleteCommentId(comment.id), setDeleteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
                   className={`
                     ${userdata
                       ? (

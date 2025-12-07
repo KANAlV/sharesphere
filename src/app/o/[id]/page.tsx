@@ -111,7 +111,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     mod_deleted: boolean;
     likes: number;
     dislikes: number;
-    lnd:LikesDislikesDetails
+    lnd:LikesDislikesDetails;
+    anonymous: boolean;
   }[];
 
   const announcements = (await sql`

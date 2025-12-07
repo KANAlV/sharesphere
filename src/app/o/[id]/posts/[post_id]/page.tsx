@@ -63,7 +63,8 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
       p.lnd,
       p.images,
       p.user_deleted,
-      p.mod_deleted
+      p.mod_deleted,
+      p.anonymous
     FROM posts p
     JOIN users u ON p.author_id = u.id
     WHERE p.id = ${post_id}
@@ -79,6 +80,7 @@ export default async function PostPage(props: { params: Promise<{ id: string, po
     images: string[]; // just an array of URLs
     user_deleted: boolean;
     mod_deleted: boolean;
+    anonymous: boolean;
   }[];
 
   const post = posts[0];

@@ -23,7 +23,8 @@ type Post = {
   mod_deleted: boolean;
   likes: number;
   dislikes: number;
-  lnd:LikesDislikesDetails
+  lnd:LikesDislikesDetails;
+  anonymous: boolean;
 };
 
 type Details = {
@@ -260,7 +261,7 @@ export default function CoursePage({
                 <div className="items-center">
                   <h2 className="text-xl font-bold">{post.title}</h2>
                   <p className="inline-block opacity-80">
-                    {post.user_deleted || post.mod_deleted? "Anon":post.username} — {displayPostedDate(post.posted)}
+                    {post.user_deleted || post.mod_deleted || post.anonymous? "[Anonymous]":post.username} — {displayPostedDate(post.posted)}
                   </p>
                 </div>
                 <p className="line-clamp-3">{post.mod_deleted? "[deleted] by mod":(post.user_deleted? "[deleted] by user":(post.content))}</p>
