@@ -66,6 +66,7 @@ export default function CoursePage({
   const [loading, setLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [showAnnouncements, setShowAnnouncements] = useState<boolean>(true);
+  const [hideDeleted, setHideDeleted] = useState(false);
 
   // --- Load More Posts ---
   const loadMorePosts = useCallback(async () => {
@@ -220,24 +221,32 @@ export default function CoursePage({
           </div>
           
           {/* Sort */}
-          <div className="pt-5">
-            <div className="relative inline-block">
-              <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="select-none cursor-pointer bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
-                <div>Most Liked</div>
+          <div className="flex pt-5 justify-between">
+            {/* Dropdown */}
+            <div>
+              <div className="relative inline-block">
+                <div onClick={() => setSortSelect(!sortSelect)} id="filter" className="select-none cursor-pointer bg-gray-500/50 h-10 w-35 px-3 rounded-lg content-center hover:inset-shadow-2xs appearance-none">
+                  <div>Most Liked</div>
+                </div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
+                  <svg
+                    className="w-3 h-3 fill-current text-[#818181] dark:text-white"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                    >
+                    <polygon points="0,3 20,3 10,15" />
+                  </svg>
+                </div>
               </div>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                <svg
-                  className="w-3 h-3 fill-current text-[#818181] dark:text-white"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
-                  >
-                  <polygon points="0,3 20,3 10,15" />
-                </svg>
+              <div className={`${sortSelect ? "block":"hidden"} absolute z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
+                <Link href={`../${id}`}><div className="hover:bg-gray-500/30 px-3">Recent</div></Link>
+                <div className="hover:bg-gray-500/30 px-3">Most Liked</div>
               </div>
             </div>
-            <div className={`${sortSelect ? "block":"hidden"} absolute z-20 bg-white dark:bg-[#7B7B7B] w-35 hover:inset-shadow-2xs appearance-none`}>
-              <Link href={`../${id}`}><div className="hover:bg-gray-500/30 px-3">Recent</div></Link>
-              <div className="hover:bg-gray-500/30 px-3">Most Liked</div>
+            {/* hide deleted */}
+            <div onClick={() => setHideDeleted(!hideDeleted)} className="flex items-center cursor-pointer">
+              <input onChange={() => setHideDeleted(!hideDeleted)} checked={hideDeleted} type="checkbox" />
+              <p className="px-2">Hide deleted</p>
             </div>
           </div>
 
@@ -247,7 +256,7 @@ export default function CoursePage({
               <div
                 key={`${post.dir}-${idx}`} // unique even if dir duplicates
                 onClick={() => redirect(post.dir)}
-                className="p-4 border-t border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15 cursor-pointer"
+                className={`${(post.user_deleted || post.mod_deleted) && hideDeleted? "hidden":""} p-4 border-t border-stone-800 hover:bg-gray-100/15 dark:hover:bg-stone-950/15 cursor-pointer`}
               >
                 <div className="items-center">
                   <h2 className="text-xl font-bold">{post.title}</h2>

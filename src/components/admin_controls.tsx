@@ -887,37 +887,37 @@ export default function AdminControls({
             </div>
             <div className="pb-4">
               Role name: <input className={`px-2 border-2 border-gray-500 w-42 rounded-md`} onChange={(e) => editFilter(e.target.value)} type="text" value={editRoleName}/>
-              <div className="text-gray-500">Note: Role name only helps identify a moderator, and does not have preset permissions</div>
+              <div className="text-gray-500">Note: Role name only helps identify a moderator, and does not have preset permissions.</div>
             </div>
             Permissions
             <div className="block lg:flex justify-evenly">
               <div className={`${isAdmin == "1"?"":"hidden"} flex lg:block`}>
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Adviser</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={isAdviser} onChange={() => editPerms("8")}/></div>
+                <div onClick={() => editPerms("8")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={isAdviser} onChange={() => editPerms("8")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">All</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
+                <div onClick={() => editPerms("7")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Announce</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
+                <div onClick={() => editPerms("2")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Page Details</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
+                <div onClick={() => editPerms("3")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Posts</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
+                <div onClick={() => editPerms("4")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Comments</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
+                <div onClick={() => editPerms("5")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Roles Management</div>
-                <div className="flex justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
+                <div onClick={() => editPerms("6")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
               </div>
             </div>
             <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
