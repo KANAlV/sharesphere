@@ -36,10 +36,12 @@ type Post = {
 };
 
 export default function Posts({
+  id,
   userdata,
   courses,
   posts: initialPosts,
 }: {
+  id: string;
   userdata: UserData[] | null;
   courses: Course[];
   posts: Post[];
@@ -57,7 +59,7 @@ export default function Posts({
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/posts?offset=${offset}`);
+      const res = await fetch(`/api/search?search=${id}&offset=${offset}`);
       const newPosts: Post[] = await res.json();
 
       if (newPosts.length === 0) {
@@ -116,10 +118,10 @@ export default function Posts({
   }, [posts.length]);
 
   return (
-    <div className="bg-transparent w-15/16 min-h-[90vh] mx-auto mb-5 rounded-3xl">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-left ml-10 text-gray-900 dark:text-white">
-          Posts
+    <div className="bg-transparent mt-24 w-15/16 min-h-[90vh] mx-auto mb-5 rounded-3xl">
+      <div className="flex justify-between mb-4 items-center">
+        <h1 className="text-xl font-bold text-left ml-10 text-gray-900 dark:text-white">
+          Search Resluts of: "{id}"
         </h1>
         {/* hide deleted */}
         <div onClick={() => setHideDeleted(!hideDeleted)} className="flex items-center cursor-pointer">
