@@ -38,7 +38,8 @@ export default function Topbar({ user }: { user: User | null }) {
               <span className="hidden lg:block self-center text-2xl font-semibold whitespace-nowrap text-white">SHARESPHERE</span>
           </Link>
 
-          <div className="flex h-10 border-2 rounded-full overflow-clip">
+          {/* Search bar */}
+          <div className={`${isHidden ? "hidden":"flex"} h-10 border-2 rounded-full overflow-clip`}>
             <input
             type="text"
             value={search}

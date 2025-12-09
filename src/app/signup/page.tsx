@@ -107,7 +107,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="bg-gray-100 text-black min-h-screen flex flex-col md:flex-row">
+    <div className="bg-gray-100 text-black min-h-screen w-full flex flex-col md:flex-row transition-all duration-300">
 
       {/* Left Panel */}
       <div className="md:w-1/2 w-full bg-[#1E1E3F] text-white flex flex-col items-center justify-center p-10">
