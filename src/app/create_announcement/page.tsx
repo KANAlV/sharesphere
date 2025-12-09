@@ -19,8 +19,8 @@ export default async function Page() {
       id: string;
   }[];
 
-  return (<>
+  return (<div className="block w-full h-screen overflow-y-scroll scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
     <TokenChecker />
     <CreateAnnouncementPage courses={courses} orgs={orgs}/>;
-  </>)
+  </div>)
 }

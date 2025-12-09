@@ -146,12 +146,16 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         body: JSON.stringify(body),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        alert("Failed to create post.");
+        if (data.bannedWord) {
+          alert(`Your post contains a banned word: "${data.bannedWord}"`);
+        } else {
+          alert(data.error || "Failed to create post.");
+        }
         return;
       }
-
-      const data: { success: boolean; message?: string } = await res.json();
 
       if (data.success) {
         alert("Post created!");

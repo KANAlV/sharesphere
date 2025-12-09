@@ -128,7 +128,11 @@ export default function PageCreate() {
         setPreview(null);
         setUploadedUrl(null);
       } else {
+        if (data.bannedWord) {
+        setMessage(`❌ Your page contains a banned word: "${data.bannedWord}"`);
+      } else {
         setMessage(data.error || "❌ Failed to create page");
+      }
       }
     } catch {
       setMessage("⚠️ Network error");

@@ -42,6 +42,29 @@ export async function POST(req: Request) {
       userId,
     });
 
+    // --- Word filter check (whole word, case-insensitive) ---
+    const bannedWords = await sql`
+      SELECT word
+      FROM wordlist
+      WHERE status = true
+    `;
+
+    const lowerTitle = title.toLowerCase();
+    const lowerContent = content.toLowerCase();
+
+    for (const w of bannedWords) {
+      const word = w.word.toLowerCase();
+
+      // Regex to match whole word only (\y for word boundary in Postgres regex)
+      const regex = new RegExp(`\\b${word}\\b`, "i");
+      if (regex.test(title) || regex.test(content)) {
+        return NextResponse.json({
+          error: "Your announcement contains banned words",
+          bannedWord: w.word,
+        }, { status: 400 });
+      }
+    }
+
     // *** IMPORTANT: USE THE EXACT TABLE NAME annnouncemetns ***
     const inserted = await sql`
       INSERT INTO annnouncemetns (

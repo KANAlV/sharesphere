@@ -10,6 +10,29 @@ export async function POST(req: Request) {
   try {
     const { page_name, theme, pagetype, description, bannerUrl, rules } = await req.json();
 
+    // --- Word filter check (whole word, case-insensitive) ---
+    const bannedWords = await sql`
+      SELECT word
+      FROM wordlist
+      WHERE status = true
+    `;
+
+    const lowerTitle = page_name.toLowerCase();
+    const lowerContent = description.toLowerCase();
+
+    for (const w of bannedWords) {
+      const word = w.word.toLowerCase();
+
+      // Regex to match whole word only (\y for word boundary in Postgres regex)
+      const regex = new RegExp(`\\b${word}\\b`, "i");
+      if (regex.test(page_name) || regex.test(description)) {
+        return NextResponse.json({
+          error: "Your page contains banned words",
+          bannedWord: w.word,
+        }, { status: 400 });
+      }
+    }
+
     let normalizedName;
 
     // Normalize page_name: replace spaces with underscores

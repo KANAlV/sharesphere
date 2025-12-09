@@ -27,6 +27,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // --- Word filter check (whole word, case-insensitive) ---
+    const bannedWords = await sql`
+      SELECT word
+      FROM wordlist
+      WHERE status = true
+    `;
+
+    const lowerTitle = title.toLowerCase();
+    const lowerContent = content.toLowerCase();
+
+    for (const w of bannedWords) {
+      const word = w.word.toLowerCase();
+
+      // Regex to match whole word only (\y for word boundary in Postgres regex)
+      const regex = new RegExp(`\\b${word}\\b`, "i");
+      if (regex.test(title) || regex.test(content)) {
+        return NextResponse.json({
+          error: "Your post contains banned words",
+          bannedWord: w.word,
+        }, { status: 400 });
+      }
+    }
+
     // Insert post
     const result = await sql`
     INSERT INTO posts (title, content, categories_id, organization_id, author_id, anonymous, images)

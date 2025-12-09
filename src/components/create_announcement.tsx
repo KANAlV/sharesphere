@@ -44,24 +44,30 @@ export default function CreateAnnouncementPage({
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) {
-        console.error(await res.text());
-        return alert("Failed to create announcement.");
-      }
-
       const data = await res.json();
+
+      if (!res.ok) {
+        // Show banned word if present
+        if (data.bannedWord) {
+          return alert(`Your announcement contains a banned word: "${data.bannedWord}"`);
+        } else {
+          console.error(await res.text());
+          return alert(data.error || "Failed to create announcement.");
+        }
+      }
 
       if (data.success) {
         alert("Announcement Created!");
         window.location.assign("/");
       } else {
-        alert(data.message || "Failed to create post");
+        alert(data.message || "Failed to create announcement");
       }
     } catch (err) {
       console.error(err);
-      alert("Error creating post");
+      alert("Error creating announcement");
     }
   };
+
 
  return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-[#1a1a1a] dark:to-[#0e0e0e] flex justify-center py-10">

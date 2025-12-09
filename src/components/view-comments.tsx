@@ -171,7 +171,13 @@ export default function PostView({ comment_id, myModData, post, details, userdat
       if (data.success) {
         setComment("");
         window.location.reload();
-      } else alert(data.message || "Failed to post comment");
+      } else {
+        if (data.bannedWord) {
+          alert(`❌ Your page contains a banned word: "${data.bannedWord}"`);
+        } else {
+          alert(data.error || "❌ Failed to create page");
+        }
+      };
     } catch (err) {
       console.error(err);
       alert("Error posting comment");
