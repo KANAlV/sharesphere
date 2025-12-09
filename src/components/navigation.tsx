@@ -47,12 +47,13 @@ export default function Navigation({ user }: { user: User | null }) {
       >
         {/* Navigation panel */}
         <div
-          className={`lg:pt-18 bg-slate-300 dark:bg-slate-800 h-screen lg:border-r border-gray-500`}
+          className={`lg:pt-18 bg-slate-300 dark:bg-slate-800 h-screen lg:border-r border-gray-500
+                      overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}
         >
           <div
             className={`flex lg:block w-full lg:pt-2 ${
               isOpen ? "lg:px-8" : "lg:hidden"
-            } items-center overflow-x-scroll lg:overflow-x-clip scrollbar-track-black/0 whitespace-nowrap gap-4 px-4`}
+            } items-center overflow-x-scroll lg:overflow-x-clip whitespace-nowrap gap-4 px-4`}
           >
             {/* User PC view */}
             {user && (
@@ -61,7 +62,8 @@ export default function Navigation({ user }: { user: User | null }) {
                   waitRedir("/u/"+user.username);
                   setIsOpen(false);
                 }}
-                className={`hidden lg:flex flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none lg:flex-row lg:justify-start lg:my-4`}
+                className={`hidden flex-col pt-2 items-center justify-center min-w-[22%] h-full pb-3 hover:bg-gray-500/50 select-none
+                             lg:flex lg:flex-row lg:justify-start lg:my-4`}
               >
                 <div className="lg:pl-2 mt-1">
                   <div className="text-gray-500">Logged in As:</div>
@@ -90,7 +92,13 @@ export default function Navigation({ user }: { user: User | null }) {
             {user?.udata === "1" && (
               <NavItem label="Page Creation" icon={PageIcon} onClick={() => waitRedir("/page_creation")} isOpen={isOpen} />
             )}
-             {/* Admin Account creation */}
+
+            {/* Word List */}
+            {user?.udata === "1" && (
+              <NavItem label="Filtered Terms" icon={WordList} onClick={() => waitRedir("/filtered_terms")} isOpen={isOpen} />
+            )}
+            
+            {/* Admin Account creation */}
             {user?.udata === "1" && (
              <NavItem label="Administrators" icon={AdminIcon} onClick={() => waitRedir("/administrator")} isOpen={isOpen} />
             )}
@@ -224,5 +232,9 @@ const PageIcon = () => (
   <circle cx="6" cy="7" r="1" fill="currentColor"/>
   <circle cx="9" cy="7" r="1" fill="currentColor"/>
   </svg>
+)
+
+const WordList = () => (
+  <svg fill="currentColor" width="24" height="24" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg"><path d="M648 983q-91 0-169-46-76-44-121-120-46-79-46-170t46-169q45-76 121-120 78-46 169-46t169 46q76 44 121 120 46 78 46 169t-46 170q-45 76-121 120-78 46-169 46zM515 847q60 41 133 41 65 0 120.5-32.5T856 768t32-121q1-72-40-132zm133-440q-65 0-120.5 32.5T440 527t-32 120q-1 73 40 133l333-333q-60-40-133-40zM47 43h553q10 0 16.5 7t6.5 16v29q0 9-6.5 16t-16.5 7H47q-10 0-17-7t-7-16V66q0-9 7-16t17-7zm0 139h553q10 0 16.5 7t6.5 17v28q0 10-6.5 16.5T600 257H47q-10 0-17-6.5T23 234v-28q0-10 7-17t17-7zm0 140h246q10 0 16.5 6.5T316 345v28q0 10-6.5 17t-16.5 7H47q-10 0-17-7t-7-17v-28q0-10 7-16.5t17-6.5zm0 139h153q10 0 16.5 7t6.5 16v29q0 9-6.5 16t-16.5 7H47q-10 0-17-7t-7-16v-29q0-9 7-16t17-7z"/></svg>
 )
 const LoginIcon = UserIcon;

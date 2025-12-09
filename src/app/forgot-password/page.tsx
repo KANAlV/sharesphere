@@ -153,7 +153,7 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="bg-gray-100 text-black min-h-screen flex flex-col">
+    <div className="bg-gray-100 text-black min-h-screen flex flex-col w-full">
       <nav className="flex justify-between items-center px-8 py-4 bg-[#1E1E3F] text-white">
         <div className="flex items-center gap-2">
           <Image src="/sharesphere_logo.png" alt="Logo" width={40} height={40} />

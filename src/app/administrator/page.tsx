@@ -67,6 +67,7 @@ return (
   <div
     className="
       min-h-screen
+      w-screen
       flex 
       justify-center 
       md:items-center
@@ -78,7 +79,7 @@ return (
     "
   >
     <div className="w-full flex justify-center">
-      <div className="w-4/5 max-w-5xl bg-[#111] border border-gray-700 rounded-xl p-6 shadow-xl">
+      <div className="w-full lg:w-4/5 max-w-5xl bg-[#111] border border-gray-700 rounded-xl p-6 shadow-xl">
 
         <h1 className="text-2xl font-semibold mb-4 text-center">
           Admin Accounts
@@ -89,7 +90,7 @@ return (
             onClick={() => (window.location.href = '/create-admin')}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
           >
-            + Create Admin
+            + Add Admin
           </button>
         </div>
 

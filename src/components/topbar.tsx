@@ -64,7 +64,7 @@ export default function Topbar({ user }: { user: User | null }) {
                 <UserDropdown user={user} />
               ) : (<>
                 <UserDropdown user={null} />
-                <div className="inline-flex">
+                <div className="inline-flex items-center">
                   <div className="hidden md:block">
                     <div onClick={() => waitRedir("/login")}>
                       <button
