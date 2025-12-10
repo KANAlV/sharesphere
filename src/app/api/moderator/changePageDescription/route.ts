@@ -1,7 +1,27 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
+import { cookies } from "next/headers";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+
+  let user: null | { id: string; username: string; email: string; udata: string; } = null;
+
+  if (token) {
+    try {
+      user = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        username: string;
+        email: string;
+        udata: string;
+      };
+    } catch {
+      user = null;
+    }
+  }
+
   try {
     const {  Desc, pageId, pageType  } = await req.json();
 
@@ -48,6 +68,18 @@ export async function POST(req: Request) {
       `;
     }
     
+    const log = await sql`
+      INSERT INTO moderation_logs (page_id, action, reciever, action_by)
+      VALUES (
+        (SELECT id FROM posts p
+          WHERE p.organization_id = ${page_id} OR p.categories_id = ${page_id}
+          LIMIT 1),
+        'change page desc',
+        ${page_id},
+        ${user?.id}
+      )
+      RETURNING *;
+    `;
 
     return NextResponse.json({ res });
   } catch (error) {

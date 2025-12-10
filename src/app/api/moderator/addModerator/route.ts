@@ -5,22 +5,22 @@ import jwt from "jsonwebtoken";
 
 export async function POST(req: Request) {
   const cookieStore = await cookies();
-    const token = cookieStore.get("session")?.value;
-  
-    let user: null | { id: string; username: string; email: string; udata: string; } = null;
-  
-    if (token) {
-      try {
-        user = jwt.verify(token, process.env.JWT_SECRET!) as {
-          id: string;
-          username: string;
-          email: string;
-          udata: string;
-        };
-      } catch {
-        user = null;
-      }
+  const token = cookieStore.get("session")?.value;
+
+  let user: null | { id: string; username: string; email: string; udata: string; } = null;
+
+  if (token) {
+    try {
+      user = jwt.verify(token, process.env.JWT_SECRET!) as {
+        id: string;
+        username: string;
+        email: string;
+        udata: string;
+      };
+    } catch {
+      user = null;
     }
+  }
   try {
     const { userId, pageId, pageType } = await req.json();
 

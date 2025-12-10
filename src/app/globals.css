@@ -40,3 +40,15 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* Hide default calendar icon across browsers */
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  width: 1em; /* Ensures the hidden indicator covers the same space */
+  cursor: pointer;
+}
+
+/* Optional: For Firefox consistency, though less commonly required */
+input[type="datetime-local"]::-moz-calendar-picker-indicator {
+    opacity: 0;
+}

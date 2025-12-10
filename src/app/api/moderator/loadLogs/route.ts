@@ -15,7 +15,7 @@ export async function GET(req: Request) {
         ml.action::TEXT,
 
         CASE
-          WHEN ml.action IN ('edit moderator', 'add moderator', 'remove moderator')
+          WHEN ml.action IN ('edit moderator', 'add moderator', 'remove moderator', 'mute user')
           THEN rec.username
           ELSE ml.reciever::TEXT
         END AS reciever,
@@ -30,6 +30,7 @@ export async function GET(req: Request) {
         ON ml.action = 'edit moderator'
         OR ml.action = 'add moderator'
         OR ml.action = 'remove moderator'
+        OR ml.action = 'mute user'
       AND rec.id = ml.reciever
 
       -- Moderator who performed action
