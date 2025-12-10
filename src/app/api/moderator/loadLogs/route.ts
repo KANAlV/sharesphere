@@ -9,23 +9,46 @@ export async function GET(req: Request) {
     const type = url.searchParams.get("type");
 
     const logs = await sql`
-    SELECT 
-      ml.id::TEXT,
-      ml.page_id::TEXT,
-      ml.action::TEXT,
-      ml.reciever,
-      ab.username AS action_by,
-      ml.created_at::TEXT
-    FROM moderation_logs ml
-    LEFT JOIN users ab ON ml.action_by = ab.id
-    LEFT JOIN posts p ON ml.page_id = p.id
-    ${ type === "o"
-        ? sql`LEFT JOIN organization o ON p.organization_id = o.id WHERE o.name = ${filterId}`
-        : sql`LEFT JOIN categories c ON p.categories_id = c.id WHERE c.category_name = ${filterId}`
-    }
-    ORDER BY ml.created_at DESC
-  `;
+      SELECT 
+        ml.id::TEXT,
+        ml.page_id::TEXT,
+        ml.action::TEXT,
 
+        CASE
+          WHEN ml.action IN ('edit moderator', 'add moderator', 'remove moderator')
+          THEN rec.username
+          ELSE ml.reciever::TEXT
+        END AS reciever,
+
+        ab.username AS action_by,
+        ml.created_at::TEXT
+
+      FROM moderation_logs ml
+
+      -- Join reciever (only when needed)
+      LEFT JOIN users rec 
+        ON ml.action = 'edit moderator'
+        OR ml.action = 'add moderator'
+        OR ml.action = 'remove moderator'
+      AND rec.id = ml.reciever
+
+      -- Moderator who performed action
+      LEFT JOIN users ab 
+        ON ab.id = ml.action_by
+
+      -- Page data join
+      LEFT JOIN posts p 
+        ON ml.page_id = p.id
+
+      ${
+        type === "o"
+          ? sql`LEFT JOIN organization o ON p.organization_id = o.id WHERE o.name = ${filterId}`
+          : sql`LEFT JOIN categories c ON p.categories_id = c.id WHERE c.category_name = ${filterId}`
+      }
+
+      ORDER BY ml.created_at DESC
+      LIMIT 20;
+    `;
 
     return NextResponse.json({ logs });
 

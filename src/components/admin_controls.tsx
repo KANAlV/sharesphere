@@ -96,6 +96,7 @@ export default function AdminControls({
   const [mods, setMods] = useState(false);
   const [reports, setReports] = useState(false);
   const [logs, setLogs] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   // --- page details --- //
   // --- page description
@@ -519,7 +520,7 @@ export default function AdminControls({
         }
         setIsAdviser(newVal);
         setAll(newVal);
-        setMute(true);
+        setMute(newVal);
         setAnnounce(newVal);
         setPagedetails(newVal);
         setDelete_posts(newVal);
@@ -531,7 +532,7 @@ export default function AdminControls({
       case "7": {
         const newVal = !all;
         setAll(newVal);
-        setMute(true);
+        setMute(newVal);
         setAnnounce(newVal);
         setPagedetails(newVal);
         setDelete_posts(newVal);
@@ -742,7 +743,8 @@ export default function AdminControls({
               >Cancel</button>
               <button 
                 type="button"
-                onClick={() => submitChangeDescription()} 
+                disabled={disabled}
+                onClick={() => {setDisabled(true), submitChangeDescription()}} 
                 className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
@@ -817,8 +819,9 @@ export default function AdminControls({
                 className="px-4 py-2 bg-gray-500 text-white rounded-lg cursor-pointer hover:bg-gray-400"
               >Cancel</button>
               <button 
+                disabled={disabled}
                 type="button"
-                onClick={() => submitRemoveRule()} 
+                onClick={() => {setDisabled(true), submitRemoveRule()}} 
                 className="ml-4 px-4 py-2 bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
@@ -856,11 +859,12 @@ export default function AdminControls({
             <div className={`${addModShowResults? "":"hidden"} max-h-60 overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}>
               {addModShowResults && addModResults.length > 0 ? (
                 addModResults.map((user, idx) => (
-                  <div key={idx}
-                    onClick={() => addModerator(user.id)}
-                    className="mt-2 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50">
+                  <button type="button" key={idx}
+                    disabled={disabled}
+                    onClick={(e) => {setDisabled(true), addModerator(user.id)}}
+                    className="mt-2 px-4 py-2 border-2 border-gray-500 rounded-lg hover:bg-gray-500/50 cursor-pointer">
                     <h2 className="font-bold">{user.username}</h2>
-                  </div>
+                  </button>
                 ))
               ) : (
                 <p style={{ opacity: 0.5 }}>No users found.</p>
@@ -893,31 +897,35 @@ export default function AdminControls({
             <div className="block lg:flex justify-evenly">
               <div className={`${isAdmin == "1"?"":"hidden"} flex lg:block`}>
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Adviser</div>
-                <div onClick={() => editPerms("8")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={isAdviser} onChange={() => editPerms("8")}/></div>
+                <div onClick={() => editPerms("8")} className={`${isAdviser? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{isAdviser? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">All</div>
-                <div onClick={() => editPerms("7")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={all} onChange={() => editPerms("7")}/></div>
+                <div onClick={() => editPerms("7")} className={`${all? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{all? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Announce</div>
-                <div onClick={() => editPerms("2")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={announce} onChange={() => editPerms("2")}/></div>
+                <div onClick={() => editPerms("2")} className={`${announce? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{announce? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Page Details</div>
-                <div onClick={() => editPerms("3")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={pagedetails} onChange={() => editPerms("3")}/></div>
+                <div onClick={() => editPerms("3")} className={`${pagedetails? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{pagedetails? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Posts</div>
-                <div onClick={() => editPerms("4")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_posts} onChange={() => editPerms("4")}/></div>
+                <div onClick={() => editPerms("4")} className={`${delete_posts? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{delete_posts? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Delete Comments</div>
-                <div onClick={() => editPerms("5")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={delete_comments} onChange={() => editPerms("5")}/></div>
+                <div onClick={() => editPerms("5")} className={`${delete_comments? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{delete_comments? "✔":"✕"}</div>
+              </div>
+              <div className="flex lg:block">
+                <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Mute</div>
+                <div onClick={() => editPerms("1")} className={`${mute? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{mute? "✔":"✕"}</div>
               </div>
               <div className="flex lg:block">
                 <div className="flex lg:justify-center items-center w-full border-1 border-gray-500 px-2 py-1">Roles Management</div>
-                <div onClick={() => editPerms("6")} className="flex cursor-pointer justify-center items-center border-1 border-gray-500 px-2 py-1"><input type="checkbox" checked={roles_management} onChange={() => editPerms("6")}/></div>
+                <div onClick={() => editPerms("6")} className={`${roles_management? "bg-green-700":"bg-red-700"} flex h-full lg:h-6 cursor-pointer justify-center items-center border-1 text-white font-bold border-gray-500 px-2 py-1`}>{roles_management? "✔":"✕"}</div>
               </div>
             </div>
             <div className={`${editChanged? "":"hidden"} flex w-full justify-end`}>
@@ -929,8 +937,9 @@ export default function AdminControls({
                 >Cancel</button>
                 <button 
                   type="button"
-                  onClick={() => submitEditMod(editID)} 
-                  className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
+                  disabled={disabled}
+                  onClick={() => {setDisabled(true), submitEditMod(editID)}} 
+                  className="ml-4 px-4 py-2 bg-blue-700 text-white rounded-lg cursor-pointer hover:bg-blue-500">Save</button>
               </div>
             </div>
           </div>
@@ -957,7 +966,8 @@ export default function AdminControls({
               >Cancel</button>
               <button 
                 type="button"
-                onClick={() => submitRemoveMod(removeID)} 
+                disabled={disabled}
+                onClick={() => {setDisabled(true), submitRemoveMod(removeID)}} 
                 className="ml-4 px-4 py-2 bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Save</button>
             </div>
           </div>
@@ -1402,7 +1412,7 @@ export default function AdminControls({
           {/* Logs */}
           <div
             className={`${logs ? "block" : "hidden"} px-8 pt-8 pb-4 lg:rounded-t-2xl 
-                        border-t-2 border-gray-500/50 overflow-x-auto 
+                        border-t-2 lg:h-17/20 border-gray-500/50 overflow-x-auto 
                         scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600`}
           >
             <div className="text-xl pb-2 border-b-2 border-gray-500">
@@ -1410,14 +1420,14 @@ export default function AdminControls({
             </div>
 
             {/* display logs.map here */}
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 space-y-3 ">
               {logsList.length === 0 && (
                 <div className="text-gray-400 italic">No reports found.</div>
               )}
 
-              {logsList.map((l) => (
+              {logsList.map((l, idx) => (
                 <div
-                  key={l.id}
+                  key={l.id + idx}
                   className="p-4 border border-gray-600 rounded-lg bg-gray-800/30"
                 > 
                   <div>{new Date(l.created_at).toLocaleString()}</div>

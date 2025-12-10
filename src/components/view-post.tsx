@@ -639,7 +639,7 @@ function MainComments(props: NestedRepliesProps) {
   const [reportUsername, setReportUsername] = useState("");
   const pageType = usePathname().startsWith("/o")? "organization":"categories"
 
-  // --- deliting comment --- ///
+  // --- deleting comment --- //
   const [deleteWindow, openDeleteWindow] = useState(false);
   const [deleteCommentId, setDeleteCommentId] = useState("");
   const [deleteUsername, setDeleteUsername] = useState("");
@@ -647,6 +647,13 @@ function MainComments(props: NestedRepliesProps) {
   const [userReactState, setUserReactState] = useState<{
     [commentId: string]: { liked: boolean; disliked: boolean }
   }>({});
+
+  // --- muting user --- ///
+  const [muteWindow, openMuteWindow] = useState(false);
+  const [muteUsername, setMuteUsername] = useState("");
+  const [muteDuration, setMuteDuration] = useState<Date>(new Date());
+  const [muteReason, setMuteReason] = useState("");
+  const [mutePage, setMutePage] = useState("");
 
   async function fetchNested() {
     try {
@@ -818,6 +825,25 @@ function MainComments(props: NestedRepliesProps) {
     }
   }
 
+  // helper to format Date for <input type="datetime-local">
+  const formatDateTimeLocal = (date: Date) => {
+    // returns YYYY-MM-DDTHH:MM
+    const iso = date.toISOString(); // in UTC
+    const tzOffset = date.getTimezoneOffset() * 60000; // local offset in ms
+    const localISO = new Date(date.getTime() - tzOffset).toISOString();
+    return localISO.slice(0, 16);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value);
+    setMuteDuration(newDate);
+  };
+
+  //-- Mute User
+  async function submitMuteUser() {
+    
+  }
+
   return (<>
     {/* Report Modal */}
     <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
@@ -874,6 +900,37 @@ function MainComments(props: NestedRepliesProps) {
       </div>
     </div>
 
+    {/* Mute Modal */}
+    <div onClick={() => {openMuteWindow(false), setMuteUsername("")}} className={`${muteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Mute "{muteUsername}"</h1>
+
+        <input
+          type="datetime-local"
+          value={formatDateTimeLocal(muteDuration)}
+          onChange={handleChange}
+        />
+
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openMuteWindow(false)
+              setMuteUsername("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            onClick={() => submitMuteUser()}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Mute</button>
+        </div>
+      </div>
+    </div>
+
     {/* Main Content */}
     <div>
       <div className="h-1"/>
@@ -900,7 +957,7 @@ function MainComments(props: NestedRepliesProps) {
                 </svg>
               </div>
             </div>
-            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative z-40 bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
               <div
               onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
               className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
@@ -936,6 +993,18 @@ function MainComments(props: NestedRepliesProps) {
                   </g>
                 </svg>
                 <p className="pl-2.5">Delete</p>
+              </div>
+              <div
+              onClick={() => {openMuteWindow(true), setMuteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
+              className={`
+                ${myModData?.perms?.mute
+                  ? ""
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12 3.75a.75.75 0 00-1.255-.555L5.46 8H2.75A1.75 1.75 0 001 9.75v4.5c0 .966.784 1.75 1.75 1.75h2.71l5.285 4.805A.75.75 0 0012 20.25V3.75zM6.255 9.305l4.245-3.86v13.11l-4.245-3.86a.75.75 0 00-.505-.195h-3a.25.25 0 01-.25-.25v-4.5a.25.25 0 01.25-.25h3a.75.75 0 00.505-.195z"/><path d="M16.28 8.22a.75.75 0 10-1.06 1.06L17.94 12l-2.72 2.72a.75.75 0 101.06 1.06L19 13.06l2.72 2.72a.75.75 0 101.06-1.06L20.06 12l2.72-2.72a.75.75 0 00-1.06-1.06L19 10.94l-2.72-2.72z"/></svg>
+                <p className="pl-2.5">Mute</p>
               </div>
             </div>
           </div>
