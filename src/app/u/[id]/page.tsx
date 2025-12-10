@@ -46,8 +46,8 @@ export default async function DispalyUser(props: { params: Promise<{ id: string 
     }[];
 
     return (
-        <>
+        <div className="block w-full h-screen overflow-y-scroll scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
             <UserPage user={user} posts={posts}/>
-        </>
+        </div>
     )
 }

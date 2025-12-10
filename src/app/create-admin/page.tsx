@@ -107,8 +107,8 @@ export default function CreateAdminOnly() {
     }
   }
 
-  return (
-    <div className="flex w-full min-h-screen justify-center items-center mt-14">
+  return (<div className="w-full mt-20 overflow-y-scroll scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
+    <div className="flex mt-12 lg:mt-20 w-full justify-center items-center">
       <div className="p-6 bg-[#1a1a1a] border border-gray-700 rounded-xl w-[400px] relative">
 
      <button
@@ -195,7 +195,7 @@ export default function CreateAdminOnly() {
           </button>
 
           {/* FIX: Prevent upward movement (reserve fixed space) */}
-          <div className="min-h-[130px] transition-all">
+          <div className="min-h-[50px] transition-all">
             {foundUser && (
               <div className="p-3 bg-[#222] rounded border border-gray-700">
                 <p className="text-gray-300">
@@ -223,5 +223,5 @@ export default function CreateAdminOnly() {
         </div>
       </div>
     </div>
-  );
+  </div>);
 }

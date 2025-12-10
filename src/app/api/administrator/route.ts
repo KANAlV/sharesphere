@@ -6,9 +6,11 @@ export async function GET() {
   try {
     const admins = await sql`
       SELECT 
+        a.admin_id::TEXT AS id,
         u.username,
         u.email,
-        CONCAT(ud.firstname, ' ', ud.middlename, ' ', ud.surname) AS fullname
+        CONCAT(ud.firstname, ' ', ud.middlename, ' ', ud.surname) AS fullname,
+        a.level
       FROM admins a
       JOIN users u ON a.admin_id = u.id
       LEFT JOIN userdata ud ON ud.id = u.id

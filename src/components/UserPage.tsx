@@ -129,7 +129,7 @@ export default function UserPage({ user, posts: initialPosts, }: { user: User[],
     };
     
     return (
-        <div className="flex z-10 mt-12 absolute w-full min-h-screen h-auto">
+        <div className="flex mt-12 w-full">
             <div className="relative w-full lg:max-w-2xl xl:max-w-4xl 2xl:max-w-5xl 3xl:max-w-6xl mx-auto sm:mt-20">
                 {/* Banner */}
                 <div className="relative h-40 rounded-2xl overflow-clip"> {/* Adjust h-72 for desired height */}
