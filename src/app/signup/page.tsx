@@ -181,6 +181,7 @@ export default function SignupPage() {
                 placeholder="Enter OTP"
                 value={form.otp}
                 onChange={handleChange}
+                maxLength={6}
                 className="border p-3 w-full rounded text-center tracking-widest"
                 required
               />

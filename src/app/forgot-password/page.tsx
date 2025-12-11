@@ -234,6 +234,7 @@ export default function ForgotPassword() {
                   type="text"
                   placeholder="Enter OTP"
                   value={otp}
+                 maxLength={6}//length
                   onChange={(e) => {
                     const cleaned = e.target.value.replace(/[^a-zA-Z0-9]/g, "");
                     setOtp(cleaned);
