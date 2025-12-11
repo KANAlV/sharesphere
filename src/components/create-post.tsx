@@ -1,5 +1,6 @@
 "use client";
 import { useState, useCallback, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 
 type Sel = { name: string; id: string };
 type tags = { dir: string; name: string; description: string };
@@ -19,6 +20,8 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
   const [postTags, setPostTags] = useState<tags[]>([]);
   const [newTags, setNewTags] = useState<tags[]>([]);
   const [images, setImages] = useState<ImagePreview[]>([]);
+  const [disable, setDisable] = useState(false)
+  const router = useRouter();
 
   const uploadImages = async (files: FileList) => {
     const remain = 5 - images.length;
@@ -93,19 +96,23 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
   const removeTag = (dir: string) => setPostTags((prev) => prev.filter((t) => t.dir !== dir));
 
   const submitPost = async () => {
+    setDisable(true);
     // Validation
     if (!title.trim()) {
       alert("Please enter a title.");
+      setDisable(false);
       return;
     }
 
     if (!content.trim()) {
       alert("Please enter content for your post.");
+      setDisable(false);
       return;
     }
 
     if ((pagetype === "courses" || pagetype === "orgs") && !course_org) {
       alert(`Please select a course/organization.`);
+      setDisable(false);
       return;
     }
 
@@ -154,6 +161,7 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         } else {
           alert(data.error || "Failed to create post.");
         }
+        setDisable(false);
         return;
       }
 
@@ -170,10 +178,12 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
         window.location.assign("/");
       } else {
         alert(data.message || "Failed to create post");
+        setDisable(false);
       }
     } catch (error) {
       console.error(error);
       alert("Error creating post");
+      setDisable(false);
     }
   };
 
@@ -282,8 +292,13 @@ export default function CreatePostPage({ courses, orgs }: { courses: Sel[]; orgs
 
         {/* Buttons */}
           <div className="flex justify-end gap-3 mt-6">
-          <button className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">Discard</button>
+          <button
+            onClick={() => router.back()}
+            className="px-6 py-2 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-700 transition">
+            Discard
+          </button>
           <button 
+            disabled={disable}
             onClick={submitPost}
             className="px-6 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition"
           >Post</button>
