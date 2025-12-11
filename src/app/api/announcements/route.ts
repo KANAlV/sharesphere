@@ -8,7 +8,8 @@ export async function GET() {
     const announcements = await sql`
       SELECT announceid, author_id, title, content
       FROM annnouncemetns
-      ORDER BY created_at DESC;
+      ORDER BY created_at DESC
+      LIMIT 20;
     `;
 
     console.log("✅ Announcements fetched:", announcements);

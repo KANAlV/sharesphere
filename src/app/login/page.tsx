@@ -180,7 +180,7 @@ export default function Login() {
 
           <div className="relative">
             <input
-              type={showPassword ? "text" : "password"}
+              type="password"
               name="password"
               placeholder="Password"
               value={form.password}
