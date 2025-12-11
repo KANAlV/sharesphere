@@ -175,9 +175,12 @@ export default function FilteredTerms() {
             <div className="flex w-full justify-end mt-10 ">
                 <button onClick={() => setAdd(true)} className="px-3 py-1 bg-blue-600 hover:bg-blue-400 cursor-pointer rounded-lg">Add Filter</button>
             </div>
-            <div className="mt-2 overflow-clip rounded-2xl">
-                <div className=" w-full h-4 bg-amber-300 dark:bg-[#1F1E3D]"></div>
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <div className="mt-2 overflow-clip rounded-2xl
+            overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
+            ">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700
+                border-t-16 border-b-8 border-amber-300 dark:border-[#1F1E3D]
+                ">
                     <thead className="bg-gray-50 dark:bg-slate-800 divide-y">
                     <tr>
                         <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Status</th>
@@ -216,6 +219,7 @@ export default function FilteredTerms() {
                     ))}
                     </tbody>
                 </table>
+                <div className=" h-30 w-full lg:hidden"/>
             </div>
         </div>
     </div>

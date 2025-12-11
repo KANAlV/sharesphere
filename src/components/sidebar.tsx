@@ -114,10 +114,10 @@ export default function Sidebar({
     <div>
       {/* MOBILE TOGGLE */}
       <div
-        className="z-30 lg:hidden fixed top-42 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
+        className="z-30 lg:hidden flex items-center justify-center fixed bottom-24 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
         onClick={() => setIsOpen(!isOpen)}
       >
-        ≡
+        <div>{isOpen? "✕":"≡"}</div>
       </div>
 
       {/* SIDEBAR CONTAINER */}

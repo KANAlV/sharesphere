@@ -977,10 +977,10 @@ export default function AdminControls({
       <div>
         {/* MOBILE TOGGLE */}
         <div
-          className="z-30 lg:hidden fixed top-42 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
-          onClick={() => setIsOpen(true)}
+          className="z-30 flex items-center justify-center lg:hidden fixed bottom-24 right-5 w-10 h-10 text-3xl text-center rounded-full bg-slate-500/50"
+          onClick={() => setIsOpen(!isOpen)}
         >
-          ≡
+          <div>{isOpen? "✕":"≡"}</div>
         </div>
 
         {/* SIDEBAR CONTAINER */}
@@ -992,12 +992,6 @@ export default function AdminControls({
           overflow-y-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600
           text-white`}
         >
-          {/* MOBILE CLOSE BUTTON */}
-          <div className="lg:hidden h-5 w-screen">
-            <div className="fixed right-7 w-5 h-5 text-3xl" onClick={() => setIsOpen(false)}>
-              ≡
-            </div>
-          </div>
 
           {/* --- TABS --- */}
           <div className="flex h-14 overflow-x-auto scrollbar scrollbar-track-background/0 scrollbar-thumb-gray-600">
