@@ -287,6 +287,14 @@ function MainComments(props: NestedRepliesProps) {
   const [deleteCommentId, setDeleteCommentId] = useState("");
   const [deleteUsername, setDeleteUsername] = useState("");
 
+  // --- muting user --- ///
+  const [muteWindow, openMuteWindow] = useState(false);
+  const [muteUsername, setMuteUsername] = useState("");
+  const [muteDuration, setMuteDuration] = useState<Date>(new Date());
+  const [muteReason, setMuteReason] = useState("");
+  const [muteGlobally, setMuteGlobally] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
   const [userReactState, setUserReactState] = useState<{
     [commentId: string]: { liked: boolean; disliked: boolean }
   }>({});
@@ -461,6 +469,84 @@ function MainComments(props: NestedRepliesProps) {
     }
   }
 
+  // helper to format Date for <input type="datetime-local">
+  const formatDateTimeLocal = (date: Date) => {
+    // returns YYYY-MM-DDTHH:MM
+    const iso = date.toISOString(); // in UTC
+    const tzOffset = date.getTimezoneOffset() * 60000; // local offset in ms
+    const localISO = new Date(date.getTime() - tzOffset).toISOString();
+    return localISO.slice(0, 16);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value);
+    setMuteDuration(newDate);
+  };
+
+  //-- Mute User
+  async function submitMuteUser() {
+    if (!muteUsername) {
+      alert("No user selected to mute.");
+      return;
+    }
+
+    if (!muteDuration) {
+      alert("Please select a mute duration.");
+      return;
+    }
+
+    if (!muteReason) {
+      alert("Please specify a reason.");
+      return;
+    }
+    
+    const url = window.location.href;
+    const parts = new URL(url).pathname.split("/");
+
+    let page_input;
+    if(!muteGlobally){
+      page_input = parts[2];
+    } else {
+      page_input = null;
+    }
+
+    try {
+      const res = await fetch("/api/muteUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          page_id: postId,
+          page_input: page_input,
+          username: muteUsername,
+          muteUntil: muteDuration.toISOString(), // send ISO string to backend
+          muteReason: muteReason,
+          page_type: pageType
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(`Failed to mute user: ${error.message || res.statusText}`);
+        setDisabled(false);
+        return;
+      }
+
+      // Success
+      alert(`User "${muteUsername}" has been muted until ${muteDuration.toLocaleString()}`);
+      openMuteWindow(false);
+      setMuteUsername("");
+      setMuteDuration(new Date());
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while muting the user.");
+      setDisabled(false);
+    } finally {
+      setDisabled(false);
+    }
+  }
+
   return (<>
     {/* Report Modal */}
     <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
@@ -517,6 +603,69 @@ function MainComments(props: NestedRepliesProps) {
       </div>
     </div>
 
+    {/* Mute Modal */}
+    <div onClick={() => {openMuteWindow(false), setMuteUsername("")}} className={`${muteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Mute "{muteUsername}"</h1>
+
+        <div className=" mt-4" >Reason:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <textarea
+            value={muteReason}
+            onChange={(e) => setMuteReason(e.target.value)}
+            className="w-full px-2 py-2 resize-none"
+          />
+        </div>
+        
+        <div className=" mt-4" >Mute until:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <input
+            type="datetime-local"
+            value={formatDateTimeLocal(muteDuration)}
+            onChange={handleChange}
+            className="w-full px-2 py-2"
+          />
+          <div className="absolute right-6 pointer-events-none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex mt-2">
+          Mute Globally
+          <div
+            onClick={() => setMuteGlobally(!muteGlobally)}
+            className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+            ${muteGlobally ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+              ${muteGlobally ? "translate-x-6" : "translate-x-0"}`}
+            />
+          </div>
+        </div>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openMuteWindow(false)
+              setMuteUsername("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            disabled={disabled}
+            onClick={() => {setDisabled(true), submitMuteUser()}}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Mute</button>
+        </div>
+      </div>
+    </div>
+
     {/* Main Content */}
     <div>
       <div className="h-1"/>
@@ -543,7 +692,7 @@ function MainComments(props: NestedRepliesProps) {
                 </svg>
               </div>
             </div>
-            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative z-40 bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
               <div
               onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
               className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
@@ -579,6 +728,18 @@ function MainComments(props: NestedRepliesProps) {
                   </g>
                 </svg>
                 <p className="pl-2.5">Delete</p>
+              </div>
+              <div
+              onClick={() => {openMuteWindow(true), setMuteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
+              className={`
+                ${myModData?.perms?.mute
+                  ? ""
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12 3.75a.75.75 0 00-1.255-.555L5.46 8H2.75A1.75 1.75 0 001 9.75v4.5c0 .966.784 1.75 1.75 1.75h2.71l5.285 4.805A.75.75 0 0012 20.25V3.75zM6.255 9.305l4.245-3.86v13.11l-4.245-3.86a.75.75 0 00-.505-.195h-3a.25.25 0 01-.25-.25v-4.5a.25.25 0 01.25-.25h3a.75.75 0 00.505-.195z"/><path d="M16.28 8.22a.75.75 0 10-1.06 1.06L17.94 12l-2.72 2.72a.75.75 0 101.06 1.06L19 13.06l2.72 2.72a.75.75 0 101.06-1.06L20.06 12l2.72-2.72a.75.75 0 00-1.06-1.06L19 10.94l-2.72-2.72z"/></svg>
+                <p className="pl-2.5">Mute</p>
               </div>
             </div>
           </div>
@@ -847,6 +1008,14 @@ function NestedReplies(props: NestedRepliesProps) {
   const [deleteCommentId, setDeleteCommentId] = useState("");
   const [deleteUsername, setDeleteUsername] = useState("");
 
+  // --- muting user --- ///
+  const [muteWindow, openMuteWindow] = useState(false);
+  const [muteUsername, setMuteUsername] = useState("");
+  const [muteDuration, setMuteDuration] = useState<Date>(new Date());
+  const [muteReason, setMuteReason] = useState("");
+  const [muteGlobally, setMuteGlobally] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
   async function fetchNested() {
     try {
       const res = await fetch(
@@ -1017,6 +1186,84 @@ function NestedReplies(props: NestedRepliesProps) {
     }
   }
 
+  // helper to format Date for <input type="datetime-local">
+  const formatDateTimeLocal = (date: Date) => {
+    // returns YYYY-MM-DDTHH:MM
+    const iso = date.toISOString(); // in UTC
+    const tzOffset = date.getTimezoneOffset() * 60000; // local offset in ms
+    const localISO = new Date(date.getTime() - tzOffset).toISOString();
+    return localISO.slice(0, 16);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value);
+    setMuteDuration(newDate);
+  };
+
+  //-- Mute User
+  async function submitMuteUser() {
+    if (!muteUsername) {
+      alert("No user selected to mute.");
+      return;
+    }
+
+    if (!muteDuration) {
+      alert("Please select a mute duration.");
+      return;
+    }
+
+    if (!muteReason) {
+      alert("Please specify a reason.");
+      return;
+    }
+    
+    const url = window.location.href;
+    const parts = new URL(url).pathname.split("/");
+
+    let page_input;
+    if(!muteGlobally){
+      page_input = parts[2];
+    } else {
+      page_input = null;
+    }
+
+    try {
+      const res = await fetch("/api/muteUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          page_id: postId,
+          page_input: page_input,
+          username: muteUsername,
+          muteUntil: muteDuration.toISOString(), // send ISO string to backend
+          muteReason: muteReason,
+          page_type: pageType
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(`Failed to mute user: ${error.message || res.statusText}`);
+        setDisabled(false);
+        return;
+      }
+
+      // Success
+      alert(`User "${muteUsername}" has been muted until ${muteDuration.toLocaleString()}`);
+      openMuteWindow(false);
+      setMuteUsername("");
+      setMuteDuration(new Date());
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while muting the user.");
+      setDisabled(false);
+    } finally {
+      setDisabled(false);
+    }
+  }
+
   return (<>
     {/* Report Modal */}
     <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
@@ -1073,6 +1320,69 @@ function NestedReplies(props: NestedRepliesProps) {
       </div>
     </div>
 
+    {/* Mute Modal */}
+    <div onClick={() => {openMuteWindow(false), setMuteUsername("")}} className={`${muteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Mute "{muteUsername}"</h1>
+
+        <div className=" mt-4" >Reason:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <textarea
+            value={muteReason}
+            onChange={(e) => setMuteReason(e.target.value)}
+            className="w-full px-2 py-2 resize-none"
+          />
+        </div>
+        
+        <div className=" mt-4" >Mute until:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <input
+            type="datetime-local"
+            value={formatDateTimeLocal(muteDuration)}
+            onChange={handleChange}
+            className="w-full px-2 py-2"
+          />
+          <div className="absolute right-6 pointer-events-none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex mt-2">
+          Mute Globally
+          <div
+            onClick={() => setMuteGlobally(!muteGlobally)}
+            className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+            ${muteGlobally ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+              ${muteGlobally ? "translate-x-6" : "translate-x-0"}`}
+            />
+          </div>
+        </div>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openMuteWindow(false)
+              setMuteUsername("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            disabled={disabled}
+            onClick={() => {setDisabled(true), submitMuteUser()}}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Mute</button>
+        </div>
+      </div>
+    </div>
+
     {/* Main Content */}
     <div>
       <div className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
@@ -1099,7 +1409,7 @@ function NestedReplies(props: NestedRepliesProps) {
                 </svg>
               </div>
             </div>
-            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+            <div className={`${optionsDropdown === comment.id? "":"hidden"} relative z-40 bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
               <div
               onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
               className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
@@ -1135,6 +1445,18 @@ function NestedReplies(props: NestedRepliesProps) {
                   </g>
                 </svg>
                 <p className="pl-2.5">Delete</p>
+              </div>
+              <div
+              onClick={() => {openMuteWindow(true), setMuteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
+              className={`
+                ${myModData?.perms?.mute
+                  ? ""
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12 3.75a.75.75 0 00-1.255-.555L5.46 8H2.75A1.75 1.75 0 001 9.75v4.5c0 .966.784 1.75 1.75 1.75h2.71l5.285 4.805A.75.75 0 0012 20.25V3.75zM6.255 9.305l4.245-3.86v13.11l-4.245-3.86a.75.75 0 00-.505-.195h-3a.25.25 0 01-.25-.25v-4.5a.25.25 0 01.25-.25h3a.75.75 0 00.505-.195z"/><path d="M16.28 8.22a.75.75 0 10-1.06 1.06L17.94 12l-2.72 2.72a.75.75 0 101.06 1.06L19 13.06l2.72 2.72a.75.75 0 101.06-1.06L20.06 12l2.72-2.72a.75.75 0 00-1.06-1.06L19 10.94l-2.72-2.72z"/></svg>
+                <p className="pl-2.5">Mute</p>
               </div>
             </div>
           </div>
@@ -1403,6 +1725,14 @@ function NestedReplies2(props: NestedRepliesProps) {
   const [deleteWindow, openDeleteWindow] = useState(false);
   const [deleteCommentId, setDeleteCommentId] = useState("");
   const [deleteUsername, setDeleteUsername] = useState("");
+  
+  // --- muting user --- ///
+  const [muteWindow, openMuteWindow] = useState(false);
+  const [muteUsername, setMuteUsername] = useState("");
+  const [muteDuration, setMuteDuration] = useState<Date>(new Date());
+  const [muteReason, setMuteReason] = useState("");
+  const [muteGlobally, setMuteGlobally] = useState(false);
+  const [disabled, setDisabled] = useState(false);
 
   async function fetchNested() {
     try {
@@ -1573,6 +1903,84 @@ function NestedReplies2(props: NestedRepliesProps) {
     }
   }
 
+  // helper to format Date for <input type="datetime-local">
+  const formatDateTimeLocal = (date: Date) => {
+    // returns YYYY-MM-DDTHH:MM
+    const iso = date.toISOString(); // in UTC
+    const tzOffset = date.getTimezoneOffset() * 60000; // local offset in ms
+    const localISO = new Date(date.getTime() - tzOffset).toISOString();
+    return localISO.slice(0, 16);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = new Date(e.target.value);
+    setMuteDuration(newDate);
+  };
+
+  //-- Mute User
+  async function submitMuteUser() {
+    if (!muteUsername) {
+      alert("No user selected to mute.");
+      return;
+    }
+
+    if (!muteDuration) {
+      alert("Please select a mute duration.");
+      return;
+    }
+
+    if (!muteReason) {
+      alert("Please specify a reason.");
+      return;
+    }
+    
+    const url = window.location.href;
+    const parts = new URL(url).pathname.split("/");
+
+    let page_input;
+    if(!muteGlobally){
+      page_input = parts[2];
+    } else {
+      page_input = null;
+    }
+
+    try {
+      const res = await fetch("/api/muteUser", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          page_id: postId,
+          page_input: page_input,
+          username: muteUsername,
+          muteUntil: muteDuration.toISOString(), // send ISO string to backend
+          muteReason: muteReason,
+          page_type: pageType
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        alert(`Failed to mute user: ${error.message || res.statusText}`);
+        setDisabled(false);
+        return;
+      }
+
+      // Success
+      alert(`User "${muteUsername}" has been muted until ${muteDuration.toLocaleString()}`);
+      openMuteWindow(false);
+      setMuteUsername("");
+      setMuteDuration(new Date());
+    } catch (err) {
+      console.error(err);
+      alert("An error occurred while muting the user.");
+      setDisabled(false);
+    } finally {
+      setDisabled(false);
+    }
+  }
+
   return (<>
     {/* Report Modal */}
     <div onClick={() => {openReportWindow(false), setReportCommentId("")}} className={`${reportWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
@@ -1629,6 +2037,69 @@ function NestedReplies2(props: NestedRepliesProps) {
       </div>
     </div>
 
+    {/* Mute Modal */}
+    <div onClick={() => {openMuteWindow(false), setMuteUsername("")}} className={`${muteWindow? "":"hidden"} fixed flex justify-center items-center z-40 top-0 left-0 w-full h-full bg-black/50`}>
+      <div 
+      onClick={(e) => e.stopPropagation()}
+      className="relative p-4 w-xs h-fit bg-slate-300 dark:bg-slate-800 rounded-2xl"
+      >
+        <h1 className="text-2xl select-none">Mute "{muteUsername}"</h1>
+
+        <div className=" mt-4" >Reason:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <textarea
+            value={muteReason}
+            onChange={(e) => setMuteReason(e.target.value)}
+            className="w-full px-2 py-2 resize-none"
+          />
+        </div>
+        
+        <div className=" mt-4" >Mute until:</div>
+        <div className="flex items-center justify-center w-full border-2  border-gray-500 rounded-xl">
+          <input
+            type="datetime-local"
+            value={formatDateTimeLocal(muteDuration)}
+            onChange={handleChange}
+            className="w-full px-2 py-2"
+          />
+          <div className="absolute right-6 pointer-events-none">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 9H21M7 3V5M17 3V5M6 13H8M6 17H8M11 13H13M11 17H13M16 13H18M16 17H18M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" className="stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+
+        <div className="flex mt-2">
+          Mute Globally
+          <div
+            onClick={() => setMuteGlobally(!muteGlobally)}
+            className={`w-12 h-6 flex items-center rounded-full ml-2 p-1 cursor-pointer transition-colors
+            ${muteGlobally ? "bg-[#1F1E3D]" : "bg-gray-400"}`}
+          >
+            <div
+              className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform
+              ${muteGlobally ? "translate-x-6" : "translate-x-0"}`}
+            />
+          </div>
+        </div>
+        <div className={`flex pt-5 w-full justify-end`}>
+          <button 
+            type="button" 
+            onClick={() => {
+              openMuteWindow(false)
+              setMuteUsername("")
+            }}
+            className="px-4 py-2 select-none bg-gray-500 rounded-lg cursor-pointer hover:bg-gray-400"
+          >Cancel</button>
+          <button 
+            type="button"
+            disabled={disabled}
+            onClick={() => {setDisabled(true), submitMuteUser()}}
+            className="ml-4 px-4 py-2 select-none bg-red-700 text-white rounded-lg cursor-pointer hover:bg-red-500">Mute</button>
+        </div>
+      </div>
+    </div>
+
     {/* Main Content */}
     <div>
       <div style={{borderLeft: `2px solid ${fontcolor}`}} className="absolute border-l-2 w-full h-6 rounded-b-2xl"/>
@@ -1657,7 +2128,7 @@ function NestedReplies2(props: NestedRepliesProps) {
                     </svg>
                   </div>
                 </div>
-                <div className={`${optionsDropdown === comment.id? "":"hidden"} relative bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
+                <div className={`${optionsDropdown === comment.id? "":"hidden"} relative z-40 bg-slate-300 dark:bg-slate-800 text-black dark:text-white`}>
                   <div
                   onClick={() => {openReportWindow(true), setReportCommentId(comment.id), setReportUsername(comment.username)}}
                   className="flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50"
@@ -1694,6 +2165,18 @@ function NestedReplies2(props: NestedRepliesProps) {
                     </svg>
                     <p className="pl-2.5">Delete</p>
                   </div>
+              <div
+              onClick={() => {openMuteWindow(true), setMuteUsername(comment.username), setOptionsDropdown(optionsDropdown === comment.id ? null : comment.id)}}
+              className={`
+                ${myModData?.perms?.mute
+                  ? ""
+                  : "hidden"
+                }
+                flex py-1 px-3 items-center cursor-pointer hover:bg-gray-500/50`}
+              >
+                <svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M12 3.75a.75.75 0 00-1.255-.555L5.46 8H2.75A1.75 1.75 0 001 9.75v4.5c0 .966.784 1.75 1.75 1.75h2.71l5.285 4.805A.75.75 0 0012 20.25V3.75zM6.255 9.305l4.245-3.86v13.11l-4.245-3.86a.75.75 0 00-.505-.195h-3a.25.25 0 01-.25-.25v-4.5a.25.25 0 01.25-.25h3a.75.75 0 00.505-.195z"/><path d="M16.28 8.22a.75.75 0 10-1.06 1.06L17.94 12l-2.72 2.72a.75.75 0 101.06 1.06L19 13.06l2.72 2.72a.75.75 0 101.06-1.06L20.06 12l2.72-2.72a.75.75 0 00-1.06-1.06L19 10.94l-2.72-2.72z"/></svg>
+                <p className="pl-2.5">Mute</p>
+              </div>
                 </div>
               </div>
 

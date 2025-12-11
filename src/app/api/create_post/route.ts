@@ -50,6 +50,23 @@ export async function POST(req: Request) {
       }
     }
 
+    // --- Check if user is muted ---
+    const muted = await sql`
+      SELECT duration, reason
+      FROM muted
+      WHERE user_id = ${userId}
+        AND (page_id IS NULL OR (page_id = ${org_id} OR page_id = ${course_id}))
+        AND duration > NOW()
+      ORDER BY duration DESC
+    `;
+
+    if (muted.length > 0) {
+      const m = muted[0];
+      return NextResponse.json({
+        error: `You are muted until ${new Date(m.duration).toLocaleString()} for reason: ${m.reason}`
+      }, { status: 403 });
+    }
+
     // Insert post
     const result = await sql`
     INSERT INTO posts (title, content, categories_id, organization_id, author_id, anonymous, images)

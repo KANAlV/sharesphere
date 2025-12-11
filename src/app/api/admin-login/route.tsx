@@ -127,7 +127,7 @@ export async function POST(req: Request) {
           udata: "1",
         },
         process.env.JWT_SECRET!,
-        { expiresIn: "1h" }
+        { expiresIn: "3h" }
       );
 
       const res = NextResponse.json(
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         path: "/",
-        maxAge: 60 * 60,
+        maxAge: 3 *  60 * 60,
       });
 
       return res;
@@ -210,7 +210,7 @@ export async function PUT(req: Request) {
         udata: "1",
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "1h" }
+      { expiresIn: "3h" }
     );
 
     delete adminOtpStore[email];
@@ -232,7 +232,7 @@ export async function PUT(req: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       path: "/",
-      maxAge: 60 * 60,
+      maxAge: 3 * 60 * 60,
     });
 
     return res;

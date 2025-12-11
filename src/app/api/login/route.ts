@@ -228,7 +228,7 @@ export async function PUT(req: Request) {
         udata: "0",
       },
       process.env.JWT_SECRET!,
-      { expiresIn: "1h" }
+      { expiresIn: "3h" }
     );
 
     delete loginOtpStore[email];
