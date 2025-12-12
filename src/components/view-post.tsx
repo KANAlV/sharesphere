@@ -122,6 +122,9 @@ export default function PostView({ post, myModData, details, userdata }: { post:
   const [muteGlobally, setMuteGlobally] = useState(false);
   const [disabled, setDisabled] = useState(false);
 
+  // --- loading --- //
+  const [loading, setLoading] = useState(false);
+
   // --- Set background color ---
   useEffect(() => {
     const prev = document.body.style.backgroundColor;
@@ -192,7 +195,15 @@ export default function PostView({ post, myModData, details, userdata }: { post:
   };
 
   const postComment = async (postId: string, commentText: string, parentCommentId: unknown, anonymous: boolean) => {
-    if (!commentText.trim()) return alert("Comment cannot be empty");
+    if (loading) {
+      return;
+    } else {
+      setLoading(true);
+    }
+    if (!commentText.trim()) {
+      setLoading(false);
+      return alert("Comment cannot be empty");
+    }
     try {
       const res = await fetch("/api/posts/post_comment", {
         method: "POST",
@@ -206,20 +217,25 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       } else {
         if (data.bannedWord) {
           alert(`❌ Your comment contains a banned word: "${data.bannedWord}"`);
+          setLoading(false);
         } else {
           alert(data.error || "❌ Failed to create comment");
+          setLoading(false);
         }
       }
     } catch (err) {
       console.error(err);
       alert("Error posting comment");
+      setLoading(false);
     }
   };
 
   // --- reporting
   async function sendReport() {
+    if(loading) {return;} else {setLoading(true);}
     if(reportReason == "") {
       alert("Please enter the reason for the report");
+      setLoading(false);
       return;
     } 
 
@@ -235,20 +251,24 @@ export default function PostView({ post, myModData, details, userdata }: { post:
         // Successfully report
         alert("Successfully Reported"); 
         openReportWindow(false);
+        setLoading(false);
         setReportReason("");
       } else {
+        setLoading(false);
         // Handle error response
         const errorData = await res.json();
         alert(`Failed to report: ${errorData.error}`);
       }
     } catch (err) {
       console.error("Failed to report:", err);
+      setLoading(false);
       alert("An error occurred while reporting.");
     }
   }
 
   // --- deleting
   async function DeletePost() {    
+    if(loading) {return;} else {setLoading(true);}
     try {
       const res = await fetch(`/api/deletePost`, {
         method: "POST",
@@ -264,10 +284,12 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       } else {
         // Handle error response
         const errorData = await res.json();
+        setLoading(false);
         alert(`Failed to delete post: ${errorData.error}`);
       }
     } catch (err) {
       console.error("Failed to delete:", err);
+      setLoading(false);
       alert("An error occurred while deleting post.");
     }
   }
@@ -312,7 +334,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
     } else {
       page_input = null;
     }
-
+    if(loading) {return;} else {setLoading(true);}
     try {
       const res = await fetch("/api/muteUser", {
         method: "POST",
@@ -332,6 +354,7 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       if (!res.ok) {
         const error = await res.json();
         alert(`Failed to mute user: ${error.message || res.statusText}`);
+        setLoading(false);
         setDisabled(false);
         return;
       }
@@ -340,13 +363,16 @@ export default function PostView({ post, myModData, details, userdata }: { post:
       alert(`User "${muteUsername}" has been muted until ${muteDuration.toLocaleString()}`);
       openMuteWindow(false);
       setMuteUsername("");
+      setLoading(false);
       setMuteDuration(new Date());
     } catch (err) {
       console.error(err);
       alert("An error occurred while muting the user.");
       setDisabled(false);
+      setLoading(false);
     } finally {
       setDisabled(false);
+      setLoading(false);
     }
   }
 
